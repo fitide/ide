@@ -1,12 +1,10 @@
 package org.ide.FileExplorerController;
 
 import org.ide.FileExplorerController.Exceptions.*;
-import org.ide.FileExplorerController.File_tree.FileTreeBuilder;
 import org.ide.FileExplorerController.Node.Directory;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,6 +47,29 @@ class FileExplorerControllerTest {
         assertEquals(0, dir.getDirsCnt());
         assertEquals(1, dir.getFilesCnt());
         assertEquals("text.txt", dir.getFile(0).name);
+    }
+
+    @Test
+    void testCopyTree() {
+        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        Directory rootDir = controller.getFileTree();
+        Directory cdir = controller.getTreeCopy();
+
+        testDir(rootDir, cdir);
+    }
+
+    void testDir(Directory source, Directory target) {
+        assertEquals(source.name, target.name);
+        assertEquals(source.getFilesCnt(), target.getFilesCnt());
+        assertEquals(source.getDirsCnt(), target.getDirsCnt());
+
+        for (int i = 0; i < source.getFilesCnt(); i++) {
+            assertEquals(source.getFile(i).name, target.getFile(i).name);
+        }
+        for (int i = 0; i < source.getDirsCnt(); i++) {
+            testDir(source.getDir(i), target.getDir(i));
+        }
+
     }
 
     @Test

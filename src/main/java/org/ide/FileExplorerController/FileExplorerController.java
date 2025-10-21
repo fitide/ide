@@ -21,7 +21,7 @@ public class FileExplorerController {
         workingDir = builder.getTree(pathToDir);
     }
 
-    public Directory getFileTree() {
+    Directory getFileTree() {
         return workingDir;
     }
 
@@ -29,6 +29,31 @@ public class FileExplorerController {
         FileTreeBuilder builder = new FileTreeBuilder();
         workingDir = builder.getTree(pathToDir);
         return workingDir;
+    }
+
+    public Directory getTreeCopy() {
+        if (workingDir == null) return workingDir;
+
+        Directory cdir = new Directory(workingDir.name);
+        copyTree(workingDir, cdir);
+        return cdir;
+    }
+
+    private void copyTree(Directory source, Directory target) {
+        try {
+            for (int i = 0; i < source.getFilesCnt(); i++) {
+                target.addFile(new FEFile(source.getFile(i).name));
+            }
+            for (int i = 0; i < source.getDirsCnt(); i++) {
+                Directory ccdir = new Directory(source.getDir(i).name);
+                copyTree(source.getDir(i), ccdir);
+                target.addDir(ccdir);
+            }
+
+        } catch (FileAlreadyExistException | DirAlreadyExistException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public void createFile(Path pathToDir, String name) throws WrongTypeOfNodeException,
