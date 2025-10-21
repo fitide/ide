@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class FileExplorerController {
-    public Directory workingDir;
+    private Directory workingDir;
 
     public FileExplorerController(String pathToDir) {
         FileTreeBuilder builder = new FileTreeBuilder();
@@ -87,10 +87,6 @@ public class FileExplorerController {
 
         deleteFilesRecursively(file);
 
-        if (!file.delete()) {
-            throw new UnnableToDeleteException("");
-        }
-
         Directory dir = FileTreeBuilder.getDir(workingDir, pathToDir.subpath(0, pathToDir.getNameCount() - 1));
         dir.deleteDir(pathToDir.getFileName().toString());
     }
@@ -105,6 +101,10 @@ public class FileExplorerController {
                     throw new UnnableToDeleteException("Unable to delete recursively");
                 }
             }
+        }
+
+        if (!rootDir.delete()) {
+            throw new UnnableToDeleteException("");
         }
     }
 

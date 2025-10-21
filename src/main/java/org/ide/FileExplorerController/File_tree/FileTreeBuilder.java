@@ -84,7 +84,8 @@ public class FileTreeBuilder {
 
     static private Node getNode(Node node, Path path) throws NoNodeFoundException {
         for (int i = 0; i < path.getNameCount(); i++) {
-            if (node.name == path.getName(i).toString()) {
+            String curName = path.getName(i).toString();
+            if (node.name.equals(curName)) {
                 if (i == path.getNameCount() - 1) {
                     return node;
                 }
@@ -100,8 +101,21 @@ public class FileTreeBuilder {
         throw new NoNodeFoundException("No node Found with fileName" + path.getFileName().toString());
     }
 
+    static private Node searchInDir(Directory dir, Path path, int it) {
+        for (int j = 0; j < dir.getFilesCnt(); j++) {
+            Node found = getNode(dir.getFile(j), path, it + 1);
+            if (found != null) return found;
+        }
+        for (int j = 0; j < dir.getDirsCnt(); j++) {
+            Node found = getNode(dir.getDir(j), path, it + 1);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+
     static private Node getNode(Node node, Path path, int it) {
-        if (node.name == path.getName(it).toString()) {
+        if (node.name.equals(path.getName(it).toString())) {
             if (it == path.getNameCount() - 1) {
                 return node;
             }
@@ -116,17 +130,4 @@ public class FileTreeBuilder {
 
         return null;
     }
-
-    static private Node searchInDir(Directory dir, Path path, int it) {
-        for (int j = 0; j < dir.getFilesCnt(); j++) {
-            Node found = getNode(dir.getFile(j), path, it + 1);
-            if (found != null) return found;
-        }
-        for (int j = 0; j < dir.getDirsCnt(); j++) {
-            Node found = getNode(dir.getFile(j), path, it + 1);
-            if (found != null) return found;
-        }
-        return null;
-    }
-
 }

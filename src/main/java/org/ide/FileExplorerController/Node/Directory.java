@@ -3,7 +3,6 @@ package org.ide.FileExplorerController.Node;
 import org.ide.FileExplorerController.Exceptions.DirAlreadyExistException;
 import org.ide.FileExplorerController.Exceptions.FileAlreadyExistException;
 
-import java.io.File;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class Directory extends Node {
     }
 
     public int getFilesCnt() {
-        return dirs.size();
+        return files.size();
     }
 
     public Directory getDir(int it) {
@@ -68,7 +67,7 @@ public class Directory extends Node {
 
     public void deleteFile(String name) {
         for (int i = 0; i < files.size(); i++) {
-            if(files.get(i).name == name) {
+            if(files.get(i).name.equals(name)) {
                 files.remove(i);
                 return;
             }
@@ -77,7 +76,7 @@ public class Directory extends Node {
 
     public void deleteDir(String name) {
         for (int i = 0; i < dirs.size(); i++) {
-            if(dirs.get(i).name == name) {
+            if(dirs.get(i).name.equals(name)) {
                 dirs.remove(i);
                 return;
             }
