@@ -199,15 +199,27 @@ public class FileExplorerController {
 
     public void moveDir(Path pathToDir, Path pathToNewDir)
             throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException,
-            FileAlreadyExistException, DirAlreadyExistException, IOException {
+            FileAlreadyExistException, DirAlreadyExistException, IOException, CopyDirIntoitsInsideException {
 
-        copyDir(pathToDir, pathToNewDir);
+        _copyDir(pathToDir, pathToNewDir);
 
         deleteDirectory(pathToDir);
     }
 
-    public void copyDir(Path pathToDir, Path pathToNewDir) throws WrongTypeOfNodeException, FileAlreadyExistException, NoNodeFoundException, DirAlreadyExistException, IOException {
+    public void copyDir(Path pathToDir, Path pathToNewDir)
+            throws WrongTypeOfNodeException, FileAlreadyExistException, NoNodeFoundException,
+            DirAlreadyExistException, IOException, CopyDirIntoitsInsideException {
 
+        if (pathToNewDir.startsWith(pathToDir)) {
+            throw new CopyDirIntoitsInsideException("");
+        }
+
+        _copyDir(pathToDir, pathToNewDir);
+    }
+
+    private void _copyDir(Path pathToDir, Path pathToNewDir)
+            throws WrongTypeOfNodeException, FileAlreadyExistException, NoNodeFoundException,
+            DirAlreadyExistException, IOException {
         File dir = new File(pathToDir.toString());
         if (!dir.isDirectory()) {
             throw new WrongTypeOfNodeException("Wrong type to copy; Required Directory");
