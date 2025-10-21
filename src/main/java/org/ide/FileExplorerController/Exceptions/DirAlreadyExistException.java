@@ -1,4 +1,4 @@
-package org.ide.File_explorer.Exceptions;
+package org.ide.FileExplorerController.Exceptions;
 
 public class DirAlreadyExistException extends Exception {
     public DirAlreadyExistException(String message) {

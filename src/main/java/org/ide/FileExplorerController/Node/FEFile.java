@@ -1,9 +1,9 @@
-package org.ide.File_explorer.Node;
+package org.ide.FileExplorerController.Node;
 
 public class FEFile extends Node {
 
-    public FEFile(String name, String path) {
-        super(name, path);
+    public FEFile(String name) {
+        super(name);
     }
 
     @Override

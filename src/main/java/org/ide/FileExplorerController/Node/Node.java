@@ -1,12 +1,10 @@
-package org.ide.File_explorer.Node;
+package org.ide.FileExplorerController.Node;
 
 public abstract class Node {
     public String name;
-    public String path;
 
-    protected Node(String name, String path) {
+    protected Node(String name) {
         this.name = name;
-        this.path = path;
     }
 
     @Override
