@@ -6,6 +6,7 @@ import org.ide.FileExplorerController.Node.Directory;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -111,4 +112,79 @@ class FileExplorerControllerTest {
             throw new RuntimeException(e);
         }
     }
+
+
+    @Test
+    void testReadAndUpdateFile() {
+        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        Directory rootDir = controller.getFileTree();
+        Path pathToFile = Paths.get("src", "test", "resources", "source", "text1.txt");
+        try {
+            String []str = controller.openFile(pathToFile);
+            assertEquals(2, str.length);
+            assertEquals("123", str[0]);
+            assertEquals("3456", str[1]);
+
+            controller.saveChangesToFile(pathToFile, new String[0]);
+            str = controller.openFile(pathToFile);
+            assertEquals(0, str.length);
+
+            controller.saveChangesToFile(pathToFile, new String[]{"123", "3456"});
+            str = controller.openFile(pathToFile);
+            assertEquals(2, str.length);
+            assertEquals("123", str[0]);
+            assertEquals("3456", str[1]);
+
+
+        } catch (UnnableToReadFileException | UnnableToWriteInFileException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testRenaming() {
+        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        Directory rootDir = controller.getFileTree();
+
+        Path pathToFile = Paths.get("src", "test", "resources", "source", "text1.txt");
+        Path pathToDir = Paths.get("src", "test", "resources", "source", "dir1");
+
+
+        try {
+            assertEquals("text1.txt", rootDir.getFile(0).name);
+
+            controller.renameFile(pathToFile, "text1new.txt");
+
+            assertTrue(new File(Paths.get("src", "test", "resources", "source", "text1new.txt").toString()).exists());
+            assertFalse(new File(pathToFile.toString()).exists());
+            assertEquals("text1new.txt", rootDir.getFile(0).name);
+
+            controller.renameFile(Paths.get("src", "test", "resources", "source", "text1new.txt"), "text1.txt");
+
+            assertEquals("text1.txt", rootDir.getFile(0).name);
+            assertTrue(new File(pathToFile.toString()).exists());
+            assertFalse(new File(Paths.get("src", "test", "resources", "source", "text1new.txt").toString()).exists());
+
+
+
+            assertEquals("dir1", rootDir.getDir(0).name);
+
+            controller.renameDirectory(pathToDir, "dir1new");
+
+            assertTrue(new File(Paths.get("src", "test", "resources", "source", "dir1new").toString()).exists());
+            assertFalse(new File(pathToDir.toString()).exists());
+            assertEquals("dir1new", rootDir.getDir(0).name);
+
+            controller.renameDirectory(Paths.get("src", "test", "resources", "source", "dir1new"), "dir1");
+
+            assertEquals("dir1", rootDir.getDir(0).name);
+            assertTrue(new File(pathToDir.toString()).exists());
+            assertFalse(new File(Paths.get("src", "test", "resources", "source", "dir1new").toString()).exists());
+
+        } catch (NoNodeFoundException | WrongTypeOfNodeException | UnnableToRenameException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

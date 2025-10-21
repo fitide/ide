@@ -121,7 +121,7 @@ public class FileExplorerController {
         writer.write("");
 
         for (String str : strs) {
-            writer.append(str);
+            writer.append(str + "\n");
         }
 
         writer.flush();
@@ -147,19 +147,20 @@ public class FileExplorerController {
     }
 
     public void renameFile(Path pathToFile, String newName) throws NoNodeFoundException, WrongTypeOfNodeException, UnnableToRenameException {
+        tryRename(pathToFile, newName);
+
         FEFile fileNode = FileTreeBuilder.getFile(workingDir, pathToFile);
         fileNode.name = newName;
-
-        tryRename(pathToFile, newName);
 
     }
 
     public void renameDirectory(Path pathToDir, String newName)
             throws UnnableToRenameException, NoNodeFoundException, WrongTypeOfNodeException {
-        FEFile fileNode = FileTreeBuilder.getFile(workingDir, pathToDir);
-        fileNode.name = newName;
-
         tryRename(pathToDir, newName);
+
+        Directory directory = FileTreeBuilder.getDir(workingDir, pathToDir);
+        directory.name = newName;
+
     }
 
     private void tryRename(Path pathToFile, String newName) throws UnnableToRenameException {
