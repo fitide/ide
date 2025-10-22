@@ -12,11 +12,12 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 class FileExplorerControllerTest {
 
-    String pathToTestDir = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "source";
+    String pathToTestDir = "src" + File.separator + "test" + File.separator + "resources";
+    String pathToSource = pathToTestDir + File.separator + "source";
 
     @Test
     void getFileTree() {
-        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        FileExplorerController controller = new FileExplorerController(pathToSource);
         Directory rootDir = controller.getFileTree();
 
         assertEquals(1, rootDir.getFilesCnt());
@@ -51,7 +52,7 @@ class FileExplorerControllerTest {
 
     @Test
     void testCopyTree() {
-        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        FileExplorerController controller = new FileExplorerController(pathToSource);
         Directory rootDir = controller.getFileTree();
         Directory cdir = controller.getTreeCopy();
 
@@ -74,7 +75,7 @@ class FileExplorerControllerTest {
 
     @Test
     void testCreateDeleteFile() {
-        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        FileExplorerController controller = new FileExplorerController(pathToSource);
         Directory rootDir = controller.getFileTree();
 
         try {
@@ -97,7 +98,7 @@ class FileExplorerControllerTest {
 
     @Test
     void testCreateDeleteDir() {
-        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        FileExplorerController controller = new FileExplorerController(pathToSource);
         Directory rootDir = controller.getFileTree();
 
         try {
@@ -137,7 +138,7 @@ class FileExplorerControllerTest {
 
     @Test
     void testReadAndUpdateFile() {
-        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        FileExplorerController controller = new FileExplorerController(pathToSource);
         Directory rootDir = controller.getFileTree();
         Path pathToFile = Paths.get("src", "test", "resources", "source", "text1.txt");
         try {
@@ -164,7 +165,7 @@ class FileExplorerControllerTest {
 
     @Test
     void testRenaming() {
-        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        FileExplorerController controller = new FileExplorerController(pathToSource);
         Directory rootDir = controller.getFileTree();
 
         Path pathToFile = Paths.get("src", "test", "resources", "source", "text1.txt");
@@ -207,5 +208,59 @@ class FileExplorerControllerTest {
         }
     }
 
+    @Test
+    void testMoveCopyFile() {
+        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        Directory rootDir = controller.getFileTree();
 
+        Path pathToRootDir = Paths.get("src", "test", "resources", "source");
+        Path pathToStartFile = Paths.get("src", "test", "resources", "source", "text1.txt");
+        Path pathToDirToMove = Paths.get("src", "test", "resources", "target");
+        Path newPathToFile = Paths.get("src", "test", "resources", "target", "text1.txt");
+
+
+        try {
+            controller.moveFile(pathToStartFile, pathToDirToMove);
+            assertEquals(2, controller.openFile(newPathToFile).length);
+            assertFalse(new File(pathToStartFile.toString()).exists());
+
+            controller.copyFile(newPathToFile, pathToRootDir);
+            assertEquals(2, controller.openFile(pathToStartFile).length);
+
+            controller.deleteFile(newPathToFile);
+            assertFalse(new File(newPathToFile.toString()).exists());
+
+        } catch (NoNodeFoundException | UnnableToDeleteException | WrongTypeOfNodeException | IOException |
+                 FileAlreadyExistException | UnnableToReadFileException | UnnableToWriteInFileException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testMovyCopyDir() {
+        FileExplorerController controller = new FileExplorerController(pathToTestDir);
+        Directory rootDir = controller.getFileTree();
+
+        Path pathToDirToCopy = Paths.get("src", "test", "resources", "source", "dir1", "dir2");
+        Path pathToRootDir = Paths.get("src", "test", "resources", "source", "dir1");
+        Path pathToDirWhereCopy = Paths.get("src", "test", "resources", "target");
+        Path newPathToDir = Paths.get("src", "test", "resources", "target", "dir2");
+
+        try {
+            controller.moveDir(pathToDirToCopy, pathToDirWhereCopy);
+            assertTrue(new File(newPathToDir.toString() + File.separator + "text2.txt").exists());
+            assertFalse(new File(pathToRootDir.toString() + File.separator + "dir2").exists());
+
+            controller.copyDir(newPathToDir, pathToRootDir);
+            assertTrue(new File(pathToRootDir.toString() + File.separator + "dir2").exists());
+
+            controller.deleteDirectory(newPathToDir);
+            assertFalse(new File(newPathToDir.toString()).exists());
+
+        } catch (FileAlreadyExistException | NoNodeFoundException | CopyDirIntoitsInsideException |
+                 DirAlreadyExistException | UnnableToWriteInFileException | UnnableToDeleteException | IOException |
+                 UnnableToReadFileException | WrongTypeOfNodeException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

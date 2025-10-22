@@ -167,7 +167,7 @@ public class FileExplorerController {
         for (int i = 0; i < strsList.size(); i++) {
             strs[i] = strsList.get(i);
         }
-
+        scanner.close();
         return strs;
     }
 
@@ -197,7 +197,7 @@ public class FileExplorerController {
     }
 
     public void moveFile(Path pathToFile, Path pathToNewDir)
-            throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException, IOException, FileAlreadyExistException {
+            throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException, IOException, FileAlreadyExistException, UnnableToWriteInFileException, UnnableToReadFileException {
 
         copyFile(pathToFile, pathToNewDir);
 
@@ -206,26 +206,23 @@ public class FileExplorerController {
     }
 
     public void copyFile(Path pathToFile, Path pathToNewDir) throws IOException, FileAlreadyExistException,
-            NoNodeFoundException, WrongTypeOfNodeException {
+            NoNodeFoundException, WrongTypeOfNodeException, UnnableToReadFileException, UnnableToWriteInFileException {
         File sourceFile = new File(pathToFile.toString());
         if (!sourceFile.isFile()) {
             throw new WrongTypeOfNodeException("Wrong type to copy; Required File");
         }
 
         File targetFile = new File(pathToNewDir.toString() + File.separator + pathToFile.getFileName().toString());
-        if (targetFile.exists()) {
-            Files.copy(sourceFile.toPath(), targetFile.toPath());
-
-        }
-        else {
+        if (!targetFile.exists()) {
             createFile(pathToNewDir, targetFile.getName());
         }
 
+        saveChangesToFile(targetFile.toPath(), openFile(pathToFile));
     }
 
     public void moveDir(Path pathToDir, Path pathToNewDir)
             throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException,
-            FileAlreadyExistException, DirAlreadyExistException, IOException, CopyDirIntoitsInsideException {
+            FileAlreadyExistException, DirAlreadyExistException, IOException, CopyDirIntoitsInsideException, UnnableToWriteInFileException, UnnableToReadFileException {
 
         _copyDir(pathToDir, pathToNewDir);
 
@@ -234,7 +231,7 @@ public class FileExplorerController {
 
     public void copyDir(Path pathToDir, Path pathToNewDir)
             throws WrongTypeOfNodeException, FileAlreadyExistException, NoNodeFoundException,
-            DirAlreadyExistException, IOException, CopyDirIntoitsInsideException {
+            DirAlreadyExistException, IOException, CopyDirIntoitsInsideException, UnnableToWriteInFileException, UnnableToReadFileException {
 
         if (pathToNewDir.startsWith(pathToDir)) {
             throw new CopyDirIntoitsInsideException("");
@@ -245,7 +242,7 @@ public class FileExplorerController {
 
     private void _copyDir(Path pathToDir, Path pathToNewDir)
             throws WrongTypeOfNodeException, FileAlreadyExistException, NoNodeFoundException,
-            DirAlreadyExistException, IOException {
+            DirAlreadyExistException, IOException, UnnableToWriteInFileException, UnnableToReadFileException {
         File dir = new File(pathToDir.toString());
         if (!dir.isDirectory()) {
             throw new WrongTypeOfNodeException("Wrong type to copy; Required Directory");
@@ -255,7 +252,7 @@ public class FileExplorerController {
     }
 
     private void copyRecursively(File dir, Path path)
-            throws FileAlreadyExistException, NoNodeFoundException, IOException, WrongTypeOfNodeException, DirAlreadyExistException {
+            throws FileAlreadyExistException, NoNodeFoundException, IOException, WrongTypeOfNodeException, DirAlreadyExistException, UnnableToWriteInFileException, UnnableToReadFileException {
 
         createDir(path, dir.getName());
 
