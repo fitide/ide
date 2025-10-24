@@ -1,5 +1,6 @@
 package org.ide.FileExplorerController;
 
+import org.apache.log4j.Logger;
 import org.ide.FileExplorerController.Exceptions.*;
 import org.ide.FileExplorerController.File_tree.FileTreeBuilder;
 import org.ide.FileExplorerController.Node.Directory;
@@ -15,10 +16,13 @@ import java.util.Scanner;
 
 public class FileExplorerController {
     private Directory workingDir;
+    private final Logger logger;
 
-    public FileExplorerController(String pathToDir) {
+    public FileExplorerController(String pathToDir, Logger logger) {
         FileTreeBuilder builder = new FileTreeBuilder();
         workingDir = builder.getTree(pathToDir);
+        this.logger = logger;
+        logger.debug("File tree:\n" + workingDir.toString());
     }
 
     Directory getFileTree() {
@@ -26,28 +30,37 @@ public class FileExplorerController {
     }
 
     public Directory updateTree(String pathToDir) {
+        logger.info("update tree request");
         FileTreeBuilder builder = new FileTreeBuilder();
         workingDir = builder.getTree(pathToDir);
+        logger.debug("Tree updated:\n" + workingDir.toString());
         return workingDir;
     }
 
     public Directory getTreeCopy() {
+        logger.info("Tree copy request");
+
         if (workingDir == null) return workingDir;
 
         Directory cdir = new Directory(workingDir.name);
+        logger.debug("TreeDir copied = " + cdir.name + "\n");
         copyTree(workingDir, cdir);
         return cdir;
     }
 
     private void copyTree(Directory source, Directory target) {
+
         try {
             for (int i = 0; i < source.getFilesCnt(); i++) {
                 target.addFile(new FEFile(source.getFile(i).name));
+                logger.debug("TreeFile copied = " + target.name);
             }
             for (int i = 0; i < source.getDirsCnt(); i++) {
                 Directory ccdir = new Directory(source.getDir(i).name);
-                copyTree(source.getDir(i), ccdir);
                 target.addDir(ccdir);
+                logger.debug("TreeDir copied = " + ccdir.name);
+                copyTree(source.getDir(i), ccdir);
+
             }
 
         } catch (FileAlreadyExistException | DirAlreadyExistException e) {
@@ -58,6 +71,10 @@ public class FileExplorerController {
 
     public void createFile(Path pathToDir, String name) throws WrongTypeOfNodeException,
             NoNodeFoundException, FileAlreadyExistException, IOException {
+        logger.info("Create File request");
+        logger.debug("Path to dir = " + pathToDir.toString());
+        logger.debug("File name = " + name);
+
         Directory dir = null;
         FEFile newFile;
         try {
@@ -77,6 +94,10 @@ public class FileExplorerController {
 
     public void createDir(Path pathToRootDir, String name) throws NoNodeFoundException,
             DirAlreadyExistException, WrongTypeOfNodeException {
+        logger.info("Create dir request");
+        logger.debug("Path for root dir: " + pathToRootDir.toString());
+        logger.debug("New name = " + name);
+
         Directory dir;
         dir = FileTreeBuilder.getDir(workingDir, pathToRootDir);
         Directory newDir = new Directory(name);
@@ -89,6 +110,9 @@ public class FileExplorerController {
 
     public void deleteFile(Path pathToFile)
             throws NoNodeFoundException, WrongTypeOfNodeException, UnnableToDeleteException {
+        logger.info("Delete file request");
+        logger.debug("Path to file for deleting: " + pathToFile.toString());
+
         File file = new File(pathToFile.toString());
         if (!file.isFile()) {
             throw new WrongTypeOfNodeException("Trying to delete not a file while required file");
@@ -105,6 +129,9 @@ public class FileExplorerController {
 
     public void deleteDirectory(Path pathToDir)
             throws NoNodeFoundException, WrongTypeOfNodeException, UnnableToDeleteException {
+        logger.info("Delete directory request");
+        logger.debug("Path to dir for deleting: " + pathToDir.toString());
+
         File file = new File(pathToDir.toString());
         if (!file.isDirectory()) {
             throw new WrongTypeOfNodeException("Trying to delete not a file while required file");
@@ -117,6 +144,7 @@ public class FileExplorerController {
     }
 
     private void deleteFilesRecursively(File rootDir) throws UnnableToDeleteException {
+
         for (File children : Objects.requireNonNull(rootDir.listFiles())) {
             if (children.isDirectory()) {
                 deleteFilesRecursively(children);
@@ -131,10 +159,15 @@ public class FileExplorerController {
         if (!rootDir.delete()) {
             throw new UnnableToDeleteException("");
         }
+        logger.debug("Deleted dir: " + rootDir.getName());
     }
 
     public void saveChangesToFile(Path pathToFile, String[] strs)
             throws UnnableToWriteInFileException, IOException {
+        logger.info("Save changes to file request");
+        logger.debug("Path to file: " + pathToFile.toString());
+        logger.debug("Cnt strings for saving: " + strs.length);
+
         File file = new File(pathToFile.toString());
         if (!file.canWrite()) {
             throw new UnnableToWriteInFileException("Unable to write in file with name "
@@ -146,7 +179,7 @@ public class FileExplorerController {
         writer.write("");
 
         for (String str : strs) {
-            writer.append(str + "\n");
+            writer.append(str).append("\n");
         }
 
         writer.flush();
@@ -154,6 +187,9 @@ public class FileExplorerController {
     }
 
     public String[] openFile(Path pathToFile) throws UnnableToReadFileException, FileNotFoundException {
+        logger.info("Open file request");
+        logger.debug("Path to file: " + pathToFile.toString());
+
         File file = new File(pathToFile.toString());
         if (!file.canRead()) {
             throw new UnnableToReadFileException("");
@@ -172,6 +208,10 @@ public class FileExplorerController {
     }
 
     public void renameFile(Path pathToFile, String newName) throws NoNodeFoundException, WrongTypeOfNodeException, UnnableToRenameException {
+        logger.info("Rename file request");
+        logger.debug("Path to file: " + pathToFile.toString());
+        logger.debug("New name: " + newName);
+
         tryRename(pathToFile, newName);
 
         FEFile fileNode = FileTreeBuilder.getFile(workingDir, pathToFile);
@@ -181,6 +221,10 @@ public class FileExplorerController {
 
     public void renameDirectory(Path pathToDir, String newName)
             throws UnnableToRenameException, NoNodeFoundException, WrongTypeOfNodeException {
+        logger.info("Rename dir request");
+        logger.debug("Path to file: " + pathToDir.toString());
+        logger.debug("New name: " + newName);
+
         tryRename(pathToDir, newName);
 
         Directory directory = FileTreeBuilder.getDir(workingDir, pathToDir);
@@ -198,15 +242,21 @@ public class FileExplorerController {
 
     public void moveFile(Path pathToFile, Path pathToNewDir)
             throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException, IOException, FileAlreadyExistException, UnnableToWriteInFileException, UnnableToReadFileException {
+        logger.info("Move file request");
+        logger.debug("Path to file: " + pathToFile.toString());
+        logger.debug("Path to new dir: " + pathToNewDir.toString());
 
         copyFile(pathToFile, pathToNewDir);
 
         deleteFile(pathToFile);
-
     }
 
     public void copyFile(Path pathToFile, Path pathToNewDir) throws IOException, FileAlreadyExistException,
             NoNodeFoundException, WrongTypeOfNodeException, UnnableToReadFileException, UnnableToWriteInFileException {
+        logger.info("Move dir request");
+        logger.debug("Path to file: " + pathToFile.toString());
+        logger.debug("Path to dir where copy: " + pathToNewDir.toString());
+
         File sourceFile = new File(pathToFile.toString());
         if (!sourceFile.isFile()) {
             throw new WrongTypeOfNodeException("Wrong type to copy; Required File");
@@ -224,6 +274,10 @@ public class FileExplorerController {
             throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException,
             FileAlreadyExistException, DirAlreadyExistException, IOException, CopyDirIntoitsInsideException, UnnableToWriteInFileException, UnnableToReadFileException {
 
+        logger.info("Move dir request");
+        logger.debug("Path to dir to move: " + pathToDir.toString());
+        logger.debug("Path to dir where move: " + pathToNewDir.toString());
+
         _copyDir(pathToDir, pathToNewDir);
 
         deleteDirectory(pathToDir);
@@ -232,6 +286,9 @@ public class FileExplorerController {
     public void copyDir(Path pathToDir, Path pathToNewDir)
             throws WrongTypeOfNodeException, FileAlreadyExistException, NoNodeFoundException,
             DirAlreadyExistException, IOException, CopyDirIntoitsInsideException, UnnableToWriteInFileException, UnnableToReadFileException {
+        logger.info("Copy dir request");
+        logger.debug("Path to dir to copy: " + pathToDir.toString());
+        logger.debug("Path to dir where copy: " + pathToNewDir.toString());
 
         if (pathToNewDir.startsWith(pathToDir)) {
             throw new CopyDirIntoitsInsideException("");
@@ -255,8 +312,8 @@ public class FileExplorerController {
             throws FileAlreadyExistException, NoNodeFoundException, IOException, WrongTypeOfNodeException, DirAlreadyExistException, UnnableToWriteInFileException, UnnableToReadFileException {
 
         createDir(path, dir.getName());
-
         Path newPath = Paths.get(path.toString(), dir.getName());
+        logger.debug("Copied dir: " + newPath.toString());
 
         for (File children : Objects.requireNonNull(dir.listFiles())) {
             if (children.isDirectory()) {
