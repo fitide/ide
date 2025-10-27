@@ -1,4 +1,4 @@
-package org.PluginController.PluginInterface;
+package org.ide.PluginController.PluginInterface;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 

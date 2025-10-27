@@ -1,6 +1,4 @@
-package org.PluginController.PluginControllerConfigurator;
-
-import org.PluginController.PluginNode.PluginNode;
+package org.ide.PluginController.PluginControllerConfigurator;
 
 import java.io.File;
 import java.io.IOException;

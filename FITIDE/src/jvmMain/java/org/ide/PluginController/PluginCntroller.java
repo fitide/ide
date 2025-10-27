@@ -1,6 +1,6 @@
-package org.PluginController;
+package org.ide.PluginController;
 
-import org.PluginController.PluginNode.PluginNode;
+import org.ide.PluginController.PluginNode.PluginNode;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

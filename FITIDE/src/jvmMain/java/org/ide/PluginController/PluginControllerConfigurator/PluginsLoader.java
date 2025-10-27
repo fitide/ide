@@ -1,8 +1,8 @@
-package org.PluginController.PluginControllerConfigurator;
+package org.ide.PluginController.PluginControllerConfigurator;
 
-import org.PluginController.Exceptions.NotInstanceOfPluginException;
-import org.PluginController.PluginInterface.Plugin;
-import org.PluginController.PluginNode.PluginNode;
+import org.ide.PluginController.Exceptions.NotInstanceOfPluginException;
+import org.ide.PluginController.PluginInterface.Plugin;
+import org.ide.PluginController.PluginNode.PluginNode;
 
 import java.io.File;
 import java.io.FileNotFoundException;

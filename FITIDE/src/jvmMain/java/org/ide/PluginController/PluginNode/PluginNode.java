@@ -1,10 +1,9 @@
-package org.PluginController.PluginNode;
+package org.ide.PluginController.PluginNode;
 
-import org.PluginController.Exceptions.NotInstanceOfPluginException;
-import org.PluginController.PluginControllerConfigurator.PluginsLoader;
-import org.PluginController.PluginInterface.Plugin;
+import org.ide.PluginController.Exceptions.NotInstanceOfPluginException;
+import org.ide.PluginController.PluginControllerConfigurator.PluginsLoader;
+import org.ide.PluginController.PluginInterface.Plugin;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
