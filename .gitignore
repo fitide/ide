@@ -34,5 +34,11 @@ build/
 ### VS Code ###
 .vscode/
 
+### IDEA ###
+.idea
+
+.gradel
+build
+
 ### Mac OS ###
 .DS_Store
