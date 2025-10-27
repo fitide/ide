@@ -37,7 +37,7 @@ build/
 ### IDEA ###
 .idea
 
-.gradel
+.gradle
 build
 
 ### Mac OS ###
