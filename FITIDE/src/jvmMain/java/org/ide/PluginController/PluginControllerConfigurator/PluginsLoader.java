@@ -27,6 +27,6 @@ public class PluginsLoader {
         File conf = new File(pathToConfig.toString());
         if (!conf.exists()) throw new FileNotFoundException(pathToConfig.toString() + " not found");
 
-
+        return null;
     }
 }

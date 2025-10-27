@@ -6,6 +6,5 @@ import java.io.File;
 
 public interface Plugin {
 
-
     ParseTree getFileParseTree(File file);
 }

@@ -8,7 +8,9 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm() {
+        withJava()
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -28,11 +30,11 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation("org.apache.logging.log4j:log4j-api:2.23.1")
+            implementation("org.antlr:antlr4:4.13.1")
             runtimeOnly("org.apache.logging.log4j:log4j-core:2.23.1")
         }
     }
 }
-
 
 compose.desktop {
     application {
