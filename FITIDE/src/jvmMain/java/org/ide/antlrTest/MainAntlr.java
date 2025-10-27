@@ -6,9 +6,6 @@ import Simple.SimpleGremmarParser;
 import Simple.SimpleGremmarVisitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
-import java.io.*;
-
-import static java.lang.System.*;
 
 public class MainAntlr {
     public ParseTree tree;
