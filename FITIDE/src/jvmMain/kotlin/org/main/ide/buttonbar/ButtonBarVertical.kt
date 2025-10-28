@@ -1,27 +1,30 @@
 package org.main.ide.buttonbar
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ButtonBarVertical() {
-    Box(modifier = Modifier
-        .background(Color.Gray)
-        .fillMaxSize()) {
-        Button(onClick = {  }){
-            Text("Run")
-        }
-        Button(onClick = {  }) {
-            Text(text = "Terminal")
-        }
-        Button(onClick = {  }) {
-            Text("Problems")
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(60.dp)
+            .background(Color.Gray)
+            .padding(4.dp),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        IconWithTooltip("icons/build.svg", "Build")
+        Spacer(Modifier.height(8.dp))
+        IconWithTooltip("icons/terminal.svg", "Terminal")
+        Spacer(Modifier.height(8.dp))
+        IconWithTooltip("icons/problems.svg", "Problems")
     }
 }
