@@ -10,24 +10,45 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Scanner;
+
+import org.apache.logging.log4j.LogManager;
 
 public class FileExplorerController {
     private Directory workingDir;
     private final Logger logger;
+    private final File recycleBin;
+    private int binIt;
 
-    public FileExplorerController(String pathToDir) {
-        FileTreeBuilder builder = new FileTreeBuilder();
-        workingDir = builder.getTree(pathToDir);
-        logger = null;
+    public FileExplorerController(String pathToDir) throws UnnableToCreateFileException {
+        this(pathToDir, LogManager.getLogger(FileExplorerController.class));
     }
 
-    public FileExplorerController(String pathToDir, Logger logger) {
+    public FileExplorerController(String pathToDir, Logger logger) throws UnnableToCreateFileException {
         FileTreeBuilder builder = new FileTreeBuilder();
         workingDir = builder.getTree(pathToDir);
         this.logger = logger;
         if (logger != null) logger.debug("File tree:\n" + workingDir.toString());
+
+
+        File recycleBin = new File(pathToDir + File.separator + ".ide" + File.separator + "recycle_bin");
+        if (!recycleBin.exists()) {
+            if (!recycleBin.mkdir()) {
+                throw new UnnableToCreateFileException("Unable to create file in conf");
+            }
+        }
+        this.recycleBin = recycleBin;
+
+        for (File bin : Objects.requireNonNull(recycleBin.listFiles())) {
+            try {
+                int binIt = Integer.parseInt(bin.getName());
+                this.binIt = Math.max(binIt + 1, this.binIt);
+            } catch (NumberFormatException ignored) {
+            }
+
+        }
     }
 
     Directory getFileTree() {
@@ -246,7 +267,8 @@ public class FileExplorerController {
     }
 
     public void moveFile(Path pathToFile, Path pathToNewDir)
-            throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException, IOException, FileAlreadyExistException, UnnableToWriteInFileException, UnnableToReadFileException {
+            throws NoNodeFoundException, UnnableToDeleteException, WrongTypeOfNodeException,
+            IOException, FileAlreadyExistException, UnnableToWriteInFileException, UnnableToReadFileException {
         if (logger != null) logger.info("Move file request");
         if (logger != null) logger.debug("Path to file: " + pathToFile.toString());
         if (logger != null) logger.debug("Path to new dir: " + pathToNewDir.toString());
@@ -328,6 +350,89 @@ public class FileExplorerController {
                 copyFile(Paths.get(children.getAbsolutePath()), newPath);
             }
         }
+    }
 
+    public void safeDeleteFile(Path pathToFile)
+            throws WrongTypeOfNodeException, IOException, UnnableToCreateFileException,
+            FileAlreadyExistException, NoNodeFoundException, UnnableToWriteInFileException,
+            UnnableToDeleteException, UnnableToReadFileException {
+
+        checkForAbleForDeleting(pathToFile);
+        File bin = createNewBin();
+
+        moveFile(pathToFile, bin.toPath());
+        deleteFile(pathToFile);
+    }
+
+    public void safeDeleteDir(Path pathToDir)
+            throws UnnableToCreateFileException, IOException, WrongTypeOfNodeException,
+            FileAlreadyExistException, NoNodeFoundException, CopyDirIntoitsInsideException,
+            DirAlreadyExistException, UnnableToWriteInFileException, UnnableToDeleteException,
+            UnnableToReadFileException {
+
+        checkForAbleForDeleting(pathToDir);
+        File bin = createNewBin();
+
+        moveDir(pathToDir, bin.toPath());
+        deleteDirectory(pathToDir);
+    }
+
+    private void checkForAbleForDeleting(Path pathToFile)
+            throws WrongTypeOfNodeException, IOException {
+        File file = new File(pathToFile.toString());
+        if (!file.isFile()) {
+            throw new WrongTypeOfNodeException("Trying to delete not a file while required file");
+        }
+        if (!file.exists()) {
+            throw new FileNotFoundException("Trying to delete file that does not exist");
+        }
+    }
+
+    private File createNewBin()
+            throws IOException, UnnableToCreateFileException {
+        File newBin = new File(this.recycleBin.getPath() + File.separator + binIt);
+        binIt++;
+
+        if (!newBin.createNewFile()) {
+            throw new UnnableToCreateFileException("Unable to create new bin");
+        }
+        return newBin;
+    }
+
+    public void restoreLast(Path whereSave)
+            throws NoFilesInBinException, FileAlreadyExistException, NoNodeFoundException,
+            CopyDirIntoitsInsideException, DirAlreadyExistException, UnnableToWriteInFileException,
+            UnnableToDeleteException, IOException, UnnableToReadFileException, WrongTypeOfNodeException {
+        int maxIt = -1;
+        for (File bin : Objects.requireNonNull(recycleBin.listFiles())) {
+            try {
+                maxIt = Math.max(maxIt, Integer.parseInt(bin.getName()));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        if (maxIt == -1) throw new NoFilesInBinException("There is no bins");
+
+        Path pathToBinToRestore = Paths.get(recycleBin.getAbsolutePath(), String.valueOf(maxIt));
+        File bin = new File(pathToBinToRestore.toString());
+
+        restore(bin, whereSave);
+
+        deleteDirectory(pathToBinToRestore);
+    }
+
+    private void restore(File bin, Path whereSave)
+            throws FileAlreadyExistException, NoNodeFoundException, CopyDirIntoitsInsideException,
+            DirAlreadyExistException, UnnableToWriteInFileException, UnnableToDeleteException, IOException,
+            UnnableToReadFileException, WrongTypeOfNodeException {
+
+        for (File file : bin.listFiles()) {
+            if (file.isFile()) {
+                moveFile(file.getAbsoluteFile().toPath(), whereSave);
+            }
+            else if (file.isDirectory()) {
+                moveDir(file.getAbsoluteFile().toPath(), whereSave);
+            }
+        }
     }
 }
