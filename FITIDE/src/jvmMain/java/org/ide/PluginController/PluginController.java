@@ -1,10 +1,7 @@
 package org.ide.PluginController;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.ide.PluginController.Exceptions.ConfAlreadyExistException;
-import org.ide.PluginController.Exceptions.DirectoryForLangAlreadyExistException;
-import org.ide.PluginController.Exceptions.LangALreadyAddedException;
-import org.ide.PluginController.Exceptions.NotInstanceOfPluginException;
+import org.ide.PluginController.Exceptions.*;
 import org.ide.PluginController.LangsInfo.Lang;
 import org.ide.PluginController.PluginControllerConfigurator.PluginsLoader;
 import org.ide.PluginController.PluginControllerConfigurator.PluginsSaver;
@@ -47,13 +44,11 @@ public class PluginController {
     }
 
     public void addLang(String langStr, Path pathToPluginDir, String[] extensions)
-            throws LangALreadyAddedException, IOException, NotInstanceOfPluginException,
+            throws IOException, NotInstanceOfPluginException,
             ClassNotFoundException, InvocationTargetException, NoSuchMethodException,
-            InstantiationException, IllegalAccessException, DirectoryForLangAlreadyExistException {
+            InstantiationException, IllegalAccessException, DirectoryForLangAlreadyExistException, LangDoesntExistException {
 
-        if (langs.containsKey(langStr)) {
-            throw new LangALreadyAddedException(langStr + " already added");
-        }
+        checkLang(langStr);
 
         Path newLangPath = Paths.get(IDEConfigDir.getAbsolutePath(), langStr);
         if (!newLangPath.toFile().exists())
@@ -88,59 +83,107 @@ public class PluginController {
     }
 
     public void addConf(String langStr, String name, String[] args, Path pathToCompiler)
-            throws ConfAlreadyExistException {
+            throws ConfAlreadyExistException, LangDoesntExistException {
+        checkLang(langStr);
 
         Lang lang = langs.get(langStr);
         lang.addConf(name, pathToCompiler, args);
     }
 
-    public void updateConfParam(String langStr, String confName, String newName, Path pathToCompile, String[] newArgs) {
+    public void updateConfParam(String langStr, String confName, String newName, Path pathToCompile, String[] newArgs)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         lang.updateParams(confName, newName, pathToCompile, newArgs);
     }
 
-    public void updateConfParam(String langStr, String confName, String newName, String[] newArgs) {
+    public void updateConfParam(String langStr, String confName, String newName, String[] newArgs)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         lang.updateParams(confName, newName, newArgs);
     }
 
-    public void updateConfParam(String langStr, String confName, String newName, Path pathToCompile) {
+    public void updateConfParam(String langStr, String confName, String newName, Path pathToCompile)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         lang.updateParams(confName, newName, pathToCompile);
     }
 
-    public void updateConfParam(String langStr, String confName, String[] newArgs, Path pathToCompile) {
+    public void updateConfParam(String langStr, String confName, String[] newArgs, Path pathToCompile)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         lang.updateParams(confName, newArgs, pathToCompile);
     }
 
-    public void updateConfParam(String langStr, String confName, Path pathToCompile) {
+    public void updateConfParam(String langStr, String confName, Path pathToCompile)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         lang.updateParams(confName, pathToCompile);
     }
 
-    public void updateConfParam(String langStr, String confName, String[] newArgs) {
+    public void updateConfParam(String langStr, String confName, String[] newArgs)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         lang.updateParams(confName, newArgs);
     }
 
-    public void updateConfParam(String langStr, String confName, String newName) {
+    public void updateConfParam(String langStr, String confName, String newName)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         lang.updateParams(confName, newName);
     }
 
-    public ParseTree getTree(String langStr, File file) {
+    public ParseTree getTree(String langStr, File file)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         return lang.getFileParseTree(file);
     }
 
-    public Tag[] getTags(String langStr, ParseTree tree) {
+    public Tag[] getTags(String langStr, ParseTree tree)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         return lang.getTagsOfNode(tree);
     }
 
-    public String getCompileString(String langStr, String confName) {
+    public String getCompileString(String langStr, String confName)
+            throws LangDoesntExistException {
+        checkLang(langStr);
+
         Lang lang = langs.get(langStr);
         return lang.getCompileString(confName);
+    }
+
+    public void deleteLan(String lang) throws LangDoesntExistException {
+        checkLang(lang);
+
+        langs.remove(lang);
+    }
+
+    public void deleteConfig(String lang, String confName)
+            throws LangDoesntExistException, ConfigDoestntExistException {
+        checkLang(lang);
+
+        langs.get(lang).deleteConfig(confName);
+    }
+
+    private void checkLang(String lang) throws LangDoesntExistException {
+        if (!langs.containsKey(lang)) throw new LangDoesntExistException(lang + " does not exist");
     }
 }

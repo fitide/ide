@@ -2,6 +2,7 @@ package org.ide.PluginController.LangsInfo;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.PluginController.Exceptions.ConfAlreadyExistException;
+import org.ide.PluginController.Exceptions.ConfigDoestntExistException;
 import org.ide.PluginController.Exceptions.NotInstanceOfPluginException;
 import org.ide.PluginController.PluginControllerConfigurator.PluginsLoader;
 import org.ide.PluginController.PluginInterface.Plugin;
@@ -85,4 +86,11 @@ public class Lang {
         return plugin.getTagsOfNode(tree);
     }
 
+    public void deleteConfig(String confName) throws ConfigDoestntExistException {
+        if (!confs.containsKey(confName)) {
+            throw new ConfigDoestntExistException(confName + " does not exist");
+        }
+
+        confs.remove(confName);
+    }
 }
