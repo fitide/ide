@@ -27,7 +27,6 @@ fun App(fileExplorer: FileExplorer) {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Верхняя панель
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -43,12 +42,10 @@ fun App(fileExplorer: FileExplorer) {
                     color = Color.Black
                 )
 
-                // Основная область
                 Row(modifier = Modifier.fillMaxSize()) {
-                    // Левая панель
                     Box(
                         modifier = Modifier
-                            .width(60.dp)  // уменьшено
+                            .width(60.dp)
                             .fillMaxHeight()
                             .background(Color.Gray)
                     ) {
@@ -65,10 +62,10 @@ fun App(fileExplorer: FileExplorer) {
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .weight(0.2f)  // уменьшено
+                                    .weight(0.2f)
                                     .fillMaxHeight()
                             ) {
-                                FileExplorerView(fileExplorer.currentPath)
+                                FileExplorerView(fileExplorer)
                             }
 
                             VerticalDivider(color = Color.DarkGray)

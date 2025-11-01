@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ide.fitide.generated.resources.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -21,10 +22,10 @@ fun ButtonBarVertical() {
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconWithTooltip("icons/build.svg", "Build")
+        IconWithTooltip(Res.drawable.build, "Build")
         Spacer(Modifier.height(8.dp))
-        IconWithTooltip("icons/terminal.svg", "Terminal")
+        IconWithTooltip(Res.drawable.terminal, "Terminal")
         Spacer(Modifier.height(8.dp))
-        IconWithTooltip("icons/problems.svg", "Problems")
+        IconWithTooltip(Res.drawable.problems, "Problems")
     }
 }

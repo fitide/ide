@@ -5,25 +5,22 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.useResource
-import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun IconWithTooltip(svgPath: String, tooltip: String, onClick: () -> Unit = {}) {
-    val painter = useResource(svgPath) { loadSvgPainter(it, Density(1f)) }
-
+fun IconWithTooltip(svgResource: DrawableResource, tooltip: String, onClick: () -> Unit = {}) {
     TooltipArea(
         tooltip = {
             Box(
@@ -36,12 +33,14 @@ fun IconWithTooltip(svgPath: String, tooltip: String, onClick: () -> Unit = {}) 
         },
         tooltipPlacement = TooltipPlacement.CursorPoint(offset = DpOffset(10.dp, 10.dp))
     ) {
-        IconButton(
+        FilledTonalIconButton(
             onClick = onClick,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(48.dp),
+            shape = RoundedCornerShape(0.dp),
+            colors = IconButtonDefaults.iconButtonColors()
         ) {
             Icon(
-                painter = painter,
+                painter = painterResource(svgResource),
                 contentDescription = tooltip,
                 modifier = Modifier
                     .fillMaxSize()

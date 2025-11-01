@@ -20,6 +20,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation("dev.icerock.moko:resources:0.22.1")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -30,7 +31,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(compose.components.resources)
-            implementation("log4j:log4j:1.2.17")
+            implementation("org.apache.logging.log4j:log4j-api:2.23.1")
         }
     }
 }
@@ -42,7 +43,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.main.ide"
+            packageName = "FITIDE"
             packageVersion = "1.0.0"
         }
     }
