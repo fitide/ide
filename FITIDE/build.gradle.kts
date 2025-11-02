@@ -20,7 +20,6 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation("dev.icerock.moko:resources:0.22.1")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -33,9 +32,16 @@ kotlin {
             implementation(compose.components.resources)
             implementation("org.apache.logging.log4j:log4j-api:2.23.1")
         }
+        jvmTest.dependencies {
+            implementation(project.dependencies.platform("org.junit:junit-bom:5.10.0"))
+            implementation("org.junit.jupiter:junit-jupiter")
+        }
     }
 }
 
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
+}
 
 compose.desktop {
     application {
