@@ -40,6 +40,9 @@ kotlin {
     }
 }
 
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
+}
 
 compose.desktop {
     application {
