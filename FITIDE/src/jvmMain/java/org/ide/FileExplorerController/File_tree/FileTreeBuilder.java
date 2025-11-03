@@ -8,7 +8,6 @@ import org.ide.FileExplorerController.Node.Directory;
 import org.ide.FileExplorerController.Node.FEFile;
 import org.ide.FileExplorerController.Node.Node;
 
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -36,7 +35,6 @@ public class FileTreeBuilder {
             for (File inFile : Objects.requireNonNull(curDir.listFiles())) {
                 if (inFile.isFile()) {
                     FEFile file = new FEFile(inFile.getName());
-                    file.icon = FileSystemView.getFileSystemView().getSystemIcon(inFile);
                     dir.addFile(file);
                 }
                 else if (inFile.isDirectory()) {
