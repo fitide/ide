@@ -9,10 +9,7 @@ import org.ide.FileExplorerController.Node.FEFile;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 import org.apache.logging.log4j.LogManager;
 
@@ -188,11 +185,11 @@ public class FileExplorerController {
         if (logger != null) logger.debug("Deleted dir: " + rootDir.getName());
     }
 
-    public void saveChangesToFile(Path pathToFile, String[] strs)
+    public void saveChangesToFile(Path pathToFile, List<String> strs)
             throws UnnableToWriteInFileException, IOException {
         if (logger != null) logger.info("Save changes to file request");
         if (logger != null) logger.debug("Path to file: " + pathToFile.toString());
-        if (logger != null) logger.debug("Cnt strings for saving: " + strs.length);
+        if (logger != null) logger.debug("Cnt strings for saving: " + strs.size());
 
         File file = new File(pathToFile.toString());
         if (!file.canWrite()) {
@@ -212,7 +209,7 @@ public class FileExplorerController {
         writer.close();
     }
 
-    public String[] openFile(Path pathToFile) throws UnnableToReadFileException, FileNotFoundException {
+    public List<String> openFile(Path pathToFile) throws UnnableToReadFileException, FileNotFoundException {
         if (logger != null) logger.info("Open file request");
         if (logger != null) logger.debug("Path to file: " + pathToFile.toString());
 
@@ -225,12 +222,7 @@ public class FileExplorerController {
         while(scanner.hasNextLine()) {
             strsList.addLast(scanner.nextLine());
         }
-        String []strs = new String[strsList.size()];
-        for (int i = 0; i < strsList.size(); i++) {
-            strs[i] = strsList.get(i);
-        }
-        scanner.close();
-        return strs;
+        return strsList;
     }
 
     public void renameFile(Path pathToFile, String newName) throws NoNodeFoundException, WrongTypeOfNodeException, UnnableToRenameException {
