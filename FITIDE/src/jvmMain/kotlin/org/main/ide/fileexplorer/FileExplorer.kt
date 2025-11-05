@@ -245,12 +245,12 @@ fun FileExplorerView(fileExplorer: FileExplorer) {
 
     Box(
         Modifier
-            .background(Color.DarkGray)
+            .background(Color.Gray)
             .fillMaxSize()
             .padding(4.dp)
     ) {
         if (currentPath.isEmpty()) {
-            Text("Проект не открыт. Нажмите 'File' для выбора директории.", color = Color.LightGray)
+            Text("Проект не открыт. Нажмите 'File' для выбора директории.", color = Color.Black)
         } else if (fileTree != null) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(flatList) { flatNode ->

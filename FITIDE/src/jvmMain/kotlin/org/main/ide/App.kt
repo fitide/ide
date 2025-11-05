@@ -38,7 +38,7 @@ fun App(fileExplorer: FileExplorer) {
 
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
-                    thickness = 2.dp,
+                    thickness = 1.dp,
                     color = Color.Black
                 )
 
@@ -52,7 +52,7 @@ fun App(fileExplorer: FileExplorer) {
                         ButtonBarVertical()
                     }
 
-                    VerticalDivider(color = Color.DarkGray)
+                    VerticalDivider(color = Color.Black)
 
                     Column(modifier = Modifier.fillMaxSize()) {
                         Row(
@@ -68,7 +68,7 @@ fun App(fileExplorer: FileExplorer) {
                                 FileExplorerView(fileExplorer)
                             }
 
-                            VerticalDivider(color = Color.DarkGray)
+                            VerticalDivider(color = Color.Black)
 
                             Box(
                                 modifier = Modifier
@@ -81,8 +81,8 @@ fun App(fileExplorer: FileExplorer) {
 
                         HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
-                            thickness = 2.dp,
-                            color = Color.DarkGray
+                            thickness = 1.dp,
+                            color = Color.Black
                         )
 
                         Box(
@@ -100,7 +100,7 @@ fun App(fileExplorer: FileExplorer) {
 }
 
 @Composable
-fun VerticalDivider(color: Color, thickness: Dp = 5.dp) {
+fun VerticalDivider(color: Color, thickness: Dp = 1.dp) {
     Box(
         modifier = Modifier
             .fillMaxHeight()
