@@ -32,6 +32,7 @@ kotlin {
             implementation("org.apache.logging.log4j:log4j-api:2.23.1")
             implementation("org.antlr:antlr4-runtime:4.13.2")
             runtimeOnly("org.apache.logging.log4j:log4j-core:2.23.1")
+            implementation("com.googlecode.json-simple:json-simple:1.1.1")
         }
         jvmTest.dependencies {
             implementation(project.dependencies.platform("org.junit:junit-bom:5.10.0"))
