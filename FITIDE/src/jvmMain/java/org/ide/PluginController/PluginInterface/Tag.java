@@ -2,6 +2,7 @@ package org.ide.PluginController.PluginInterface;
 
 public enum Tag {
     Class,
+    Type,
     Statement,
     ImportStatement,
     Func,

@@ -35,4 +35,14 @@ public interface Plugin {
     List<ParseTree> getBodeOfModule(ParseTree module);
 
     List<ParseTree> getFuncsOfClass(ParseTree classNode);
+
+    List<ExternalFile> getStandartFiles();
+
+    List<ExternalFunc> getStandartFuncs();
+
+    List<ExternalVar> getStandartVars();
+
+    List<ExternalClass> getStandartClasses();
+
+    List<ExternalType> getStandartTypes();
 }
