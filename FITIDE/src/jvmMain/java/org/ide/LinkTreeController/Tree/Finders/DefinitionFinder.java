@@ -1,6 +1,6 @@
 package org.ide.LinkTreeController.Tree.Finders;
 
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 
 import java.nio.file.Path;
 import java.util.Queue;
@@ -10,17 +10,17 @@ import java.util.concurrent.Future;
 public class DefinitionFinder extends Finder {
 
 
-    public DefinitionFinder(FileNode fileNode, String name, ExecutorService service, Queue<Future<Path>> futures) {
-        super(fileNode, name, service, futures);
+    public DefinitionFinder(CommonFileNode commonFileNode, String name, ExecutorService service, Queue<Future<Path>> futures) {
+        super(commonFileNode, name, service, futures);
     }
 
     @Override
     protected Path searchInNode() {
-        return fileNode.searchForDefinitionInNode(name);
+        return commonFileNode.searchForDefinitionInNode(name);
     }
 
     @Override
     protected void extendForChilds() {
-        fileNode.searchForDefinition(name, service, futures);
+        commonFileNode.searchForDefinition(name, service, futures);
     }
 }

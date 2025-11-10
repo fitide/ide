@@ -1,18 +1,18 @@
 package org.ide.LinkTreeController.Tree.Finders;
 
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 public abstract  class FinderByPath implements Callable<Path> {
-    protected final FileNode fileNode;
+    protected final CommonFileNode commonFileNode;
     protected Path path;
     protected final String name;
 
-    FinderByPath(FileNode root, Path path, String name) {
+    FinderByPath(CommonFileNode root, Path path, String name) {
         this.path = path;
-        this.fileNode = root;
+        this.commonFileNode = root;
         this.name = name;
     }
 
@@ -22,14 +22,14 @@ public abstract  class FinderByPath implements Callable<Path> {
         Path pathToFind;
 
         try {
-            fileNode.Treelock.readLock().lock();
-            if (fileNode.childs.containsKey(path.getRoot().toString())) {
+            commonFileNode.Treelock.readLock().lock();
+            if (commonFileNode.childs.containsKey(path.getRoot().toString())) {
                 pathToFind = search();
             } else {
                 pathToFind = null;
             }
         } finally {
-            fileNode.Treelock.readLock().unlock();
+            commonFileNode.Treelock.readLock().unlock();
         }
 
         return pathToFind;

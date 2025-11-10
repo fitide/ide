@@ -1,9 +1,10 @@
 package org.ide.LinkTreeController.Tree.Nodes.Abstract;
 
+import org.ide.LinkTreeController.Exceptions.BadPathException;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.*;
-import org.ide.LinkTreeController.Tree.Nodes.FileNodes.File;
+import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -11,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public abstract class ARoot extends FileNode {
+public abstract class ARoot extends CommonFileNode {
     protected Map<String, Func> externalFunctions = new HashMap<>();
     protected Map<String, CodeClass> externalClasses = new HashMap<>();
     protected Map<String, Var> externalVars = new HashMap<>();
-    protected Map<String, File> externalFiles = new HashMap<>();
+    protected Map<String, CommonFile> externalFiles = new HashMap<>();
     protected While whileStatement;
     protected For forStatement;
     protected If ifStatement;
@@ -54,5 +55,5 @@ public abstract class ARoot extends FileNode {
 
     public abstract Path searchForDefinition(String Name) throws NoDefinitionException;
 
-    public abstract List<String> getHints(Path pathToModule, String prefix);
+    public abstract List<String> getHints(Path pathToModule, String prefix) throws BadPathException;
 }

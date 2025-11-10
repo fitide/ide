@@ -1,6 +1,6 @@
 package org.ide.LinkTreeController.Tree.Finders;
 
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 
 import java.nio.file.Path;
 import java.util.Queue;
@@ -9,13 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public abstract class Finder implements Callable<Path> {
-    protected final FileNode fileNode;
+    protected final CommonFileNode commonFileNode;
     protected final String name;
     protected final ExecutorService service;
     protected final Queue<Future<Path>> futures;
 
-    protected Finder(FileNode fileNode, String name, ExecutorService service, Queue<Future<Path>> futures) {
-        this.fileNode = fileNode;
+    protected Finder(CommonFileNode commonFileNode, String name, ExecutorService service, Queue<Future<Path>> futures) {
+        this.commonFileNode = commonFileNode;
         this.name = name;
         this.service = service;
         this.futures = futures;

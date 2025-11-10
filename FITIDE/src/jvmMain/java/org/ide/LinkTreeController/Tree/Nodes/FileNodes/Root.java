@@ -1,17 +1,20 @@
 package org.ide.LinkTreeController.Tree.Nodes.FileNodes;
 
+import org.ide.LinkTreeController.Exceptions.BadPathException;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeStrForColour;
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
+import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationByPathFinder;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionByPathFinder;
+import org.ide.LinkTreeController.Tree.Tools;
 import org.jetbrains.annotations.NotNull;
 
+import javax.tools.Tool;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -29,34 +32,14 @@ public class Root extends ARoot {
     }
 
     @Override
-    public Path searchForDeclaration(Path path, String name) {
-        if (path.getNameCount() == 0) {
-            return null;
-        }
-
-        if (this.childs.containsKey(path.getRoot().toString())) {
-            return this.childs
-                    .get(path.getRoot().toString())
-                            .searchForDeclaration(path.subpath(1, path.getNameCount()), name);
-        }
-
-        return null;
-    }
-
-    @Override
-    public void searchForDeclaration(String name, ExecutorService service, Queue<Future<Path>> futures) {
-        synchronized (futures) {
-            for (FileNode children : this.childs.values()) {
-                futures.add(service.submit(new DeclarationFinder(children, name, service, futures)));
-            }
-        }
-    }
-
-    @Override
     public Path searchForDeclaration(Path[] paths, String name) throws NoDeclarationException {
-        Path path = searchByPaths(paths, name, new SearchByPathMethodBuilder() {
+
+        Path path = searchForDeclarationInNode(name);
+        if (path != null) return path;
+
+         path = searchByPaths(paths, name, new SearchByPathMethodBuilder() {
             @Override
-            public Callable<Path> makeSearchMethod(FileNode node, Path path, String name) {
+            public Callable<Path> makeSearchMethod(CommonFileNode node, Path path, String name) {
                 return new DeclarationByPathFinder(node, path, name);
             }
         });
@@ -72,7 +55,7 @@ public class Root extends ARoot {
     public Path searchForDeclaration(String name) throws NoDeclarationException {
         Path ans = search(name, new SearchMethodBuilder() {
             @Override
-            public Callable<Path> makeSsearchMethod(FileNode node, String name, ExecutorService service, Queue<Future<Path>> futures) {
+            public Callable<Path> makeSsearchMethod(CommonFileNode node, String name, ExecutorService service, Queue<Future<Path>> futures) {
                 return new DeclarationFinder(node, name, service, futures);
             }
         });
@@ -125,36 +108,15 @@ public class Root extends ARoot {
         throw new NoDeclarationException("No declaration for " + name);
     }
 
-
-    @Override
-    public Path searchForDefinition(Path path, String name) {
-        if (path.getNameCount() == 0) {
-            return null;
-        }
-
-        if (this.childs.containsKey(path.getRoot().toString())) {
-            return this.childs
-                    .get(path.getRoot().toString())
-                        .searchForDefinition(path.subpath(1, path.getNameCount()), name);
-        }
-
-        return null;
-    }
-
-    @Override
-    public void searchForDefinition(String name, ExecutorService service, @NotNull Queue<Future<Path>> futures) {
-        synchronized (futures) {
-            for (FileNode children : this.childs.values()) {
-                futures.add(service.submit(new DefinitionFinder(children, name, service, futures)));
-            }
-        }
-    }
-
     @Override
     public Path searchForDefinition(Path[] paths, String name) throws NoDefinitionException {
-        Path path = searchByPaths(paths, name, new SearchByPathMethodBuilder() {
+
+        Path path = searchForDefinitionInNode(name);
+        if (path != null) return path;
+
+        path = searchByPaths(paths, name, new SearchByPathMethodBuilder() {
             @Override
-            public Callable<Path> makeSearchMethod(FileNode node, Path path, String name) {
+            public Callable<Path> makeSearchMethod(CommonFileNode node, Path path, String name) {
                 return new DefinitionByPathFinder(node, path, name);
             }
         });
@@ -170,7 +132,7 @@ public class Root extends ARoot {
     public Path searchForDefinition(String Name) throws NoDefinitionException {
         Path ans = search(name, new SearchMethodBuilder() {
             @Override
-            public Callable<Path> makeSsearchMethod(FileNode node, String name, ExecutorService service, Queue<Future<Path>> futures) {
+            public Callable<Path> makeSsearchMethod(CommonFileNode node, String name, ExecutorService service, Queue<Future<Path>> futures) {
                 return new DefinitionFinder(node, name, service, futures);
             }
         });
@@ -181,45 +143,6 @@ public class Root extends ARoot {
 
         return ans;
     }
-
-    @Override
-    public List<String> getHints(Path pathToModule, String prefix) {
-        List<String> listOfHints = new ArrayList<>();
-        getHints(pathToModule, prefix, listOfHints);
-        return listOfHints;
-    }
-
-    @Override
-    public void getHints(Path pathToFile, String prefix, List<String> listOfHints) {
-
-        whileStatement.getKeyWordsOfStatement(prefix, listOfHints);
-        ifStatement.getKeyWordsOfStatement(prefix, listOfHints);
-        forStatement.getKeyWordsOfStatement(prefix, listOfHints);
-        getHintsFromMap(prefix, listOfHints, externalClasses.keySet());
-        getHintsFromMap(prefix, listOfHints, externalFunctions.keySet());
-        getHintsFromMap(prefix, listOfHints, externalVars.keySet());
-
-        if (pathToFile.getNameCount() > 0 && this.childs.containsKey(pathToFile.getRoot().toString())) {
-            childs.get(pathToFile.getRoot().toString()).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
-        }
-    }
-
-    @Override
-    public List<CodeStrForColour> getSyntaxHughlighting(Path pathToFile) {
-        if (pathToFile.getNameCount() > 0 && this.childs.containsKey(pathToFile.getRoot().toString())) {
-            return childs.get(pathToFile.getRoot().toString()).getSyntaxHughlighting(pathToFile.subpath(1, pathToFile.getNameCount()));
-        }
-        return new ArrayList<>();
-    }
-
-    private void getHintsFromMap(String prefix, List<String> listOfHints, Set<String> names) {
-        for (String name : names) {
-            if (name.startsWith(prefix)) {
-                listOfHints.add(name);
-            }
-        }
-    }
-
 
     @Override
     public Path searchForDefinitionInNode(String name) {
@@ -263,9 +186,41 @@ public class Root extends ARoot {
     }
 
 
+    @Override
+    public List<String> getHints(Path pathToModule, String prefix) throws BadPathException {
+        List<String> listOfHints = new ArrayList<>();
+        getHints(pathToModule, prefix, listOfHints);
+        return listOfHints;
+    }
+
+    @Override
+    public void getHints(Path pathToFile, String prefix, List<String> listOfHints) throws BadPathException {
+
+        whileStatement.getKeyWordsOfStatement(prefix, listOfHints);
+        ifStatement.getKeyWordsOfStatement(prefix, listOfHints);
+        forStatement.getKeyWordsOfStatement(prefix, listOfHints);
+        getHintsFromMap(prefix, listOfHints, externalClasses.keySet());
+        getHintsFromMap(prefix, listOfHints, externalFunctions.keySet());
+        getHintsFromMap(prefix, listOfHints, externalVars.keySet());
+
+        if (pathToFile.getNameCount() > 0 && this.childs.containsKey(pathToFile.getRoot().toString())) {
+            childs.get(pathToFile.getRoot().toString()).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
+        }
+
+        throw new BadPathException("Bad Path");
+    }
+
+    private void getHintsFromMap(String prefix, List<String> listOfHints, Set<String> names) {
+        for (String name : names) {
+            if (name.startsWith(prefix)) {
+                listOfHints.add(name);
+            }
+        }
+    }
+
 
     private interface SearchByPathMethodBuilder {
-        Callable<Path> makeSearchMethod (FileNode fileNode, Path path, String name);
+        Callable<Path> makeSearchMethod (CommonFileNode commonFileNode, Path path, String name);
     }
 
     private Path searchByPaths(Path[] paths, String name, SearchByPathMethodBuilder method) {
@@ -294,7 +249,7 @@ public class Root extends ARoot {
     }
 
     private interface SearchMethodBuilder {
-        Callable<Path> makeSsearchMethod(FileNode fileNode, String name, ExecutorService service, Queue<Future<Path>> futures);
+        Callable<Path> makeSsearchMethod(CommonFileNode commonFileNode, String name, ExecutorService service, Queue<Future<Path>> futures);
     }
 
     private Path search(String name, SearchMethodBuilder searchMethodBuilder) {
