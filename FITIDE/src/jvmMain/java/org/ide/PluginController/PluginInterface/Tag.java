@@ -9,9 +9,7 @@ public enum Tag {
     Var,
     Constant,
     KeyWord,
-    If,
-    While,
-    For,
+    Construction,
     Declaration,
     Definition,
     Error

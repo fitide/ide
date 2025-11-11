@@ -31,7 +31,7 @@ public interface Plugin {
 
     ParseTree getIfCondStatement(ParseTree ifNode);
 
-    //module is func/while/for/if
+    //module is func/while/for/if etc
     List<ParseTree> getBodeOfModule(ParseTree module);
 
     List<ParseTree> getFuncsOfClass(ParseTree classNode);
@@ -45,4 +45,7 @@ public interface Plugin {
     List<ExternalClass> getStandartClasses();
 
     List<ExternalType> getStandartTypes();
+
+    // for/while/if etc
+    List<ExternalConstruction> getStandartConstructionsLike();
 }
