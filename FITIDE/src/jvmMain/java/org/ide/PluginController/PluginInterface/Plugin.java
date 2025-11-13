@@ -14,6 +14,7 @@ public interface Plugin {
 
     List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement);
 
+    Position getBounds(ParseTree node);
 
     // node is a class/func/var
     Position getNamePositionOfModule(ParseTree node);
