@@ -25,12 +25,7 @@ public interface Plugin {
 
     List<ParseTree> getArgsOfFunc(ParseTree func);
 
-    ParseTree getWhileCondStatement(ParseTree whileNode);
-
-    List<ParseTree> getForStatements(ParseTree forNode);
-
-    ParseTree getIfCondStatement(ParseTree ifNode);
-
+    List<ParseTree> getConstructionArgs(ParseTree constr);
     //module is func/while/for/if etc
     List<ParseTree> getBodeOfModule(ParseTree module);
 
