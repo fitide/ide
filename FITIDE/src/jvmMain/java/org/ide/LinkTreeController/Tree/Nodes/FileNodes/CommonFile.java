@@ -8,16 +8,13 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
 
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 
 public class CommonFile extends FileNode {
-    Set<AInternalCodeNode> codeNodes = new HashSet<>();
+    Map<String, AInternalCodeNode> codeNodes = new HashMap<>();
 
     public CommonFile(ReadWriteLock lock, String name) {
         super(lock, name);
@@ -26,7 +23,12 @@ public class CommonFile extends FileNode {
 
     @Override
     public Path searchForDeclaration(Path path, String name) {
-        //TODO implement
+        if (path.getNameCount() == 0) {
+            for (AInternalCodeNode node : codeNodes.values()) {
+                if (node.)
+            }
+        }
+
         return null;
     }
 

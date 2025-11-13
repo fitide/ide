@@ -1,13 +1,16 @@
 package org.ide.LinkTreeController.Tree.Nodes.Abstract;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
+import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
+import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public abstract class AInternalCodeNode extends AInternalCodeNodeEnd{
+public abstract class AInternalCodeNode {
+    public Plugin plugin;
+    public String id;
     public Path pathToFile;
     public int column;
     public int row;
@@ -16,18 +19,15 @@ public abstract class AInternalCodeNode extends AInternalCodeNodeEnd{
     public List<String> keyWordsNames;
     public List<KeyWord> keyWords;
 
-    public AInternalCodeNode(List<String> keyWordsNames) {
-        this(new ArrayList<>(), keyWordsNames, null, -1, -1, -1, -1);
-    }
 
-    public AInternalCodeNode(List<KeyWord> keyWords, List<String> keyWordsNames, Path path, int row, int column, int columnEnd, int rowEnd) {
-        super(path, row, column);
-        this.columnEnd = columnEnd;
-        this.rowEnd = rowEnd;
-        this.keyWordsNames = keyWordsNames;
-        this.keyWords = keyWords;
-    }
+    public String name;
+    public int nameRowS, nameColS, nameRowE, nameColE;
 
+    AInternalCodeNode(Plugin plugin, Path path, ParseTree tree) {
+        this.plugin = plugin;
+        this.pathToFile = path;
+        
+    }
 
     public void setPathToFile(Path pathToFile) {
         this.pathToFile = pathToFile;
@@ -41,13 +41,31 @@ public abstract class AInternalCodeNode extends AInternalCodeNodeEnd{
         this.column = column;
     }
 
+    public void setRowEnd(int rowEnd) {
+        this.rowEnd = rowEnd;
+    }
 
-    public void getKeyWordsOfStatement(String prefix, List<String> listOfHints) {
-        for (String keyWord : this.keyWordsNames) {
-            if (keyWord.startsWith(prefix)) {
-                listOfHints.add(keyWord);
-            }
+    public void setColumnEnd(int columnEnd) {
+        this.columnEnd = columnEnd;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void getCommonHints(String prefix, List<String> hints) {
+        for (String keyWord : keyWordsNames) {
+            if (keyWord.startsWith(prefix)) hints.add(keyWord);
         }
     }
 
+    public abstract void getHint(String prefix, List<String> hints);
+
+    public abstract void getHighlightning(List<CodeStrForColour> list);
+
+    public abstract Path searchForDeclaration(Path pathToNode, String name);
+
+    public abstract Path searchForDefinition(Path pathToNode, String name);
+
+    public abstract void updateTree(Path pathToModule, ParseTree parseTree);
 }

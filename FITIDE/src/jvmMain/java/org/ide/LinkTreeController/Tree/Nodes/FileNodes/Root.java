@@ -6,15 +6,13 @@ import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
-import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationByPathFinder;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionByPathFinder;
 import org.ide.LinkTreeController.Tree.Tools;
-import org.jetbrains.annotations.NotNull;
 
-import javax.tools.Tool;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -68,6 +66,15 @@ public class Root extends ARoot {
     }
 
     @Override
+    public Path searchForDeclaration(Path path, String name) {
+        if (externalFiles.containsKey(Tools.getRootStr(path))) {
+            return externalFiles.get(Tools.getRootStr(path)).searchForDeclaration(Tools.deleteRoot(path), name);
+        }
+
+        return super.searchForDeclaration(path, name);
+    }
+
+    @Override
     public Path searchForDeclarationInNode(String name) {
         if (this.externalFunctions.containsKey(name)) {
             return Paths.get(name);
@@ -106,6 +113,15 @@ public class Root extends ARoot {
         }
 
         throw new NoDeclarationException("No declaration for " + name);
+    }
+
+    @Override
+    public Path searchForDefinition(Path path, String name) {
+        if (externalFiles.containsKey(Tools.getRootStr(path))) {
+            return externalFiles.get(Tools.getRootStr(path)).searchForDefinition(Tools.deleteRoot(path), name);
+        }
+
+        return super.searchForDeclaration(path, name);
     }
 
     @Override
@@ -196,9 +212,9 @@ public class Root extends ARoot {
     @Override
     public void getHints(Path pathToFile, String prefix, List<String> listOfHints) throws BadPathException {
 
-        whileStatement.getKeyWordsOfStatement(prefix, listOfHints);
-        ifStatement.getKeyWordsOfStatement(prefix, listOfHints);
-        forStatement.getKeyWordsOfStatement(prefix, listOfHints);
+        for(Construction construction : externalConstrs.values()) {
+            construction.getCommonHints(prefix, listOfHints);
+        }
         getHintsFromMap(prefix, listOfHints, externalClasses.keySet());
         getHintsFromMap(prefix, listOfHints, externalFunctions.keySet());
         getHintsFromMap(prefix, listOfHints, externalVars.keySet());
@@ -217,6 +233,8 @@ public class Root extends ARoot {
             }
         }
     }
+
+
 
 
     private interface SearchByPathMethodBuilder {

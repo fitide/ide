@@ -1,6 +1,6 @@
 package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNodeEnd;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 
-public class Statement extends AInternalCodeNodeEnd {
+public class Statement extends AInternalCodeNode {
 }

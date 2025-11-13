@@ -4,14 +4,10 @@ import org.ide.LinkTreeController.Exceptions.BadPathException;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
-import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 
 public class Directory extends FileNode {

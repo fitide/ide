@@ -17,11 +17,9 @@ public abstract class ARoot extends CommonFileNode {
     protected Map<String, CodeClass> externalClasses = new HashMap<>();
     protected Map<String, Var> externalVars = new HashMap<>();
     protected Map<String, CommonFile> externalFiles = new HashMap<>();
-    protected While whileStatement;
-    protected For forStatement;
-    protected If ifStatement;
-
     protected final int cntSearches;
+    protected Map<String, Construction> externalConstrs = new HashMap<>();
+
 
     public ARoot(ReentrantReadWriteLock lock) {
         this(lock, 3);
@@ -32,19 +30,26 @@ public abstract class ARoot extends CommonFileNode {
         this.cntSearches = cntSearches;
     }
 
-    public void setWhileStatement(List<String> keyWordsName) {
-        this.whileStatement = new While(keyWordsName);
+
+    public void setExternalConstrs(Map<String, Construction> externalConstrs) {
+        this.externalConstrs = externalConstrs;
     }
 
-    public void setIfStatement(List<String> keyWordsName) {
-        this.ifStatement = new If(keyWordsName);
+    public void setExternalFiles(Map<String, CommonFile> externalFiles) {
+        this.externalFiles = externalFiles;
     }
 
-    public void setForStatement(List<String> keyWordsName) {
-        this.forStatement = new For(keyWordsName);
+    public void setExternalVars(Map<String, Var> externalVars) {
+        this.externalVars = externalVars;
     }
 
+    public void setExternalClasses(Map<String, CodeClass> externalClasses) {
+        this.externalClasses = externalClasses;
+    }
 
+    public void setExternalFunctions(Map<String, Func> externalFunctions) {
+        this.externalFunctions = externalFunctions;
+    }
 
 
     public abstract Path searchForDeclaration(Path[] paths, String name) throws NoDeclarationException;

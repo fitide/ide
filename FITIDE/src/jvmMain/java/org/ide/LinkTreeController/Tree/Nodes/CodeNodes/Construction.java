@@ -4,9 +4,8 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 
 import java.util.List;
 
-public class If extends AInternalCodeNode {
+public class Construction extends AInternalCodeNode {
+    public List<Statement> args;
+    public List<Statement> body;
 
-    public If(List<String> keyWordsNames) {
-        super(keyWordsNames);
-    }
 }
