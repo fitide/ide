@@ -9,6 +9,7 @@ import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
 import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory;
 import org.ide.LinkTreeController.Tree.Tools;
+import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -116,7 +117,7 @@ public abstract class CommonFileNode {
         }
     }
 
-    public void updateCode(Path pathToModule, ParseTree tree) throws BadPathException {
+    public void updateCode(Plugin plugin, Path pathToModule, ParseTree tree) throws BadPathException {
         if (pathToModule.getNameCount() == 0) {
             throw new BadPathException("Path error");
         }

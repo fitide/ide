@@ -5,8 +5,10 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
 import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Position;
+import org.ide.PluginController.PluginInterface.Tag;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class AInternalCodeNode {
@@ -20,6 +22,10 @@ public abstract class AInternalCodeNode {
     public List<String> keyWordsNames;
     public List<KeyWord> keyWords;
     public boolean isDef = false;
+    public AInternalCodeNode definition = null;
+
+    public HashMap<String, AInternalCodeNode> childs = new HashMap<>();
+
 
     public String name;
     public int nameRowS, nameColS, nameRowE, nameColE;
@@ -32,7 +38,17 @@ public abstract class AInternalCodeNode {
         this.rowEnd = position.colE;
         this.column = position.colS;
         this.columnEnd = position.colE;
-
+        Tag[] tags = plugin.getTagsOfNode(tree);
+        for (Tag tag : tags) {
+            if (tag == Tag.Declaration) {
+                isDef = false;
+                break;
+            }
+            if (tag ==Tag.Definition) {
+                isDef = true;
+                break;
+            }
+        }
     }
 
     public void setPathToFile(Path pathToFile) {
@@ -74,4 +90,10 @@ public abstract class AInternalCodeNode {
     public abstract Path searchForDefinition(Path pathToNode, String name);
 
     public abstract void updateTree(Path pathToModule, ParseTree parseTree);
+
+    public abstract AInternalCodeNode getDeclaration(Path path);
+
+    public abstract AInternalCodeNode getDefinition(Path path);
+
+    public abstract void updateCurNode(AInternalCodeNode node);
 }
