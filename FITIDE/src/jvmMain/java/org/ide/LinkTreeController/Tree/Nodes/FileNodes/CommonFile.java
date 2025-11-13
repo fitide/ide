@@ -6,8 +6,10 @@ import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
+import org.ide.LinkTreeController.Tree.Tools;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -25,8 +27,14 @@ public class CommonFile extends FileNode {
     public Path searchForDeclaration(Path path, String name) {
         if (path.getNameCount() == 0) {
             for (AInternalCodeNode node : codeNodes.values()) {
-                if (node.)
+                if (Objects.equals(node.name, name)) {
+                    return Paths.get(node.pathToFile.toString(), node.id);
+                }
             }
+        }
+
+        if (this.codeNodes.containsKey(Tools.getRootStr(path))) {
+            return this.codeNodes.get(Tools.getRootStr(path)).searchForDeclaration(Tools.deleteRoot(path), name);
         }
 
         return null;
@@ -34,18 +42,26 @@ public class CommonFile extends FileNode {
 
     @Override
     public void searchForDeclaration(String name, ExecutorService service, Queue<Future<Path>> futures) {
-        //TODO implement
+        return;
     }
 
     @Override
     public Path searchForDeclarationInNode(String name) {
-        //TODO implement
+        for (AInternalCodeNode node : codeNodes.values()) {
+            if (Objects.equals(node.name, name)) {
+                return Paths.get(node.pathToFile.toString(), node.id);
+            }
+        }
         return null;
     }
 
     @Override
     public AInternalCodeNode getDeclaration(Path path) throws NoDeclarationException {
-        //TODO implement
+        if (path.getNameCount() == 1) {
+            if (this.codeNodes.containsKey())
+        }
+
+
         return null;
     }
 
