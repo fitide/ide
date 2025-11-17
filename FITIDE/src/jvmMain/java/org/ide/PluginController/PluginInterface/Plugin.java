@@ -22,7 +22,7 @@ public interface Plugin {
     // node is a class/func/var
     Position getTypePositionOfModule(ParseTree node);
 
-    List<Position> getPositionsOfKeyWordsOfModule(ParseTree node);
+    List<ParseTree> getKeyWordsOfModule(ParseTree node);
 
     List<ParseTree> getArgsOfFunc(ParseTree func);
 
