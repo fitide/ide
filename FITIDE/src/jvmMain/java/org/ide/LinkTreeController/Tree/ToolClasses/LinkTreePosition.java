@@ -4,7 +4,7 @@ package org.ide.LinkTreeController.Tree.ToolClasses;
 import org.ide.PluginController.PluginInterface.Position;
 import org.jetbrains.annotations.NotNull;
 
-public class LinkTreePosition extends Position implements Comparable<LinkTreePosition> {
+public class LinkTreePosition extends Position implements Comparable<LinkTreePosition>, Cloneable {
     public int rowS, colS, rowE, colE;
 
 
@@ -17,5 +17,15 @@ public class LinkTreePosition extends Position implements Comparable<LinkTreePos
         if (isEndInside && isStartInside) return 0;
         if (rowS < pos.rowS) return 1;
         else return -1;
+    }
+
+    @Override
+    public LinkTreePosition clone() {
+        LinkTreePosition clone = new LinkTreePosition();
+        clone.rowS = this.rowS;
+        clone.colS = this.colS;
+        clone.rowE = this.rowE;
+        clone.colE = this.colE;
+        return clone;
     }
 }

@@ -10,6 +10,7 @@ import org.ide.PluginController.PluginInterface.Tag;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public abstract class AInternalCodeNode {
         this.namePosition.colE = namePos.colE;
     }
 
-    void setCommon(Plugin plugin, Path path, ParseTree tree) {
+    protected void setCommon(Plugin plugin, Path path, ParseTree tree) {
         this.plugin = plugin;
         this.pathToModule = path;
         Position position = plugin.getBounds(tree);
@@ -62,13 +63,28 @@ public abstract class AInternalCodeNode {
                 break;
             }
         }
-        this.keyWords = plugin.
+
+        setKeyWords(tree);
+
+        this.setChilds();
     }
+
+    protected void setKeyWords(ParseTree tree) {
+        List<ParseTree> keyWordsOfModule = plugin.getKeyWordsOfModule(tree);
+        List<KeyWord> keyWordList = new ArrayList<>();
+        for (ParseTree key : keyWordsOfModule) {
+            keyWordList.add(new KeyWord(plugin, pathToModule, key));
+        }
+        this.keyWords = keyWordList;
+    }
+
+    protected abstract void setChilds();
+
+
 
     public void setPathToFile(Path pathToFile) {
         this.pathToModule = pathToFile;
     }
-
 
     public void setId(String id) {
         if (id != null) {
@@ -85,28 +101,56 @@ public abstract class AInternalCodeNode {
         }
     }
 
-    public abstract void getHint(String prefix, List<String> hints);
+    public void getHint(String prefix, List<String> hints) {}
 
     public abstract void getHighlightning(List<CodeStrForColour> list);
 
-    public abstract Path searchForDeclaration(Path pathToNode, String name);
+    public Path searchForDeclaration(Path pathToNode, String name) {
+        return null;
+    };
 
-    public abstract Path searchForDefinition(Path pathToNode, String name);
+    public Path searchForDefinition(Path pathToNode, String name) {
+        return null;
+    }
 
-    public abstract void updateTree(Path pathToModule, ParseTree parseTree);
+    public void updateTree(Path pathToModule, ParseTree parseTree) {}
 
-    public abstract AInternalCodeNode getDeclaration(Path path);
+    public AInternalCodeNode getDeclaration(Path path) {
+        return null;
+    };
 
-    public abstract AInternalCodeNode getDefinition(Path path);
+    public AInternalCodeNode getDefinition(Path path) {
+        return null;
+    }
 
-    public abstract void updateCurNode(AInternalCodeNode node);
+    public void updateCurNode(AInternalCodeNode node) {
+        this.keyWords = node.keyWords;
+        this.namePosition = node.namePosition;
+        this.name = node.name;
+        this.wholePos = node.wholePos;
+        this.childs = node.childs;
+        this.pathToModule = node.pathToModule;
+        this.isDef = node.isDef;
+        this.plugin = node.plugin;
+        this.keyWordsNames = node.keyWordsNames;
+        this.definition = node.definition;
+        this.id = node.id;
+    }
 
-    public abstract Path[] getPathsToSearchDeclaration(Path pathToModule);
+    public Path[] getPathsToSearchDeclaration(Path pathToModule) {
+        return null;
+    }
 
-    public abstract Path[] getPathsToSearchDefinition(Path pathToModule);
+    public Path[] getPathsToSearchDefinition(Path pathToModule) {
+        return null;
+    }
 
-    public abstract Path[] getPathsToSearchDeclaration(Position position);
+    public Path[] getPathsToSearchDeclaration(Position position) {
+        return null;
+    }
 
-    public abstract Path[] getPathsToSearchDefinition(Position position);
+    public Path[] getPathsToSearchDefinition(Position position) {
+        return null;
+    }
 
 }

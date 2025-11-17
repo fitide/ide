@@ -117,7 +117,7 @@ public class CommonFile extends FileNode {
     public Path[] getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
         for (AInternalCodeNode node : this.codeNodes.values()) {
             if (node.wholePos.compareTo(linkTreePosition) == 0) {
-                node.getPathsToSearchDeclaration(linkTreePosition);
+                node.getPathsToSearchDefinition(linkTreePosition);
             }
         }
 
