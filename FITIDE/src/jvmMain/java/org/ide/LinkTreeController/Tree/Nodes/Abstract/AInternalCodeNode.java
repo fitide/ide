@@ -27,9 +27,23 @@ public abstract class AInternalCodeNode {
 
 
     public String name;
-    public LinkTreePosition namePosition;
+    public LinkTreePosition namePosition = new LinkTreePosition();
 
-    AInternalCodeNode(Plugin plugin, Path path, ParseTree tree) {
+    public AInternalCodeNode(Plugin plugin, Path path, ParseTree tree) {
+        setCommon(plugin, path, tree);
+    }
+
+    public AInternalCodeNode(Plugin plugin, Path path, ParseTree tree, String name) {
+        setCommon(plugin, path, tree);
+        this.name = name;
+        Position namePos = plugin.getNamePositionOfModule(tree);
+        this.namePosition.rowS = namePos.rowS;
+        this.namePosition.colS = namePos.colS;
+        this.namePosition.rowE = namePos.rowE;
+        this.namePosition.colE = namePos.colE;
+    }
+
+    void setCommon(Plugin plugin, Path path, ParseTree tree) {
         this.plugin = plugin;
         this.pathToModule = path;
         Position position = plugin.getBounds(tree);
@@ -48,10 +62,10 @@ public abstract class AInternalCodeNode {
                 break;
             }
         }
+        this.keyWords = plugin.
     }
 
     public void setPathToFile(Path pathToFile) {
-
         this.pathToModule = pathToFile;
     }
 
