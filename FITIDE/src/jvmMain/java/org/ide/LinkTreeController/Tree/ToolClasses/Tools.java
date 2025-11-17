@@ -1,4 +1,4 @@
-package org.ide.LinkTreeController.Tree;
+package org.ide.LinkTreeController.Tree.ToolClasses;
 
 import java.nio.file.Path;
 

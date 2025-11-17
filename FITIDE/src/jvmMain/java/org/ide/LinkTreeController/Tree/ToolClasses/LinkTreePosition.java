@@ -1,0 +1,21 @@
+package org.ide.LinkTreeController.Tree.ToolClasses;
+
+
+import org.ide.PluginController.PluginInterface.Position;
+import org.jetbrains.annotations.NotNull;
+
+public class LinkTreePosition extends Position implements Comparable<LinkTreePosition> {
+    public int rowS, colS, rowE, colE;
+
+
+    @Override
+    public int compareTo(@NotNull LinkTreePosition pos) {
+        if (rowE < pos.rowE) return 1;
+        if (rowS > pos.rowE) return -1;
+        boolean isStartInside = rowS < pos.rowS || (rowS == pos.rowS && colS <= pos.colS);
+        boolean isEndInside = rowE > pos.rowE || colE >= pos.colE;
+        if (isEndInside && isStartInside) return 0;
+        if (rowS < pos.rowS) return 1;
+        else return -1;
+    }
+}

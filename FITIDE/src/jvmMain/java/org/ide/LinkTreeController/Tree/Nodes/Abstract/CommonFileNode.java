@@ -6,9 +6,10 @@ import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
-import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory;
-import org.ide.LinkTreeController.Tree.Tools;
+import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
+import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -26,6 +27,26 @@ public abstract class CommonFileNode {
 
     public CommonFileNode(ReadWriteLock lock) {
         this.Treelock = lock;
+    }
+
+    public Path[] getPathsToSearchDeclaration(Path pathToModule) {
+        if (pathToModule.getNameCount() == 0) return null;
+
+        if (this.childs.containsKey(Tools.getRootStr(pathToModule))){
+            return this.childs.get(Tools.getRootStr(pathToModule)).getPathsToSearchDeclaration(Tools.deleteRoot(pathToModule));
+        }
+
+        return null;
+    }
+
+    public Path[] getPathsToSearchDeclaration(Path pathToFile, LinkTreePosition linkTreePosition) {
+        if (pathToFile.getNameCount() == 0) return null;
+
+        if (this.childs.containsKey(Tools.getRootStr(pathToFile))){
+            return this.childs.get(Tools.getRootStr(pathToFile)).getPathsToSearchDeclaration(Tools.deleteRoot(pathToFile), linkTreePosition);
+        }
+
+        return null;
     }
 
     public Path searchForDeclaration(Path path, String name) {
@@ -55,6 +76,26 @@ public abstract class CommonFileNode {
     }
 
     public abstract AInternalCodeNode getDeclaration(Path path) throws NoDeclarationException;
+
+    public Path[] getPathsToSearchDefinition(Path pathToModule) {
+        if (pathToModule.getNameCount() == 0) return null;
+
+        if (this.childs.containsKey(Tools.getRootStr(pathToModule))){
+            return this.childs.get(Tools.getRootStr(pathToModule)).getPathsToSearchDefinition(Tools.deleteRoot(pathToModule));
+        }
+
+        return null;
+    }
+
+    public Path[] getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
+        if (pathToFile.getNameCount() == 0) return null;
+
+        if (this.childs.containsKey(Tools.getRootStr(pathToFile))){
+            return this.childs.get(Tools.getRootStr(pathToFile)).getPathsToSearchDefinition(Tools.deleteRoot(pathToFile), linkTreePosition);
+        }
+
+        return null;
+    }
 
     public Path searchForDefinition(Path path, String name)  {
         if (path.getNameCount() == 0) {

@@ -1,8 +1,8 @@
-package org.ide.LinkTreeController.Tree.Nodes;
+package org.ide.LinkTreeController.Tree.ToolClasses;
 
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 
 public class CodeStrForColour {
-    public int rowS, colS, rowE, colE;
+    public LinkTreePosition pos;
     public LinkTreeCodeTag tag;
 }

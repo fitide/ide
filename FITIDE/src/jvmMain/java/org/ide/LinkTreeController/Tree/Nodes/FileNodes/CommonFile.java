@@ -3,11 +3,12 @@ package org.ide.LinkTreeController.Tree.Nodes.FileNodes;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
-import org.ide.LinkTreeController.Tree.IDgenerator;
+import org.ide.LinkTreeController.Tree.ToolClasses.IDgenerator;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
-import org.ide.LinkTreeController.Tree.Nodes.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
-import org.ide.LinkTreeController.Tree.Tools;
+import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
+import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
 
@@ -27,11 +28,33 @@ public class CommonFile extends FileNode {
 
 
     @Override
+    public Path[] getPathsToSearchDeclaration(Path pathToModule) {
+        if (pathToModule.getNameCount() == 0) return null;
+
+        if (childs.containsKey(Tools.getRootStr(pathToModule))) {
+            return this.codeNodes.get(Tools.getRootStr(pathToModule)).getPathsToSearchDeclaration(Tools.deleteRoot(pathToModule));
+        }
+
+        return null;
+    }
+
+    @Override
+    public Path[] getPathsToSearchDeclaration(Path pathToFile, LinkTreePosition linkTreePosition) {
+        for (AInternalCodeNode node : this.codeNodes.values()) {
+            if (node.wholePos.compareTo(linkTreePosition) == 0) {
+                node.getPathsToSearchDeclaration(linkTreePosition);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public Path searchForDeclaration(Path path, String name) {
         if (path.getNameCount() == 0) {
             for (AInternalCodeNode node : codeNodes.values()) {
                 if (Objects.equals(node.name, name) && !node.isDef) {
-                    return Paths.get(node.pathToFile.toString(), node.id);
+                    return Paths.get(node.pathToModule.toString(), node.id);
                 }
             }
         }
@@ -52,7 +75,7 @@ public class CommonFile extends FileNode {
     public Path searchForDeclarationInNode(String name) {
         for (AInternalCodeNode node : codeNodes.values()) {
             if (Objects.equals(node.name, name) && !node.isDef) {
-                return Paths.get(node.pathToFile.toString(), node.id);
+                return Paths.get(node.pathToModule.toString(), node.id);
             }
         }
         return null;
@@ -80,11 +103,33 @@ public class CommonFile extends FileNode {
     }
 
     @Override
+    public Path[] getPathsToSearchDefinition(Path pathToModule) {
+        if (pathToModule.getNameCount() == 0) return null;
+
+        if (childs.containsKey(Tools.getRootStr(pathToModule))) {
+            return this.codeNodes.get(Tools.getRootStr(pathToModule)).getPathsToSearchDefinition(Tools.deleteRoot(pathToModule));
+        }
+
+        return null;
+    }
+
+    @Override
+    public Path[] getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
+        for (AInternalCodeNode node : this.codeNodes.values()) {
+            if (node.wholePos.compareTo(linkTreePosition) == 0) {
+                node.getPathsToSearchDeclaration(linkTreePosition);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public Path searchForDefinition(Path path, String name) {
         if (path.getNameCount() == 0) {
             for (AInternalCodeNode node : codeNodes.values()) {
                 if (Objects.equals(node.name, name) && node.isDef) {
-                    return Paths.get(node.pathToFile.toString(), node.id);
+                    return Paths.get(node.pathToModule.toString(), node.id);
                 }
             }
         }
@@ -103,7 +148,7 @@ public class CommonFile extends FileNode {
     public Path searchForDefinitionInNode(String name) {
         for (AInternalCodeNode node : codeNodes.values()) {
             if (Objects.equals(node.name, name) && node.isDef) {
-                return Paths.get(node.pathToFile.toString(), node.id);
+                return Paths.get(node.pathToModule.toString(), node.id);
             }
         }
         return null;

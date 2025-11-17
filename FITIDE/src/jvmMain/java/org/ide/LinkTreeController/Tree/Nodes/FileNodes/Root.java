@@ -11,7 +11,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationByPathFinder;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionByPathFinder;
-import org.ide.LinkTreeController.Tree.Tools;
+import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
