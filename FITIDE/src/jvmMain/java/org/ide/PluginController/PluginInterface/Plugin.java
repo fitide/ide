@@ -44,4 +44,10 @@ public interface Plugin {
 
     // for/while/if etc
     List<ExternalConstruction> getStandartConstructionsLike();
+
+
+
+    Position getPositionOfModuleBody(ParseTree tree);
+    Position getPositionOfArgsOfFunc(ParseTree tree);
+
 }
