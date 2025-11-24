@@ -18,24 +18,24 @@ public abstract class AInternalCodeNode {
     public Plugin plugin;
     public String id;
     public Path pathToModule;
+    public Path pathToFile;
     public LinkTreePosition wholePos = new LinkTreePosition();
     public List<String> keyWordsNames;
     public List<KeyWord> keyWords;
-    public boolean isDef = false;
+    public CodeType codeType = CodeType.Usage;
     public AInternalCodeNode definition = null;
-
     public HashMap<String, AInternalCodeNode> childs = new HashMap<>();
 
 
     public String name;
     public LinkTreePosition namePosition = new LinkTreePosition();
 
-    public AInternalCodeNode(Plugin plugin, Path path, ParseTree tree) {
-        setCommon(plugin, path, tree);
+    public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
+        setCommon(plugin, pathToFile, path, tree);
     }
 
-    public AInternalCodeNode(Plugin plugin, Path path, ParseTree tree, String name) {
-        setCommon(plugin, path, tree);
+    public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
+        setCommon(plugin, pathToFile, path, tree);
         this.name = name;
         Position namePos = plugin.getNamePositionOfModule(tree);
         this.namePosition.rowS = namePos.rowS;
@@ -44,8 +44,9 @@ public abstract class AInternalCodeNode {
         this.namePosition.colE = namePos.colE;
     }
 
-    protected void setCommon(Plugin plugin, Path path, ParseTree tree) {
+    protected void setCommon(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
         this.plugin = plugin;
+        this.pathToFile = pathToFile;
         this.pathToModule = path;
         Position position = plugin.getBounds(tree);
         this.wholePos.rowS = position.rowS;
@@ -55,12 +56,13 @@ public abstract class AInternalCodeNode {
         Tag[] tags = plugin.getTagsOfNode(tree);
         for (Tag tag : tags) {
             if (tag == Tag.Declaration) {
-                isDef = false;
-                break;
+                codeType = CodeType.Declaration;
             }
-            if (tag ==Tag.Definition) {
-                isDef = true;
-                break;
+            if (tag == Tag.Definition) {
+                codeType = CodeType.Definition;
+            }
+            if (tag == Tag.Usage) {
+                codeType = CodeType.Usage;
             }
         }
 
@@ -73,7 +75,7 @@ public abstract class AInternalCodeNode {
         List<ParseTree> keyWordsOfModule = plugin.getKeyWordsOfModule(tree);
         List<KeyWord> keyWordList = new ArrayList<>();
         for (ParseTree key : keyWordsOfModule) {
-            keyWordList.add(new KeyWord(plugin, pathToModule, key));
+            keyWordList.add(new KeyWord(plugin, pathToFile, pathToModule, key));
         }
         this.keyWords = keyWordList;
     }
@@ -130,7 +132,7 @@ public abstract class AInternalCodeNode {
         this.wholePos = node.wholePos;
         this.childs = node.childs;
         this.pathToModule = node.pathToModule;
-        this.isDef = node.isDef;
+        this.codeType = node.codeType;
         this.plugin = node.plugin;
         this.keyWordsNames = node.keyWordsNames;
         this.definition = node.definition;
@@ -153,4 +155,7 @@ public abstract class AInternalCodeNode {
         return null;
     }
 
+    public void setDefinition(List<AInternalCodeNode> global, List<AInternalCodeNode> path) {
+        return;
+    }
 }

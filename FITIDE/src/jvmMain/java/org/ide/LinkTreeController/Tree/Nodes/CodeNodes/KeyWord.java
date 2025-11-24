@@ -14,8 +14,8 @@ import java.util.List;
 
 public class KeyWord extends AInternalCodeNode {
 
-    public KeyWord(Plugin plugin, Path path, ParseTree tree) {
-        super(plugin, path, tree);
+    public KeyWord(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
+        super(plugin, pathToFile, path, tree);
     }
 
     @Override
