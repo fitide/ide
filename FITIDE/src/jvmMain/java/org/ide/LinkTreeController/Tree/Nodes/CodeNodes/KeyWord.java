@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Position;
 
@@ -19,13 +20,8 @@ public class KeyWord extends AInternalCodeNode {
     }
 
     @Override
-    public void setChilds() {
+    public void setChilds(ParseTree curNode) {
         childs = new HashMap<>();
-    }
-
-    @Override
-    public void getHint(String prefix, List<String> hints) {
-        return;
     }
 
     @Override
@@ -34,5 +30,16 @@ public class KeyWord extends AInternalCodeNode {
         colour.pos = this.wholePos.clone();
         colour.tag = LinkTreeCodeTag.KeyWord;
         list.add(colour);
+    }
+
+    @Override
+    protected void updateTree(ParseTree tree) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree);
+        this.updateCurNode(node);
+    }
+
+    @Override
+    protected List<Path> getPaths(Position position) {
+        return List.of();
     }
 }

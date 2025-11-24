@@ -4,15 +4,14 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
+import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Position;
 import org.ide.PluginController.PluginInterface.Tag;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public abstract class AInternalCodeNode {
     public Plugin plugin;
@@ -24,7 +23,7 @@ public abstract class AInternalCodeNode {
     public List<KeyWord> keyWords;
     public CodeType codeType = CodeType.Usage;
     public AInternalCodeNode definition = null;
-    public HashMap<String, AInternalCodeNode> childs = new HashMap<>();
+    public Map<String, AInternalCodeNode> childs = new HashMap<>();
 
 
     public String name;
@@ -47,7 +46,6 @@ public abstract class AInternalCodeNode {
     protected void setCommon(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
         this.plugin = plugin;
         this.pathToFile = pathToFile;
-        this.pathToModule = path;
         Position position = plugin.getBounds(tree);
         this.wholePos.rowS = position.rowS;
         this.wholePos.colS = position.colS;
@@ -68,7 +66,10 @@ public abstract class AInternalCodeNode {
 
         setKeyWords(tree);
 
-        this.setChilds();
+        this.setChilds(tree);
+
+        this.id = UUID.randomUUID().toString();
+        this.pathToModule = Paths.get(path.toString(), id);
     }
 
     protected void setKeyWords(ParseTree tree) {
@@ -80,7 +81,7 @@ public abstract class AInternalCodeNode {
         this.keyWords = keyWordList;
     }
 
-    protected abstract void setChilds();
+    protected abstract void setChilds(ParseTree curNode);
 
 
 
@@ -101,11 +102,19 @@ public abstract class AInternalCodeNode {
         for (String keyWord : keyWordsNames) {
             if (keyWord.startsWith(prefix)) hints.add(keyWord);
         }
+
+        if (name != null && name.startsWith(prefix)) hints.add(name);
     }
 
-    public void getHint(String prefix, List<String> hints) {}
+    public void getHint(String prefix, List<String> hints, Path pathToModule) {
 
-    public abstract void getHighlightning(List<CodeStrForColour> list);
+    }
+
+    public void getHighlightning(List<CodeStrForColour> list) {
+        for (AInternalCodeNode node : childs.values()) {
+            node.getHighlightning(list);
+        }
+    }
 
     public Path searchForDeclaration(Path pathToNode, String name) {
         return null;
@@ -115,13 +124,37 @@ public abstract class AInternalCodeNode {
         return null;
     }
 
-    public void updateTree(Path pathToModule, ParseTree parseTree) {}
+    public void updateTree(Path pathToModule, ParseTree parseTree) {
+        if (pathToModule.getNameCount() != 0 && this.childs.containsKey(Tools.getRootStr(pathToModule))) {
+            this.childs.get(Tools.getRootStr(pathToModule)).updateTree(Tools.deleteRoot(pathToModule), parseTree);
+            return;
+        }
+
+        if (pathToModule.getNameCount() == 0) {
+            this.updateTree(parseTree);
+        }
+
+    }
+
+    protected abstract void updateTree(ParseTree tree);
 
     public AInternalCodeNode getDeclaration(Path path) {
+        if (path.getNameCount() == 0 && this.codeType == CodeType.Declaration || this.codeType == CodeType.Definition) {
+            return this;
+        }
+        if (path.getNameCount() > 0 && childs.containsKey(Tools.getRootStr(path))) {
+            childs.get(Tools.getRootStr(path)).getDeclaration(Tools.deleteRoot(path));
+        }
         return null;
     };
 
     public AInternalCodeNode getDefinition(Path path) {
+        if (path.getNameCount() == 0 && this.codeType == CodeType.Definition) {
+            return this;
+        }
+        if (path.getNameCount() > 0 && childs.containsKey(Tools.getRootStr(path))) {
+            childs.get(Tools.getRootStr(path)).getDeclaration(Tools.deleteRoot(path));
+        }
         return null;
     }
 
@@ -140,20 +173,38 @@ public abstract class AInternalCodeNode {
     }
 
     public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
-        return null;
+        return getPaths(pathToModule);
     }
 
     public List<Path> getPathsToSearchDefinition(Path pathToModule) {
-        return null;
+        return getPaths(pathToModule);
+    }
+
+    protected List<Path> getPaths(Path pathToModule) {
+        List<Path> list = null;
+        if (pathToModule.getNameCount() != 0) {
+            String nextId = Tools.getRootStr(pathToModule);
+            if (this.childs.containsKey(nextId)) {
+                list = childs.get(nextId).
+                        getPathsToSearchDeclaration(Tools.deleteRoot(pathToModule));
+            }
+        }
+        else {
+            list = new ArrayList<>();
+        }
+        list.add(this.pathToModule);
+        return list;
     }
 
     public List<Path> getPathsToSearchDeclaration(Position position) {
-        return null;
+        return getPaths(position);
     }
 
     public List<Path> getPathsToSearchDefinition(Position position) {
-        return null;
+        return getPaths(position);
     }
+
+    protected abstract List<Path> getPaths(Position position);
 
     public void setDefinition(List<AInternalCodeNode> global, List<AInternalCodeNode> path) {
         return;

@@ -1,6 +1,7 @@
 package org.ide.LinkTreeController.Tree.Nodes.FileNodes;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.Tree;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
@@ -179,10 +180,10 @@ public class CommonFile extends FileNode {
     @Override
     public void getHints(Path pathToModule, String prefix, List<String> listOfHints) {
         for (AInternalCodeNode node : this.codeNodes.values()) {
-            if (node.name != null && node.name.startsWith(prefix)) {
-                listOfHints.add(node.name);
-                node.getHint(prefix, listOfHints);
-            }
+            node.getCommonHints(prefix, listOfHints);
+        }
+        if (this.codeNodes.containsKey(Tools.getRootStr(pathToModule))) {
+            this.codeNodes.get(Tools.getRootStr(pathToModule)).getHint(prefix, listOfHints, Tools.deleteRoot(pathToModule));
         }
     }
 
@@ -202,25 +203,6 @@ public class CommonFile extends FileNode {
 
     @Override
     public void updateCode(Plugin plugin, Path pathToModule, ParseTree tree) {
-        List<AInternalCodeNode> list = TreeBuilder.build(plugin, tree);
-        Map<String, AInternalCodeNode> newMap = new HashMap<>();
-        for (AInternalCodeNode node : list) {
-            boolean isFound = false;
-            for (AInternalCodeNode inboundNode : this.codeNodes.values()) {
-                if (Objects.equals(node.name, inboundNode.name)) {
-                    inboundNode.updateCurNode(node);
-                    isFound = true;
-                    newMap.put(inboundNode.id, inboundNode);
-                    break;
-                }
-            }
-
-            if (!isFound) {
-                node.setId(IDgenerator.genID());
-                newMap.put(node.id, node);
-            }
-        }
-
-        this.codeNodes = newMap;
+        codeNodes = TreeBuilder.build(plugin, tree);
     }
 }
