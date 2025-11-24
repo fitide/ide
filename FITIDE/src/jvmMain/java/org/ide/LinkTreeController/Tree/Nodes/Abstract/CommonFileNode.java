@@ -29,7 +29,7 @@ public abstract class CommonFileNode {
         this.Treelock = lock;
     }
 
-    public Path[] getPathsToSearchDeclaration(Path pathToModule) {
+    public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
         if (pathToModule.getNameCount() == 0) return null;
 
         if (this.childs.containsKey(Tools.getRootStr(pathToModule))){
@@ -39,7 +39,7 @@ public abstract class CommonFileNode {
         return null;
     }
 
-    public Path[] getPathsToSearchDeclaration(Path pathToFile, LinkTreePosition linkTreePosition) {
+    public List<Path> getPathsToSearchDeclaration(Path pathToFile, LinkTreePosition linkTreePosition) {
         if (pathToFile.getNameCount() == 0) return null;
 
         if (this.childs.containsKey(Tools.getRootStr(pathToFile))){
@@ -77,7 +77,7 @@ public abstract class CommonFileNode {
 
     public abstract AInternalCodeNode getDeclaration(Path path) throws NoDeclarationException;
 
-    public Path[] getPathsToSearchDefinition(Path pathToModule) {
+    public List<Path> getPathsToSearchDefinition(Path pathToModule) {
         if (pathToModule.getNameCount() == 0) return null;
 
         if (this.childs.containsKey(Tools.getRootStr(pathToModule))){
@@ -87,7 +87,7 @@ public abstract class CommonFileNode {
         return null;
     }
 
-    public Path[] getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
+    public List<Path> getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
         if (pathToFile.getNameCount() == 0) return null;
 
         if (this.childs.containsKey(Tools.getRootStr(pathToFile))){

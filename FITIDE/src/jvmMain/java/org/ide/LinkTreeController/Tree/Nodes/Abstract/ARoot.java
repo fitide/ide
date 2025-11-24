@@ -52,11 +52,11 @@ public abstract class ARoot extends CommonFileNode {
     }
 
 
-    public abstract Path searchForDeclaration(Path[] paths, String name) throws NoDeclarationException;
+    public abstract Path searchForDeclaration(List<Path> paths, String name) throws NoDeclarationException;
 
     public abstract Path searchForDeclaration(String name) throws NoDeclarationException;
 
-    public abstract Path searchForDefinition(Path[] paths, String name) throws NoDefinitionException;
+    public abstract Path searchForDefinition(List<Path> paths, String name) throws NoDefinitionException;
 
     public abstract Path searchForDefinition(String Name) throws NoDefinitionException;
 

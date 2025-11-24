@@ -3,6 +3,7 @@ package org.ide.LinkTreeController.Tree.Nodes.FileNodes;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
 import org.ide.LinkTreeController.Tree.ToolClasses.IDgenerator;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
@@ -28,7 +29,7 @@ public class CommonFile extends FileNode {
 
 
     @Override
-    public Path[] getPathsToSearchDeclaration(Path pathToModule) {
+    public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
         if (pathToModule.getNameCount() == 0) return null;
 
         if (childs.containsKey(Tools.getRootStr(pathToModule))) {
@@ -39,7 +40,7 @@ public class CommonFile extends FileNode {
     }
 
     @Override
-    public Path[] getPathsToSearchDeclaration(Path pathToFile, LinkTreePosition linkTreePosition) {
+    public List<Path> getPathsToSearchDeclaration(Path pathToFile, LinkTreePosition linkTreePosition) {
         for (AInternalCodeNode node : this.codeNodes.values()) {
             if (node.wholePos.compareTo(linkTreePosition) == 0) {
                 node.getPathsToSearchDeclaration(linkTreePosition);
@@ -53,7 +54,7 @@ public class CommonFile extends FileNode {
     public Path searchForDeclaration(Path path, String name) {
         if (path.getNameCount() == 0) {
             for (AInternalCodeNode node : codeNodes.values()) {
-                if (Objects.equals(node.name, name) && !node.isDef) {
+                if (Objects.equals(node.name, name) && node.codeType == CodeType.Declaration) {
                     return Paths.get(node.pathToModule.toString(), node.id);
                 }
             }
@@ -74,7 +75,7 @@ public class CommonFile extends FileNode {
     @Override
     public Path searchForDeclarationInNode(String name) {
         for (AInternalCodeNode node : codeNodes.values()) {
-            if (Objects.equals(node.name, name) && !node.isDef) {
+            if (Objects.equals(node.name, name) && node.codeType == CodeType.Declaration) {
                 return Paths.get(node.pathToModule.toString(), node.id);
             }
         }
@@ -90,7 +91,7 @@ public class CommonFile extends FileNode {
         AInternalCodeNode node = codeNodes.get(Tools.getRootStr(path));
 
         if (path.getNameCount() == 1) {
-            if (!node.isDef) {
+            if (node.codeType == CodeType.Declaration) {
                 return codeNodes.get(Tools.getRootStr(path));
             }
         }
@@ -103,7 +104,7 @@ public class CommonFile extends FileNode {
     }
 
     @Override
-    public Path[] getPathsToSearchDefinition(Path pathToModule) {
+    public List<Path> getPathsToSearchDefinition(Path pathToModule) {
         if (pathToModule.getNameCount() == 0) return null;
 
         if (childs.containsKey(Tools.getRootStr(pathToModule))) {
@@ -114,7 +115,7 @@ public class CommonFile extends FileNode {
     }
 
     @Override
-    public Path[] getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
+    public List<Path> getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
         for (AInternalCodeNode node : this.codeNodes.values()) {
             if (node.wholePos.compareTo(linkTreePosition) == 0) {
                 node.getPathsToSearchDefinition(linkTreePosition);
@@ -128,7 +129,7 @@ public class CommonFile extends FileNode {
     public Path searchForDefinition(Path path, String name) {
         if (path.getNameCount() == 0) {
             for (AInternalCodeNode node : codeNodes.values()) {
-                if (Objects.equals(node.name, name) && node.isDef) {
+                if (Objects.equals(node.name, name) && node.codeType == CodeType.Definition) {
                     return Paths.get(node.pathToModule.toString(), node.id);
                 }
             }
@@ -147,7 +148,7 @@ public class CommonFile extends FileNode {
     @Override
     public Path searchForDefinitionInNode(String name) {
         for (AInternalCodeNode node : codeNodes.values()) {
-            if (Objects.equals(node.name, name) && node.isDef) {
+            if (Objects.equals(node.name, name) && node.codeType == CodeType.Definition) {
                 return Paths.get(node.pathToModule.toString(), node.id);
             }
         }
@@ -163,7 +164,7 @@ public class CommonFile extends FileNode {
         AInternalCodeNode node = codeNodes.get(Tools.getRootStr(path));
 
         if (path.getNameCount() == 1) {
-            if (node.isDef) {
+            if (node.codeType == CodeType.Definition) {
                 return codeNodes.get(Tools.getRootStr(path));
             }
         }

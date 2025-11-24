@@ -30,7 +30,7 @@ public class Root extends ARoot {
     }
 
     @Override
-    public Path searchForDeclaration(Path[] paths, String name) throws NoDeclarationException {
+    public Path searchForDeclaration(List<Path> paths, String name) throws NoDeclarationException {
 
         Path path = searchForDeclarationInNode(name);
         if (path != null) return path;
@@ -125,7 +125,7 @@ public class Root extends ARoot {
     }
 
     @Override
-    public Path searchForDefinition(Path[] paths, String name) throws NoDefinitionException {
+    public Path searchForDefinition(List<Path> paths, String name) throws NoDefinitionException {
 
         Path path = searchForDefinitionInNode(name);
         if (path != null) return path;
@@ -241,7 +241,7 @@ public class Root extends ARoot {
         Callable<Path> makeSearchMethod (CommonFileNode commonFileNode, Path path, String name);
     }
 
-    private Path searchByPaths(Path[] paths, String name, SearchByPathMethodBuilder method) {
+    private Path searchByPaths(List<Path> paths, String name, SearchByPathMethodBuilder method) {
         try {
             ExecutorService service = Executors.newScheduledThreadPool(cntSearches);
             Path ans = null;

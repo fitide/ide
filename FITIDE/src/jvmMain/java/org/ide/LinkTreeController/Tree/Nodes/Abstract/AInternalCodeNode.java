@@ -139,19 +139,19 @@ public abstract class AInternalCodeNode {
         this.id = node.id;
     }
 
-    public Path[] getPathsToSearchDeclaration(Path pathToModule) {
+    public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
         return null;
     }
 
-    public Path[] getPathsToSearchDefinition(Path pathToModule) {
+    public List<Path> getPathsToSearchDefinition(Path pathToModule) {
         return null;
     }
 
-    public Path[] getPathsToSearchDeclaration(Position position) {
+    public List<Path> getPathsToSearchDeclaration(Position position) {
         return null;
     }
 
-    public Path[] getPathsToSearchDefinition(Position position) {
+    public List<Path> getPathsToSearchDefinition(Position position) {
         return null;
     }
 
