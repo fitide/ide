@@ -10,13 +10,9 @@ import com.jediterm.terminal.TtyConnector
 import com.jediterm.terminal.ui.JediTermWidget
 import com.jediterm.terminal.ui.settings.DefaultSettingsProvider
 import com.pty4j.PtyProcessBuilder
-import java.awt.Font
 import java.nio.charset.StandardCharsets
 
 class CustomTerminalSettingsProvider : DefaultSettingsProvider() {
-    override fun shouldDisableLineSpacingForAlternateScreenBuffer(): Boolean {
-        return false
-    }
 
     override fun getDefaultBackground(): TerminalColor {
         return TerminalColor.BLACK
@@ -49,7 +45,7 @@ fun Terminal(workingDirectory: String = System.getProperty("user.home")) {
 
             val shell = if (System.getProperty("os.name").startsWith("Windows")) {
                 arrayOf("cmd.exe")
-            } else if (System.getProperty("os.name").startsWith("darwin")) {
+            } else if (System.getProperty("os.name").startsWith("Mac")) {
                 arrayOf("/bin/zsh", "-l")
             } else {
                 arrayOf("/bin/bash", "-l")
@@ -61,8 +57,8 @@ fun Terminal(workingDirectory: String = System.getProperty("user.home")) {
                 .setEnvironment(mapOf(
                     "TERM" to "xterm-256color",
                     "COLORTERM" to "truecolor",
-                    "LANG" to "UTF-8",
-                    "LC_ALL" to "UTF-8"
+                    "LANG" to "en_US.UTF-8",
+                    "LC_ALL" to "en_US.UTF-8"
                 ))
                 .setConsole(false)
                 .start()
