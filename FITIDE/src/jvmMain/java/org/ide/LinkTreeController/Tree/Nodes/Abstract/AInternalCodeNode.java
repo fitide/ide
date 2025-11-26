@@ -2,6 +2,7 @@ package org.ide.LinkTreeController.Tree.Nodes.Abstract;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
+import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
@@ -106,9 +107,7 @@ public abstract class AInternalCodeNode {
         if (name != null && name.startsWith(prefix)) hints.add(name);
     }
 
-    public void getHint(String prefix, List<String> hints, Path pathToModule) {
-
-    }
+    public abstract void getHint(String prefix, List<String> hints, Path pathToModule);
 
     public void getHighlightning(List<CodeStrForColour> list) {
         for (AInternalCodeNode node : childs.values()) {
@@ -196,17 +195,21 @@ public abstract class AInternalCodeNode {
         return list;
     }
 
-    public List<Path> getPathsToSearchDeclaration(Position position) {
+    public List<Path> getPathsToSearchDeclaration(LinkTreePosition position) {
         return getPaths(position);
     }
 
-    public List<Path> getPathsToSearchDefinition(Position position) {
+    public List<Path> getPathsToSearchDefinition(LinkTreePosition position) {
         return getPaths(position);
     }
 
-    protected abstract List<Path> getPaths(Position position);
+    protected abstract List<Path> getPaths(LinkTreePosition position);
 
-    public void setDefinition(List<AInternalCodeNode> global, List<AInternalCodeNode> path) {
-        return;
+    public void setDefinition(Map<String, AInternalCodeNode> defInFIle, List<CommonFile> includedFiles) {
+        if (defInFIle.containsKey(this.name)) this.definition = defInFIle.get(this.name);
+        for (CommonFile file : includedFiles) {
+            if (file.defInFIle.containsKey(this.name)) this.definition = file.defInFIle.get(name);
+        }
+        this.definition = null;
     }
 }

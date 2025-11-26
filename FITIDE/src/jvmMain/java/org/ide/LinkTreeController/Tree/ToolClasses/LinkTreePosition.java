@@ -7,6 +7,14 @@ import org.jetbrains.annotations.NotNull;
 public class LinkTreePosition extends Position implements Comparable<LinkTreePosition>, Cloneable {
     public int rowS, colS, rowE, colE;
 
+    public LinkTreePosition() {};
+
+    public LinkTreePosition(Position pos) {
+        this.rowS = pos.rowS;
+        this.colS = pos.colS;
+        this.rowE = pos.rowE;
+        this.colE = pos.colE;
+    }
 
     @Override
     public int compareTo(@NotNull LinkTreePosition pos) {

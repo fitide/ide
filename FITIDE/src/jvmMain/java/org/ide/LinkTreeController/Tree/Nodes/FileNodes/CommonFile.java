@@ -22,7 +22,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 
 public class CommonFile extends FileNode {
-    Map<String, AInternalCodeNode> codeNodes = new HashMap<>();
+    public Map<String, AInternalCodeNode> codeNodes = new HashMap<>();
+    public Map<String, AInternalCodeNode> defInFIle = new HashMap<>();
 
     public CommonFile(ReadWriteLock lock, String name) {
         super(lock, name);

@@ -3,15 +3,16 @@ package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
+import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
-import org.ide.PluginController.PluginInterface.Position;
 
-import javax.tools.Tool;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +20,8 @@ import java.util.Objects;
 public class Func extends AInternalCodeNode {
     public Map<String, AInternalCodeNode> args;
     public AInternalCodeNode retType;
+    public LinkTreePosition bodyPosition;
+    public LinkTreePosition argsPosition;
 
     public Func(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
         super(plugin, pathToFile, path, tree, name);
@@ -27,6 +30,8 @@ public class Func extends AInternalCodeNode {
             AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree));
             args.put(arg.id, arg);
         }
+        this.bodyPosition = new LinkTreePosition(plugin.getPositionOfModuleBody(tree));
+        this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree));
     }
 
     @Override
@@ -34,10 +39,6 @@ public class Func extends AInternalCodeNode {
         this.childs = TreeBuilder.getChilds(plugin, curNode);
     }
 
-    @Override
-    public void getCommonHints(String prefix, List<String> hints) {
-        super.getCommonHints(prefix, hints);
-    }
 
     @Override
     public void getHint(String prefix, List<String> hints, Path pathToModule) {
@@ -139,10 +140,6 @@ public class Func extends AInternalCodeNode {
     }
 
     @Override
-    public void updateTree(Path pathToModule, ParseTree parseTree) {
-    }
-
-    @Override
     protected void updateTree(ParseTree tree) {
         AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree);
         this.updateCurNode(node);
@@ -179,12 +176,31 @@ public class Func extends AInternalCodeNode {
 
 
     @Override
-    protected List<Path> getPaths(Position position) {
-        return List.of();
+    protected List<Path> getPaths(LinkTreePosition position) {
+        if (namePosition.compareTo(position) == 0) return List.of();
+        if (bodyPosition.compareTo(position) == 0) {
+            List<Path> res = new ArrayList<>();
+
+            for (AInternalCodeNode node : childs.values()) {
+                if (node.wholePos.compareTo(position) == 0) res = node.getPathsToSearchDeclaration(position);
+            }
+
+            res.add(this.pathToModule);
+            return res;
+        }
+
+        if (argsPosition.compareTo(position) == 0) {
+            List<Path> res = new ArrayList<>();
+
+            for (AInternalCodeNode node : args.values()) {
+                if (node.wholePos.compareTo(position) == 0) res = node.getPathsToSearchDeclaration(position);
+            }
+
+            res.add(this.pathToModule);
+            return res;
+        }
+
+        return null;
     }
 
-    @Override
-    public void setDefinition(List<AInternalCodeNode> global, List<AInternalCodeNode> path) {
-        super.setDefinition(global, path);
-    }
 }

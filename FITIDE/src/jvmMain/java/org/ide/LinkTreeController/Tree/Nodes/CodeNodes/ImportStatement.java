@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
@@ -28,6 +29,11 @@ public class ImportStatement extends AInternalCodeNode {
     }
 
     @Override
+    public void getHint(String prefix, List<String> hints, Path pathToModule) {
+        return;
+    }
+
+    @Override
     public void getHighlightning(List<CodeStrForColour> list) {
         super.getHighlightning(list);
 
@@ -43,41 +49,14 @@ public class ImportStatement extends AInternalCodeNode {
         this.updateCurNode(node);
     }
 
+
+
     @Override
-    public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
+    protected List<Path> getPaths(LinkTreePosition position) {
         List<Path> paths = new ArrayList<>();
         paths.add(Paths.get(pathToFile.toString(), this.name));
         paths.add(Paths.get(this.name));
         return paths;
-    }
-
-    @Override
-    public List<Path> getPathsToSearchDefinition(Path pathToModule) {
-        List<Path> paths = new ArrayList<>();
-        paths.add(Paths.get(pathToFile.toString(), this.name));
-        paths.add(Paths.get(this.name));
-        return paths;
-    }
-
-    @Override
-    public List<Path> getPathsToSearchDeclaration(Position position) {
-        List<Path> paths = new ArrayList<>();
-        paths.add(Paths.get(pathToFile.toString(), this.name));
-        paths.add(Paths.get(this.name));
-        return paths;
-    }
-
-    @Override
-    public List<Path> getPathsToSearchDefinition(Position position) {
-        List<Path> paths = new ArrayList<>();
-        paths.add(Paths.get(pathToFile.toString(), this.name));
-        paths.add(Paths.get(this.name));
-        return paths;
-    }
-
-    @Override
-    protected List<Path> getPaths(Position position) {
-        return List.of();
     }
 
 }
