@@ -16,10 +16,10 @@ import org.main.ide.editor.Editor
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.fileexplorer.FileExplorerView
 import org.main.ide.terminal.Terminal
-
+import org.main.ide.uistate.UIState
 @Composable
 @Preview
-fun App(fileExplorer: FileExplorer) {
+fun App(fileExplorer: FileExplorer, uiState: UIState) {
     MaterialTheme {
         Box(
             modifier = Modifier
@@ -49,7 +49,7 @@ fun App(fileExplorer: FileExplorer) {
                             .fillMaxHeight()
                             .background(Color.Gray)
                     ) {
-                        ButtonBarVertical()
+                        ButtonBarVertical(uiState = uiState)
                     }
 
                     VerticalDivider(color = Color.Black)
@@ -58,7 +58,7 @@ fun App(fileExplorer: FileExplorer) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(0.7f)
+                                .weight(if (uiState.isTerminalVisible) 0.7f else 1f)
                         ) {
                             Box(
                                 modifier = Modifier
@@ -79,18 +79,23 @@ fun App(fileExplorer: FileExplorer) {
                             }
                         }
 
-                        HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 1.dp,
-                            color = Color.Black
-                        )
+                        if (uiState.isTerminalVisible) {
+                            HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 1.dp,
+                                color = Color.Black
+                            )
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.3f)
-                        ) {
-                            Terminal()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(0.3f)
+                            ) {
+                                val workingDir = fileExplorer.currentPath.ifEmpty {
+                                    System.getProperty("user.home")
+                                }
+                                Terminal(workingDirectory = workingDir)
+                            }
                         }
                     }
                 }

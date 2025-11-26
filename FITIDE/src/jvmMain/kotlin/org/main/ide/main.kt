@@ -5,6 +5,7 @@ import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import org.main.ide.fileexplorer.FileExplorer
+import org.main.ide.uistate.UIState
 
 fun main() = application {
     Window(
@@ -12,6 +13,7 @@ fun main() = application {
         title = "FITIDE",
     ) {
         val fileExplorer = remember { FileExplorer() }
+        val uiState = remember { UIState() }
 
         MenuBar {
             Menu("File", mnemonic = 'F') {
@@ -19,6 +21,6 @@ fun main() = application {
                 Item("Open Directory", onClick = { fileExplorer.openDirectoryDialog() })
             }
         }
-        App(fileExplorer)
+        App(fileExplorer, uiState)
     }
 }

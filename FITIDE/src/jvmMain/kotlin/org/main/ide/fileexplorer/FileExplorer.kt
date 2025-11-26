@@ -33,10 +33,18 @@ import java.io.File
 import java.util.Locale.getDefault
 import javax.swing.JFileChooser
 
+import androidx.compose.foundation.ContextMenuArea
+import androidx.compose.foundation.ContextMenuItem
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material3.MaterialTheme
+import javax.swing.JOptionPane
+import java.nio.file.Paths
+
 data class FlatNode(
     val node: Node,
     val depth: Int,
-    val isExpanded: Boolean?
+    val isExpanded: Boolean?,
+    val path: String
 )
 
 class FileExplorer() {
@@ -45,7 +53,7 @@ class FileExplorer() {
     var fileTree: Directory? by mutableStateOf(null)
         private set
 
-    var expandedState: Map<Node, Boolean> by mutableStateOf(emptyMap())
+    var expandedState: Map<String, Boolean> by mutableStateOf(emptyMap())
 
     private lateinit var fileExplorerController: FileExplorerController
 
@@ -63,31 +71,34 @@ class FileExplorer() {
         @Composable get() {
             val root = fileTree ?: return emptyList()
             val list = mutableListOf<FlatNode>()
-            buildFlatList(root, 0, list)
+            buildFlatList(root, 0, list, currentPath)
             return list
         }
 
-    private fun buildFlatList(currentNode: Node, depth: Int, list: MutableList<FlatNode>) {
+    private fun buildFlatList(currentNode: Node, depth: Int, list: MutableList<FlatNode>, currentAbsPath: String) {
         val isDir = currentNode is Directory
-        val isExpanded = expandedState[currentNode] ?: (depth == 0)
+        val isExpanded = expandedState[currentAbsPath] ?: (depth == 0)
 
-        list.add(FlatNode(currentNode, depth, if (isDir) isExpanded else null))
+        list.add(FlatNode(currentNode, depth, if (isDir) isExpanded else null, currentAbsPath))
 
         if (isDir && isExpanded) {
 
             for (i in 0 until currentNode.dirsCnt) {
-                buildFlatList(currentNode.getDir(i), depth + 1, list)
+                val child = currentNode.getDir(i)
+                buildFlatList(child, depth + 1, list, "$currentAbsPath${File.separator}${child.name}")
             }
             for (i in 0 until currentNode.filesCnt) {
-                buildFlatList(currentNode.getFile(i), depth + 1, list)
+                val child = currentNode.getFile(i)
+                buildFlatList(child, depth + 1, list, "$currentAbsPath${File.separator}${child.name}")
             }
         }
     }
 
-    fun toggleExpansion(node: Node) {
+    fun toggleExpansion(node: Node, nodePath: String) {
         if (node !is Directory) return
         expandedState = expandedState.toMutableMap().apply {
-            this[node] = !(this[node] ?: (node == fileTree))
+            val isRoot = nodePath == currentPath
+            this[nodePath] = !(this[nodePath] ?: isRoot)
         }
     }
 
@@ -106,7 +117,7 @@ class FileExplorer() {
             try {
                 this.fileExplorerController = FileExplorerController(this.currentPath, logger)
                 this.fileTree = this.fileExplorerController.treeCopy
-                this.expandedState = mapOf(this.fileTree!! to true)
+                this.expandedState = mapOf(this.currentPath to true)
                 logger.info("Открыта директория: ${this.currentPath}")
                 logger.info("Дерево файлов построено: ${this.fileTree?.name}")
             } catch (e: Exception) {
@@ -137,7 +148,7 @@ class FileExplorer() {
                 try {
                     this.fileExplorerController = FileExplorerController(this.currentPath, logger)
                     this.fileTree = this.fileExplorerController.treeCopy
-                    this.expandedState = mapOf(this.fileTree!! to true)
+                    this.expandedState = mapOf(this.currentPath to true)
                     logger.info("Открыт файл: $selectedPath")
                     logger.info("Дерево файлов построено: ${this.fileTree?.name}")
                 } catch (e: Exception) {
@@ -155,6 +166,84 @@ class FileExplorer() {
             this.fileTree = null
             this.expandedState = emptyMap()
             logger.info("Проект закрыт.")
+        }
+    }
+
+    private fun refreshFileTree() {
+        if (isControllerInitialized()) {
+            this.fileTree = fileExplorerController.treeCopy
+            logger.info("Дерево файлов обновлено.")
+        }
+    }
+
+    fun renameNode(nodePath: String, isDirectory: Boolean) {
+        if (!isControllerInitialized()) return
+
+        val newName = JOptionPane.showInputDialog(null, "Введите новое имя:")
+        if (newName.isNullOrBlank()) {
+            logger.info("Переименование отменено.")
+            return
+        }
+
+        try {
+            val path = Paths.get(nodePath)
+            if (isDirectory) {
+                fileExplorerController.renameDirectory(path, newName)
+            } else {
+                fileExplorerController.renameFile(path, newName)
+            }
+            refreshFileTree()
+            logger.info("Переименован $nodePath в $newName")
+        } catch (e: Exception) {
+            logger.error("Ошибка переименования $nodePath: ${e.message}")
+            JOptionPane.showMessageDialog(null, "Ошибка переименования: ${e.message}", "Ошибка", JOptionPane.ERROR_MESSAGE)
+        }
+    }
+
+    fun createFileInNode(dirPath: String) {
+        if (!isControllerInitialized()) return
+
+        val fileName = JOptionPane.showInputDialog(null, "Введите имя нового файла:")
+        if (fileName.isNullOrBlank()) {
+            logger.info("Создание файла отменено.")
+            return
+        }
+
+        try {
+            val path = Paths.get(dirPath)
+            fileExplorerController.createFile(path, fileName)
+            expandedState = expandedState.toMutableMap().apply {
+                this[dirPath] = true
+            }
+            refreshFileTree()
+            logger.info("Создан файл $fileName в $dirPath")
+        } catch (e: Exception) {
+            logger.error("Ошибка создания файла в $dirPath: ${e.message}")
+            JOptionPane.showMessageDialog(null, "Ошибка создания файла: ${e.message}", "Ошибка", JOptionPane.ERROR_MESSAGE)
+        }
+    }
+
+    fun deleteNode(nodePath: String, isDirectory: Boolean) {
+        if (!isControllerInitialized()) return
+
+        val confirmation = JOptionPane.showConfirmDialog(null, "Вы уверены, что хотите удалить этот элемент?", "Подтвердите удаление", JOptionPane.YES_NO_OPTION)
+        if (confirmation != JOptionPane.YES_OPTION) {
+            logger.info("Удаление отменено.")
+            return
+        }
+
+        try {
+            val path = Paths.get(nodePath)
+            if (isDirectory) {
+                fileExplorerController.deleteDirectory(path)
+            } else {
+                fileExplorerController.deleteFile(path)
+            }
+            refreshFileTree()
+            logger.info("Удален элемент $nodePath")
+        } catch (e: Exception) {
+            logger.error("Ошибка удаления $nodePath: ${e.message}")
+            JOptionPane.showMessageDialog(null, "Ошибка удаления: ${e.message}", "Ошибка", JOptionPane.ERROR_MESSAGE)
         }
     }
 }
@@ -182,6 +271,7 @@ fun FileIconForExtension(file: FEFile): Painter {
     return painterResource(resource)
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FlatFileNode(flatNode: FlatNode, fileExplorer: FileExplorer) {
     val node = flatNode.node
@@ -192,46 +282,68 @@ fun FlatFileNode(flatNode: FlatNode, fileExplorer: FileExplorer) {
     val horizontalPadding = (depth * 16).dp
     val startIndent = if (isDirectory) 0.dp else 24.dp
 
-    Row(
-        modifier = Modifier
-            .clickable {
+    val menuItems = if (isDirectory) {
+        listOf(
+            ContextMenuItem("Переименовать") { fileExplorer.renameNode(flatNode.path, isDirectory = true) },
+            ContextMenuItem("Создать файл") { fileExplorer.createFileInNode(flatNode.path) },
+            ContextMenuItem("Удалить") { fileExplorer.deleteNode(flatNode.path, isDirectory = true) }
+        )
+    } else {
+        listOf(
+            ContextMenuItem("Переименовать") { fileExplorer.renameNode(flatNode.path, isDirectory = false) },
+            ContextMenuItem("Удалить") { fileExplorer.deleteNode(flatNode.path, isDirectory = false) }
+        )
+    }
+
+    val customContextMenuColors = MaterialTheme.colorScheme.copy(
+        surface = Color(0xA9A9A9),
+        onSurface = Color.White
+    )
+
+    MaterialTheme(customContextMenuColors) {
+        ContextMenuArea(items = { menuItems }) {
+            Row(
+                modifier = Modifier
+                    .clickable {
+                        if (isDirectory) {
+                            fileExplorer.toggleExpansion(node, flatNode.path)
+                        }
+                    }
+                    .padding(vertical = 2.dp)
+                    .padding(start = horizontalPadding)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
                 if (isDirectory) {
-                    fileExplorer.toggleExpansion(node)
+                    Icon(
+                        imageVector = if (flatNode.isExpanded == true) Icons.Default.KeyboardArrowDown else Icons.Default.ChevronRight,
+                        contentDescription = if (flatNode.isExpanded == true) "Collapse" else "Expand",
+                        modifier = Modifier.size(20.dp).padding(end = 4.dp),
+                        tint = Color.White
+                    )
+
+                    Icon(
+                        painter = painterResource(Res.drawable.folder),
+                        contentDescription = "Directory",
+                        modifier = Modifier.padding(end = 4.dp).size(20.dp),
+                        tint = Color.Unspecified
+                    )
+                    Text(node.name, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+                else if (node is FEFile && extensionIcon != null) {
+                    Spacer(Modifier.width(startIndent))
+
+                    Icon(
+                        painter = extensionIcon,
+                        contentDescription = "File icon for ${node.name}",
+                        modifier = Modifier.padding(end = 4.dp).size(20.dp),
+                        tint = Color.Unspecified
+                    )
+
+                    Text(node.name, color = Color.White)
                 }
             }
-            .padding(vertical = 2.dp)
-            .padding(start = horizontalPadding)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        if (isDirectory) {
-            Icon(
-                imageVector = if (flatNode.isExpanded == true) Icons.Default.KeyboardArrowDown else Icons.Default.ChevronRight,
-                contentDescription = if (flatNode.isExpanded == true) "Collapse" else "Expand",
-                modifier = Modifier.size(20.dp).padding(end = 4.dp),
-                tint = Color.White
-            )
-
-            Icon(
-                painter = painterResource(Res.drawable.folder),
-                contentDescription = "Directory",
-                modifier = Modifier.padding(end = 4.dp).size(20.dp),
-                tint = Color.Unspecified
-            )
-            Text(node.name, fontWeight = FontWeight.Bold, color = Color.White)
-        }
-        else if (node is FEFile && extensionIcon != null) {
-            Spacer(Modifier.width(startIndent))
-
-            Icon(
-                painter = extensionIcon,
-                contentDescription = "File icon for ${node.name}",
-                modifier = Modifier.padding(end = 4.dp).size(20.dp),
-                tint = Color.Unspecified
-            )
-
-            Text(node.name, color = Color.White)
         }
     }
 }

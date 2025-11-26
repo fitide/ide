@@ -9,10 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ide.fitide.generated.resources.*
+import org.main.ide.uistate.UIState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ButtonBarVertical() {
+fun ButtonBarVertical(uiState: UIState) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -22,10 +23,12 @@ fun ButtonBarVertical() {
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconWithTooltip(Res.drawable.build, "Build")
-        Spacer(Modifier.height(8.dp))
-        IconWithTooltip(Res.drawable.terminal, "Terminal")
-        Spacer(Modifier.height(8.dp))
-        IconWithTooltip(Res.drawable.problems, "Problems")
+        IconWithTooltip(
+            Res.drawable.terminal,
+            "Terminal",
+            onClick = {
+                uiState.toggleTerminal()
+            }
+        )
     }
 }

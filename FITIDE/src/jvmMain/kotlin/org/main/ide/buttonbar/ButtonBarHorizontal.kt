@@ -25,7 +25,5 @@ fun ButtonBarHorizontal() {
         IconWithTooltip(Res.drawable.config, "Config")
         Spacer(Modifier.width(4.dp))
         IconWithTooltip(Res.drawable.run, "Run")
-        Spacer(Modifier.width(4.dp))
-        IconWithTooltip(Res.drawable.debug, "Debug")
     }
 }
