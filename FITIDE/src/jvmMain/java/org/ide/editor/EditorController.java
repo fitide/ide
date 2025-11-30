@@ -57,4 +57,15 @@ public class EditorController {
         return !files.get(filePath).isSaved();
     }
 
+    public void updateCursor(String filePath, Cursor cursor) {
+        var file = files.get(filePath);
+        if (file != null) {
+            file.setCursor(cursor);
+        }
+    }
+
+    public Cursor getCursor(String filePath) {
+        var file = files.get(filePath);
+        return file != null ? file.getCursor() : null;
+    }
 }

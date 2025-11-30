@@ -8,15 +8,19 @@ class EditorFile {
     private boolean saved;
     private List<String> versionsList;
     private int currentVersion;
+    private Cursor cursor;
 
-    public EditorFile(List<String> content) {
+    public EditorFile(List<String> contentLines) {
         saved = true;
         this.content = new StringBuilder();
-        for (String s : content) {
-            this.content.append(s);
+        for (String s : contentLines) {
+            this.content.append(s).append('\n');
         }
         versionsList = new ArrayList<>();
         currentVersion = 0;
+        cursor = new Cursor();
+        cursor.line = 0;
+        cursor.position = 0;
     }
 
     public String getContent() {
@@ -25,12 +29,15 @@ class EditorFile {
 
     public void setContent(String newContent) {
         if (!versionsList.isEmpty()) {
-            versionsList = versionsList.subList(0, currentVersion);
+            versionsList = new ArrayList<>(versionsList.subList(0, currentVersion + 1));
         }
 
         versionsList.add(content.toString());
+        currentVersion = versionsList.size() - 1;
+
         content.setLength(0);
         content.append(newContent);
+        saved = false;
     }
 
     public void save() {
@@ -63,5 +70,13 @@ class EditorFile {
             content.setLength(0);
             content.append(versionsList.get(currentVersion));
         }
+    }
+
+    public Cursor getCursor() {
+        return cursor;
+    }
+
+    public void setCursor(Cursor cursor) {
+        this.cursor = cursor;
     }
 }
