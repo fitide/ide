@@ -13,25 +13,32 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.main.ide.buttonbar.ButtonBarHorizontal
 import org.main.ide.buttonbar.ButtonBarVertical
 import org.main.ide.editor.Editor
+import org.main.ide.editor.EditorState
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.fileexplorer.FileExplorerView
 import org.main.ide.terminal.Terminal
 import org.main.ide.uistate.UIState
+
 @Composable
 @Preview
-fun App(fileExplorer: FileExplorer, uiState: UIState) {
+fun App(
+    fileExplorer: FileExplorer,
+    uiState: UIState,
+    editorState: EditorState
+) {
     MaterialTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(Color(0xFF2B2B2B))
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
-                        .background(Color.DarkGray)
+                        .background(Color(0xFF3C3F41))
                 ) {
                     ButtonBarHorizontal()
                 }
@@ -47,7 +54,7 @@ fun App(fileExplorer: FileExplorer, uiState: UIState) {
                         modifier = Modifier
                             .width(60.dp)
                             .fillMaxHeight()
-                            .background(Color.Gray)
+                            .background(Color(0xFF3C3F41))
                     ) {
                         ButtonBarVertical(uiState = uiState)
                     }
@@ -55,31 +62,37 @@ fun App(fileExplorer: FileExplorer, uiState: UIState) {
                     VerticalDivider(color = Color.Black)
 
                     Column(modifier = Modifier.fillMaxSize()) {
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(if (uiState.isTerminalVisible) 0.7f else 1f)
                         ) {
+
                             Box(
                                 modifier = Modifier
-                                    .weight(0.2f)
+                                    .weight(0.22f)
                                     .fillMaxHeight()
                             ) {
-                                FileExplorerView(fileExplorer)
+                                FileExplorerView(
+                                    fileExplorer = fileExplorer,
+                                    editorState = editorState
+                                )
                             }
 
                             VerticalDivider(color = Color.Black)
 
                             Box(
                                 modifier = Modifier
-                                    .weight(0.8f)
+                                    .weight(0.78f)
                                     .fillMaxHeight()
                             ) {
-                                Editor()
+                                Editor(editorState)
                             }
                         }
 
                         if (uiState.isTerminalVisible) {
+
                             HorizontalDivider(
                                 modifier = Modifier.fillMaxWidth(),
                                 thickness = 1.dp,
@@ -91,9 +104,9 @@ fun App(fileExplorer: FileExplorer, uiState: UIState) {
                                     .fillMaxWidth()
                                     .weight(0.3f)
                             ) {
-                                val workingDir = fileExplorer.currentPath.ifEmpty {
-                                    System.getProperty("user.home")
-                                }
+                                val workingDir = fileExplorer.currentProject?.toString()
+                                    ?: System.getProperty("user.home")
+
                                 Terminal(workingDirectory = workingDir)
                             }
                         }
