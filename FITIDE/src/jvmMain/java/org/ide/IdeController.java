@@ -81,9 +81,7 @@ public class IdeController {
         if (fileExplorer == null)
             throw new IllegalStateException("Project not opened");
 
-        String[] lines = fileExplorer.openFile(path);
-        List<String> list = Arrays.asList(lines);
-
+        List<String> list = fileExplorer.openFile(path);;
         editorController.openFile(path.toString(), list);
 
         return String.join("\n", list);
@@ -108,7 +106,7 @@ public class IdeController {
     public void save(Path path) throws Exception {
         String text = editorController.saveFile(path.toString());
         List<String> lines = Arrays.asList(text.split("\n"));
-        fileExplorer.saveChangesToFile(path, lines.toArray(new String[0]));
+        fileExplorer.saveChangesToFile(path, lines);
     }
 
     public String undo(Path path) {

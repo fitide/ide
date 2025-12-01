@@ -32,7 +32,7 @@ public class FileExplorerController {
 
         File recycleBin = new File(pathToDir + File.separator + ".ide" + File.separator + "recycle_bin");
         if (!recycleBin.exists()) {
-            if (!recycleBin.mkdir()) {
+            if (!recycleBin.mkdirs()) {
                 throw new UnnableToCreateFileException("Unable to create file in conf");
             }
         }
