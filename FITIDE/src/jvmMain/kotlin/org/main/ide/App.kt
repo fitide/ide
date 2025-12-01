@@ -4,60 +4,121 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
+import org.main.ide.buttonbar.ButtonBarHorizontal
+import org.main.ide.buttonbar.ButtonBarVertical
 import org.main.ide.editor.Editor
+import org.main.ide.editor.EditorState
 import org.main.ide.fileexplorer.FileExplorer
+import org.main.ide.fileexplorer.FileExplorerView
 import org.main.ide.terminal.Terminal
+import org.main.ide.uistate.UIState
 
 @Composable
 @Preview
-fun App() {
+fun App(
+    fileExplorer: FileExplorer,
+    uiState: UIState,
+    editorState: EditorState
+) {
     MaterialTheme {
-
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(Color(0xFF2B2B2B))
         ) {
+            Column(modifier = Modifier.fillMaxSize()) {
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.7f)
-            ) {
-
-                Box(modifier = Modifier.weight(0.25f).fillMaxHeight()) {
-                    FileExplorer()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(Color(0xFF3C3F41))
+                ) {
+                    ButtonBarHorizontal()
                 }
 
-                VerticalDivider(color = Color.DarkGray)
+                HorizontalDivider(
+                    modifier = Modifier.fillMaxWidth(),
+                    thickness = 1.dp,
+                    color = Color.Black
+                )
 
-                Box(modifier = Modifier.weight(0.75f).fillMaxHeight()) {
-                    Editor()
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier
+                            .width(60.dp)
+                            .fillMaxHeight()
+                            .background(Color(0xFF3C3F41))
+                    ) {
+                        ButtonBarVertical(uiState = uiState)
+                    }
+
+                    VerticalDivider(color = Color.Black)
+
+                    Column(modifier = Modifier.fillMaxSize()) {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(if (uiState.isTerminalVisible) 0.7f else 1f)
+                        ) {
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(0.22f)
+                                    .fillMaxHeight()
+                            ) {
+                                FileExplorerView(
+                                    fileExplorer = fileExplorer,
+                                    editorState = editorState
+                                )
+                            }
+
+                            VerticalDivider(color = Color.Black)
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(0.78f)
+                                    .fillMaxHeight()
+                            ) {
+                                Editor(editorState)
+                            }
+                        }
+
+                        if (uiState.isTerminalVisible) {
+
+                            HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 1.dp,
+                                color = Color.Black
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(0.3f)
+                            ) {
+                                val workingDir = fileExplorer.currentProject?.toString()
+                                    ?: System.getProperty("user.home")
+
+                                Terminal(workingDirectory = workingDir)
+                            }
+                        }
+                    }
                 }
-            }
-
-            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp, color = Color.DarkGray)
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.3f)
-            ) {
-                Terminal()
             }
         }
     }
 }
 
 @Composable
-fun VerticalDivider(color: Color, thickness: Dp = 5.dp) {
+fun VerticalDivider(color: Color, thickness: Dp = 1.dp) {
     Box(
         modifier = Modifier
             .fillMaxHeight()
