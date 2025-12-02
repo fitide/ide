@@ -17,8 +17,7 @@ fun applyCustomScrollBar(root: Component) {
         bar.isOpaque = false
         bar.preferredSize = Dimension(6, bar.preferredSize.height)
 
-        //why it works?
-        bar.ui = object : BasicScrollBarUI() {
+        bar.setUI(object : BasicScrollBarUI() {
 
             override fun configureScrollBarColors() {
                 thumbColor = Color(120, 120, 120)
@@ -47,7 +46,7 @@ fun applyCustomScrollBar(root: Component) {
                     isContentAreaFilled = false
                     isFocusPainted = false
                 }
-        }
+        })
 
         bar.repaint()
     }
