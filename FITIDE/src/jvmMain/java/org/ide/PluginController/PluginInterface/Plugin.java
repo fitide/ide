@@ -12,6 +12,9 @@ public interface Plugin {
 
     Tag[] getTagsOfNode(ParseTree tree);
 
+    // for func/class/var
+    String getNameOfNode(ParseTree node);
+
     List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement);
 
     Position getBounds(ParseTree node);
