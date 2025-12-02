@@ -3,10 +3,9 @@ package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
-import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
+import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
 
@@ -46,15 +45,15 @@ public class Func extends AInternalCodeNode {
             return;
         }
 
-        if (Objects.equals(retType.id, Tools.getRootStr(pathToModule))) {
+        if (Objects.equals(retType.id, PathTools.getRootStr(pathToModule))) {
             retType.getCommonHints(prefix, hints);
-            retType.getHint(prefix, hints, Tools.deleteRoot(pathToModule));
+            retType.getHint(prefix, hints, PathTools.deleteRoot(pathToModule));
         }
 
-        if (args.containsKey(Tools.getRootStr(pathToModule))) {
-            var node = args.get(Tools.getRootStr(pathToModule));
+        if (args.containsKey(PathTools.getRootStr(pathToModule))) {
+            var node = args.get(PathTools.getRootStr(pathToModule));
             node.getCommonHints(prefix, hints);
-            node.getHint(prefix, hints, Tools.deleteRoot(pathToModule));
+            node.getHint(prefix, hints, PathTools.deleteRoot(pathToModule));
         }
 
         for (AInternalCodeNode node : args.values()) {
@@ -65,8 +64,8 @@ public class Func extends AInternalCodeNode {
             node.getCommonHints(prefix, hints);
         }
 
-        if (childs.containsKey(Tools.getRootStr(pathToModule))) {
-            childs.get(Tools.getRootStr(pathToModule)).getHint(prefix, hints, Tools.deleteRoot(pathToModule));
+        if (childs.containsKey(PathTools.getRootStr(pathToModule))) {
+            childs.get(PathTools.getRootStr(pathToModule)).getHint(prefix, hints, PathTools.deleteRoot(pathToModule));
         }
     }
 
@@ -99,12 +98,12 @@ public class Func extends AInternalCodeNode {
             }
         }
         else {
-            if (args.containsKey(Tools.getRootStr(pathToModule))) {
-                return args.get(Tools.getRootStr(pathToModule)).searchForDeclaration(Tools.deleteRoot(pathToModule), name);
+            if (args.containsKey(PathTools.getRootStr(pathToModule))) {
+                return args.get(PathTools.getRootStr(pathToModule)).searchForDeclaration(PathTools.deleteRoot(pathToModule), name);
             }
 
-            if (childs.containsKey(Tools.getRootStr(pathToModule))) {
-                return childs.get(Tools.getRootStr(pathToModule)).searchForDeclaration(Tools.deleteRoot(pathToModule), name);
+            if (childs.containsKey(PathTools.getRootStr(pathToModule))) {
+                return childs.get(PathTools.getRootStr(pathToModule)).searchForDeclaration(PathTools.deleteRoot(pathToModule), name);
             }
         }
 
@@ -127,12 +126,12 @@ public class Func extends AInternalCodeNode {
             }
         }
         else {
-            if (args.containsKey(Tools.getRootStr(pathToModule))) {
-                return args.get(Tools.getRootStr(pathToModule)).searchForDeclaration(Tools.deleteRoot(pathToModule), name);
+            if (args.containsKey(PathTools.getRootStr(pathToModule))) {
+                return args.get(PathTools.getRootStr(pathToModule)).searchForDeclaration(PathTools.deleteRoot(pathToModule), name);
             }
 
-            if (childs.containsKey(Tools.getRootStr(pathToModule))) {
-                return childs.get(Tools.getRootStr(pathToModule)).searchForDeclaration(Tools.deleteRoot(pathToModule), name);
+            if (childs.containsKey(PathTools.getRootStr(pathToModule))) {
+                return childs.get(PathTools.getRootStr(pathToModule)).searchForDeclaration(PathTools.deleteRoot(pathToModule), name);
             }
         }
 
@@ -148,8 +147,8 @@ public class Func extends AInternalCodeNode {
     @Override
     public AInternalCodeNode getDeclaration(Path path) {
         AInternalCodeNode node = super.getDeclaration(path);
-        if (node == null && args.containsKey(Tools.getRootStr(path))) {
-            return args.get(Tools.getRootStr(path)).getDeclaration(Tools.deleteRoot(path));
+        if (node == null && args.containsKey(PathTools.getRootStr(path))) {
+            return args.get(PathTools.getRootStr(path)).getDeclaration(PathTools.deleteRoot(path));
         }
 
         return node;
@@ -158,8 +157,8 @@ public class Func extends AInternalCodeNode {
     @Override
     public AInternalCodeNode getDefinition(Path path) {
         AInternalCodeNode node = super.getDeclaration(path);
-        if (node == null && args.containsKey(Tools.getRootStr(path))) {
-            return args.get(Tools.getRootStr(path)).getDeclaration(Tools.deleteRoot(path));
+        if (node == null && args.containsKey(PathTools.getRootStr(path))) {
+            return args.get(PathTools.getRootStr(path)).getDeclaration(PathTools.deleteRoot(path));
         }
 
         return node;

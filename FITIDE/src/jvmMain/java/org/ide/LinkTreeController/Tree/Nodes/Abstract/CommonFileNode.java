@@ -9,7 +9,7 @@ import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
+import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -32,8 +32,8 @@ public abstract class CommonFileNode {
     public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
         if (pathToModule.getNameCount() == 0) return null;
 
-        if (this.childs.containsKey(Tools.getRootStr(pathToModule))){
-            return this.childs.get(Tools.getRootStr(pathToModule)).getPathsToSearchDeclaration(Tools.deleteRoot(pathToModule));
+        if (this.childs.containsKey(PathTools.getRootStr(pathToModule))){
+            return this.childs.get(PathTools.getRootStr(pathToModule)).getPathsToSearchDeclaration(PathTools.deleteRoot(pathToModule));
         }
 
         return null;
@@ -42,8 +42,8 @@ public abstract class CommonFileNode {
     public List<Path> getPathsToSearchDeclaration(Path pathToFile, LinkTreePosition linkTreePosition) {
         if (pathToFile.getNameCount() == 0) return null;
 
-        if (this.childs.containsKey(Tools.getRootStr(pathToFile))){
-            return this.childs.get(Tools.getRootStr(pathToFile)).getPathsToSearchDeclaration(Tools.deleteRoot(pathToFile), linkTreePosition);
+        if (this.childs.containsKey(PathTools.getRootStr(pathToFile))){
+            return this.childs.get(PathTools.getRootStr(pathToFile)).getPathsToSearchDeclaration(PathTools.deleteRoot(pathToFile), linkTreePosition);
         }
 
         return null;
@@ -54,10 +54,10 @@ public abstract class CommonFileNode {
             return null;
         }
 
-        if (this.childs.containsKey(Tools.getRootStr(path))) {
+        if (this.childs.containsKey(PathTools.getRootStr(path))) {
             return this.childs
-                    .get(Tools.getRootStr(path))
-                    .searchForDeclaration(Tools.deleteRoot(path), name);
+                    .get(PathTools.getRootStr(path))
+                    .searchForDeclaration(PathTools.deleteRoot(path), name);
         }
 
         return null;
@@ -80,8 +80,8 @@ public abstract class CommonFileNode {
     public List<Path> getPathsToSearchDefinition(Path pathToModule) {
         if (pathToModule.getNameCount() == 0) return null;
 
-        if (this.childs.containsKey(Tools.getRootStr(pathToModule))){
-            return this.childs.get(Tools.getRootStr(pathToModule)).getPathsToSearchDefinition(Tools.deleteRoot(pathToModule));
+        if (this.childs.containsKey(PathTools.getRootStr(pathToModule))){
+            return this.childs.get(PathTools.getRootStr(pathToModule)).getPathsToSearchDefinition(PathTools.deleteRoot(pathToModule));
         }
 
         return null;
@@ -90,8 +90,8 @@ public abstract class CommonFileNode {
     public List<Path> getPathsToSearchDefinition(Path pathToFile, LinkTreePosition linkTreePosition) {
         if (pathToFile.getNameCount() == 0) return null;
 
-        if (this.childs.containsKey(Tools.getRootStr(pathToFile))){
-            return this.childs.get(Tools.getRootStr(pathToFile)).getPathsToSearchDefinition(Tools.deleteRoot(pathToFile), linkTreePosition);
+        if (this.childs.containsKey(PathTools.getRootStr(pathToFile))){
+            return this.childs.get(PathTools.getRootStr(pathToFile)).getPathsToSearchDefinition(PathTools.deleteRoot(pathToFile), linkTreePosition);
         }
 
         return null;
@@ -137,8 +137,8 @@ public abstract class CommonFileNode {
             this.childs.put(name, new Directory(this.Treelock, name));
         }
         else {
-            if (this.childs.containsKey(Tools.getRootStr(pathToDir))) {
-                this.childs.get(Tools.getRootStr(pathToDir)).addDir(Tools.deleteRoot(pathToDir), name);
+            if (this.childs.containsKey(PathTools.getRootStr(pathToDir))) {
+                this.childs.get(PathTools.getRootStr(pathToDir)).addDir(PathTools.deleteRoot(pathToDir), name);
             }
 
             throw new BadPathException("Path error");
@@ -150,8 +150,8 @@ public abstract class CommonFileNode {
             this.childs.put(name, new Directory(this.Treelock, name));
         }
         else {
-            if (this.childs.containsKey(Tools.getRootStr(pathToFile))) {
-                this.childs.get(Tools.getRootStr(pathToFile)).createFile(Tools.deleteRoot(pathToFile), name);
+            if (this.childs.containsKey(PathTools.getRootStr(pathToFile))) {
+                this.childs.get(PathTools.getRootStr(pathToFile)).createFile(PathTools.deleteRoot(pathToFile), name);
             }
 
             throw new BadPathException("Path error");
@@ -163,8 +163,8 @@ public abstract class CommonFileNode {
             throw new BadPathException("Path error");
         }
         else {
-            if (this.childs.containsKey(Tools.getRootStr(pathToModule))) {
-                this.childs.get(Tools.getRootStr(pathToModule)).createFile(Tools.deleteRoot(pathToModule), name);
+            if (this.childs.containsKey(PathTools.getRootStr(pathToModule))) {
+                this.childs.get(PathTools.getRootStr(pathToModule)).createFile(PathTools.deleteRoot(pathToModule), name);
             }
 
 

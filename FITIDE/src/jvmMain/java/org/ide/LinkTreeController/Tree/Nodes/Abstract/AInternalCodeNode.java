@@ -5,7 +5,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
+import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Position;
 import org.ide.PluginController.PluginInterface.Tag;
@@ -124,8 +124,8 @@ public abstract class AInternalCodeNode {
     }
 
     public void updateTree(Path pathToModule, ParseTree parseTree) {
-        if (pathToModule.getNameCount() != 0 && this.childs.containsKey(Tools.getRootStr(pathToModule))) {
-            this.childs.get(Tools.getRootStr(pathToModule)).updateTree(Tools.deleteRoot(pathToModule), parseTree);
+        if (pathToModule.getNameCount() != 0 && this.childs.containsKey(PathTools.getRootStr(pathToModule))) {
+            this.childs.get(PathTools.getRootStr(pathToModule)).updateTree(PathTools.deleteRoot(pathToModule), parseTree);
             return;
         }
 
@@ -141,8 +141,8 @@ public abstract class AInternalCodeNode {
         if (path.getNameCount() == 0 && this.codeType == CodeType.Declaration || this.codeType == CodeType.Definition) {
             return this;
         }
-        if (path.getNameCount() > 0 && childs.containsKey(Tools.getRootStr(path))) {
-            childs.get(Tools.getRootStr(path)).getDeclaration(Tools.deleteRoot(path));
+        if (path.getNameCount() > 0 && childs.containsKey(PathTools.getRootStr(path))) {
+            childs.get(PathTools.getRootStr(path)).getDeclaration(PathTools.deleteRoot(path));
         }
         return null;
     };
@@ -151,8 +151,8 @@ public abstract class AInternalCodeNode {
         if (path.getNameCount() == 0 && this.codeType == CodeType.Definition) {
             return this;
         }
-        if (path.getNameCount() > 0 && childs.containsKey(Tools.getRootStr(path))) {
-            childs.get(Tools.getRootStr(path)).getDeclaration(Tools.deleteRoot(path));
+        if (path.getNameCount() > 0 && childs.containsKey(PathTools.getRootStr(path))) {
+            childs.get(PathTools.getRootStr(path)).getDeclaration(PathTools.deleteRoot(path));
         }
         return null;
     }
@@ -182,10 +182,10 @@ public abstract class AInternalCodeNode {
     protected List<Path> getPaths(Path pathToModule) {
         List<Path> list = null;
         if (pathToModule.getNameCount() != 0) {
-            String nextId = Tools.getRootStr(pathToModule);
+            String nextId = PathTools.getRootStr(pathToModule);
             if (this.childs.containsKey(nextId)) {
                 list = childs.get(nextId).
-                        getPathsToSearchDeclaration(Tools.deleteRoot(pathToModule));
+                        getPathsToSearchDeclaration(PathTools.deleteRoot(pathToModule));
             }
         }
         else {

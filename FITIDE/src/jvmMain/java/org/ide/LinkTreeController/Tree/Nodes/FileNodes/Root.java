@@ -11,7 +11,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationByPathFinder;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionByPathFinder;
-import org.ide.LinkTreeController.Tree.ToolClasses.Tools;
+import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,8 +67,8 @@ public class Root extends ARoot {
 
     @Override
     public Path searchForDeclaration(Path path, String name) {
-        if (externalFiles.containsKey(Tools.getRootStr(path))) {
-            return externalFiles.get(Tools.getRootStr(path)).searchForDeclaration(Tools.deleteRoot(path), name);
+        if (externalFiles.containsKey(PathTools.getRootStr(path))) {
+            return externalFiles.get(PathTools.getRootStr(path)).searchForDeclaration(PathTools.deleteRoot(path), name);
         }
 
         return super.searchForDeclaration(path, name);
@@ -117,8 +117,8 @@ public class Root extends ARoot {
 
     @Override
     public Path searchForDefinition(Path path, String name) {
-        if (externalFiles.containsKey(Tools.getRootStr(path))) {
-            return externalFiles.get(Tools.getRootStr(path)).searchForDefinition(Tools.deleteRoot(path), name);
+        if (externalFiles.containsKey(PathTools.getRootStr(path))) {
+            return externalFiles.get(PathTools.getRootStr(path)).searchForDefinition(PathTools.deleteRoot(path), name);
         }
 
         return super.searchForDeclaration(path, name);

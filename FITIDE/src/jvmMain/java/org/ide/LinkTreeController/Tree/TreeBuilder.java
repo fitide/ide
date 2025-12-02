@@ -2,6 +2,8 @@ package org.ide.LinkTreeController.Tree;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.ImportStatement;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Tag;
@@ -41,7 +43,13 @@ public class TreeBuilder {
         for (Tag tag : tags) {
             switch (tag) {
                 case Var -> {
-                    return Var(plugin, parseTree, pathToFile, pathToParent, );
+                    return new Var(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree));
+                }
+                case ImportStatement -> {
+                    return new ImportStatement(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree));
+                }
+                case Construction -> {
+                    return new Construction(plugin, pathToFile, pathToParent, parseTree);
                 }
             }
         }
