@@ -24,6 +24,8 @@ public class Func extends AInternalCodeNode {
 
     public Func(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
         super(plugin, pathToFile, path, tree, name);
+        if (codeType == CodeType.Error) return;
+
         List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree);
         for (ParseTree parseTree : argsInTree) {
             AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule));

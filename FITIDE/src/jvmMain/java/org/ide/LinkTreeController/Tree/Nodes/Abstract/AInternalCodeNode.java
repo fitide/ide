@@ -63,7 +63,12 @@ public abstract class AInternalCodeNode {
             if (tag == Tag.Usage) {
                 codeType = CodeType.Usage;
             }
+            if (tag == Tag.Error) {
+                codeType = CodeType.Error;
+            }
         }
+
+        if (codeType == CodeType.Error) return;
 
         setKeyWords(tree);
 
