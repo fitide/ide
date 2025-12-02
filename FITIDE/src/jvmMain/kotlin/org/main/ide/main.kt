@@ -7,7 +7,7 @@ import androidx.compose.ui.window.application
 import org.ide.IdeController
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.uistate.UIState
-import org.main.ide.editor.EditorState
+import org.main.ide.editor.EditorView
 
 fun main() = application {
     Window(
@@ -18,7 +18,6 @@ fun main() = application {
 
         val fileExplorer = remember { FileExplorer(ideController) }
         val uiState = remember { UIState() }
-        val editorState = remember { EditorState(ideController) }
 
         MenuBar {
             Menu("File", mnemonic = 'F') {
@@ -27,9 +26,9 @@ fun main() = application {
         }
 
         App(
+            ideController = ideController,
             fileExplorer = fileExplorer,
             uiState = uiState,
-            editorState = editorState
         )
     }
 }
