@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Var extends AInternalCodeNode {
 
-    public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name){
+    public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
         super(plugin, pathToFile, path, tree, name);
     }
 
@@ -41,7 +41,7 @@ public class Var extends AInternalCodeNode {
 
     @Override
     protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree);
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, this.pathToFile, this.pathToModule.subpath(0, pathToModule.getNameCount()));
         this.updateCurNode(node);
     }
 
