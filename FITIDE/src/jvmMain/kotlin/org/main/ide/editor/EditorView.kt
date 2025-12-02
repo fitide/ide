@@ -26,7 +26,7 @@ fun EditorView(ideController: IdeController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF888888))
+            .background(Color.Transparent)
             .onPreviewKeyEvent { event ->
                 if (event.type == KeyEventType.KeyDown) {
                     val mod = event.isCtrlPressed || event.isMetaPressed

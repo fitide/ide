@@ -42,6 +42,7 @@ kotlin {
             implementation("org.jetbrains.jediterm:jediterm-ui:3.57")
             implementation("org.jetbrains.pty4j:pty4j:0.13.11")
             implementation("org.jetbrains:annotations:24.1.0")
+            implementation("org.jetbrains.compose.ui:ui-graphics")
         }
         jvmTest.dependencies {
             implementation(project.dependencies.platform("org.junit:junit-bom:5.10.0"))

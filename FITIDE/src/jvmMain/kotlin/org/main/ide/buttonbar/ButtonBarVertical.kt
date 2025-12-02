@@ -18,11 +18,21 @@ fun ButtonBarVertical(uiState: UIState) {
         modifier = Modifier
             .fillMaxHeight()
             .width(60.dp)
-            .background(Color.Gray)
+            .background(Color.Transparent)
             .padding(4.dp),
-        verticalArrangement = Arrangement.Bottom,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        IconWithTooltip(
+            Res.drawable.folder,
+            "File Explorer",
+            onClick = {
+                uiState.toggleFileExplorer()
+            }
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
         IconWithTooltip(
             Res.drawable.terminal,
             "Terminal",

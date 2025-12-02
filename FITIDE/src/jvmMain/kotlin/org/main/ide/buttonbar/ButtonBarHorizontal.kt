@@ -17,7 +17,7 @@ fun ButtonBarHorizontal() {
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(Color.Gray)
+            .background(Color.Transparent)
             .padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically

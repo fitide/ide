@@ -28,7 +28,7 @@ fun FileExplorerView(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF888888))
+            .background(Color.Transparent)
             .padding(4.dp)
             .focusRequester(focusRequester)
             .focusable()
