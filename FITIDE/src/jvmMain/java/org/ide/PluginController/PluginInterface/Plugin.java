@@ -12,7 +12,7 @@ public interface Plugin {
 
     Tag[] getTagsOfNode(ParseTree tree);
 
-    // for func/class/var
+    // for func/class/var/KeyWord/error
     // Не очевидное: ImportStatement->name = importStatement->value (путь к сущности подключения)
     String getNameOfNode(ParseTree node);
 

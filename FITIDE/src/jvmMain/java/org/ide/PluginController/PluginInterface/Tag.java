@@ -6,6 +6,7 @@ public enum Tag {
     Func,
     Var,
     KeyWord,
+    ErrorNode,
     Construction,
     Declaration,
     Definition,
