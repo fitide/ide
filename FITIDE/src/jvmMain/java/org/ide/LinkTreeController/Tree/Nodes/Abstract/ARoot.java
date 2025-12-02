@@ -7,6 +7,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.*;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class ARoot extends CommonFileNode {
     protected Map<String, Func> externalFunctions = new HashMap<>();
-    protected Map<String, CodeClass> externalClasses = new HashMap<>();
     protected Map<String, Var> externalVars = new HashMap<>();
     protected Map<String, CommonFile> externalFiles = new HashMap<>();
     protected final int cntSearches;
@@ -22,11 +22,11 @@ public abstract class ARoot extends CommonFileNode {
 
 
     public ARoot(ReentrantReadWriteLock lock) {
-        this(lock, 3);
+        this(lock, Paths.get(""), 3);
     }
 
-    public ARoot(ReentrantReadWriteLock lock, int cntSearches) {
-        super(lock);
+    public ARoot(ReentrantReadWriteLock lock, Path pathToFile, int cntSearches) {
+        super(lock, pathToFile);
         this.cntSearches = cntSearches;
     }
 
@@ -41,10 +41,6 @@ public abstract class ARoot extends CommonFileNode {
 
     public void setExternalVars(Map<String, Var> externalVars) {
         this.externalVars = externalVars;
-    }
-
-    public void setExternalClasses(Map<String, CodeClass> externalClasses) {
-        this.externalClasses = externalClasses;
     }
 
     public void setExternalFunctions(Map<String, Func> externalFunctions) {

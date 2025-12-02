@@ -1,0 +1,96 @@
+package org.ide.LinkTreeController;
+
+import org.antlr.v4.runtime.misc.Pair;
+import org.ide.FileExplorerController.Node.Directory;
+import org.ide.FileExplorerController.Node.FEFile;
+import org.ide.FileExplorerController.Node.Node;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
+import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
+import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Root;
+import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
+import org.ide.PluginController.PluginInterface.Plugin;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+public class LinkTreeControllerImpl implements LinkTreeController {
+    private Map<String, CommonFile> filesByExtenstion = new HashMap<>();
+    private ARoot root;
+
+    @Override
+    public void setFilesAndDirectoriesData(Directory FERoot) {
+        ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+        root = new Root(lock);
+
+        root.childs.putAll(setDirsOfNode(FERoot, lock, Paths.get("")));
+        root.childs.putAll(setFilesOfNode(FERoot, lock, Paths.get("")));
+    }
+
+    private Map<String, CommonFileNode> setDirsOfNode(Directory node, ReentrantReadWriteLock lock, Path pathToFile) {
+        Map<String, CommonFileNode> list = new HashMap<>();
+
+        for (int i = 0; i > node.getDirsCnt(); i++) {
+            list.put(node.getDir(i).name, setDir(node.getDir(i), lock, pathToFile));
+        }
+
+        return list;
+    }
+
+    private CommonFileNode setDir(Directory node, ReentrantReadWriteLock lock, Path pathToFile) {
+        org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory curDir = new org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory(
+                lock, Paths.get(pathToFile.toString(), node.name), node.name);
+
+        curDir.childs.putAll(setDirsOfNode(node, lock, curDir.pathToFile));
+        curDir.childs.putAll(setFilesOfNode(node, lock, curDir.pathToFile));
+        return curDir;
+    }
+
+    private Map<String, CommonFileNode> setFilesOfNode(Directory node, ReentrantReadWriteLock lock, Path pathToFile) {
+        Map<String, CommonFileNode> list = new HashMap<>();
+
+        for (int i = 0; i < node.getFilesCnt(); i++) {
+            list.put(node.getFile(i).name, setFile(node.getFile(i), lock, pathToFile));
+        }
+
+        return list;
+    }
+
+    private CommonFileNode setFile(FEFile fileNode, ReentrantReadWriteLock lock, Path pathToFile) {
+        return new CommonFile(lock, Paths.get(pathToFile.toString(), fileNode.name), fileNode.name);
+    }
+
+    private setFilesByExtension() {
+
+    }
+
+    @Override
+    public void addPluginForFiles(Plugin plugin) {
+
+    }
+
+    @Override
+    public void getHintsForFile(Path pathToNodule) {
+
+    }
+
+    @Override
+    public void getSyntaxHighlightning(Path pathToFile) {
+
+    }
+
+    @Override
+    public Pair<Path, LinkTreePosition> getDefinition() {
+        return null;
+    }
+
+    @Override
+    public Pair<Path, LinkTreePosition> getDeclaration() {
+        return null;
+    }
+}

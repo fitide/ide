@@ -13,6 +13,7 @@ import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -20,12 +21,13 @@ import java.util.concurrent.locks.ReadWriteLock;
 
 public abstract class CommonFileNode {
     public String name = null;
+    public Path pathToFile;
     public CommonFileNode parent;
     public List<LinkTreeFileTag> tags = new ArrayList<>();
     public Map<String, CommonFileNode> childs = new HashMap<>();
     public ReadWriteLock Treelock;
 
-    public CommonFileNode(ReadWriteLock lock) {
+    public CommonFileNode(ReadWriteLock lock, Path pathToFile) {
         this.Treelock = lock;
     }
 
@@ -134,7 +136,7 @@ public abstract class CommonFileNode {
 
     public void addDir(Path pathToDir, String name) throws BadPathException {
         if (pathToDir.getNameCount() == 0) {
-            this.childs.put(name, new Directory(this.Treelock, name));
+            this.childs.put(name, new Directory(this.Treelock, pathToDir, name));
         }
         else {
             if (this.childs.containsKey(PathTools.getRootStr(pathToDir))) {
@@ -147,7 +149,7 @@ public abstract class CommonFileNode {
 
     public void createFile(Path pathToFile, String name) throws BadPathException {
         if (pathToFile.getNameCount() == 0) {
-            this.childs.put(name, new Directory(this.Treelock, name));
+            this.childs.put(name, new Directory(this.Treelock, pathToFile, name));
         }
         else {
             if (this.childs.containsKey(PathTools.getRootStr(pathToFile))) {
@@ -169,5 +171,18 @@ public abstract class CommonFileNode {
 
 
         }
+    }
+
+    public CommonFileNode getFileNode(Path pathToFile) {
+        if (pathToFile.getNameCount() == 0) {
+            return this;
+        }
+
+        String nextName = PathTools.getRootStr(pathToFile);
+        if (this.childs.containsKey(nextName)) {
+            return childs.get(nextName).getFileNode(PathTools.deleteRoot(pathToFile));
+        }
+
+        return null;
     }
 }

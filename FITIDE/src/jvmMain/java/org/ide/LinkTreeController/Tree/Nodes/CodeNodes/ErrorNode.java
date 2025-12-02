@@ -13,6 +13,10 @@ public class ErrorNode extends AInternalCodeNode {
         super(plugin, pathToFile, path, tree, name);
     }
 
+    public ErrorNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
+        super(plugin, pathToFile, path, tree);
+    }
+
     @Override
     protected void setChilds(ParseTree curNode) {
     }

@@ -1,12 +1,14 @@
 package org.ide.LinkTreeController.Tree.Nodes.FileNodes;
 
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.*;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Func;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.ImportStatement;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
@@ -21,12 +23,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 
 public class CommonFile extends FileNode {
     public Map<String, AInternalCodeNode> codeNodes = new HashMap<>();
-    public Map<String, AInternalCodeNode> defInFIle = new HashMap<>();
+    public Map<String, AInternalCodeNode> defInFile = new HashMap<>();
+    public Map<String, AInternalCodeNode> decInFile = new HashMap<>();
 
-    public CommonFile(ReadWriteLock lock, String name) {
-        super(lock, name);
+    public CommonFile(ReadWriteLock lock, Path pathToFile, String name) {
+        super(lock, pathToFile, name);
     }
-
 
     @Override
     public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
@@ -202,6 +204,54 @@ public class CommonFile extends FileNode {
 
     @Override
     public void updateCode(Plugin plugin, Path pathToModule, ParseTree tree) {
-        codeNodes = TreeBuilder.build(plugin, tree);
+        codeNodes = TreeBuilder.build(plugin, tree, pathToFile);
+    }
+
+
+
+    public void setPlugin(Plugin plugin, ParseTree tree) {
+        codeNodes = TreeBuilder.build(plugin, tree, pathToFile);
+        var decsDefs = getDecsAndDefs();
+        for (AInternalCodeNode dec : decsDefs.a) {
+            this.decInFile.put(dec.name, dec);
+        }
+        for (AInternalCodeNode def : decsDefs.b) {
+            this.decInFile.put(def.name, def);
+            this.defInFile.put(def.name, def);
+        }
+    }
+
+    private Pair<List<AInternalCodeNode>, List<AInternalCodeNode>> getDecsAndDefs() {
+        Pair<List<AInternalCodeNode>, List<AInternalCodeNode>> decsDefs = new Pair<>(new ArrayList<>(), new ArrayList<>());
+        for (AInternalCodeNode codeNode : codeNodes.values()) {
+            if (codeNode instanceof Func || codeNode instanceof Var) {
+                switch(codeNode.codeType) {
+                    case Declaration -> decsDefs.a.add(codeNode);
+                    case Definition -> decsDefs.b.add(codeNode);
+                }
+            }
+        }
+        return decsDefs;
+    }
+
+    public void setDefs(ARoot root) {
+        List<CommonFile> files = new ArrayList<>();
+        files.add(this);
+        for (AInternalCodeNode node : codeNodes.values()) {
+            if (node instanceof ImportStatement) {
+                ImportStatement importStatement = (ImportStatement) node;
+                var paths = importStatement.getPathsToSearchDefinition(this.pathToFile);
+                for (var path : paths) {
+                    CommonFileNode commonFileNode = root.getFileNode(path);
+                    if (commonFileNode != null && commonFileNode instanceof CommonFile)
+                        files.add((CommonFile) commonFileNode);
+                }
+            }
+        }
+
+        Set<AInternalCodeNode> defs = new HashSet<>();
+        for (var file : files) {
+            defs.addAll(file.defInFile.values());
+        }
     }
 }

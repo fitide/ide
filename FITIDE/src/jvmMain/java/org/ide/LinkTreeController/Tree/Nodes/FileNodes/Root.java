@@ -26,7 +26,7 @@ public class Root extends ARoot {
     }
 
     public Root(ReentrantReadWriteLock lock, int cntSearchers) {
-        super(lock, cntSearchers);
+        super(lock, Paths.get(""), cntSearchers);
     }
 
     @Override
@@ -80,9 +80,6 @@ public class Root extends ARoot {
             return Paths.get(name);
         }
 
-        if (this.externalClasses.containsKey(name)) {
-            return Paths.get(name);
-        }
 
         if (this.externalVars.containsKey(name)) {
             return Paths.get(name);
@@ -98,9 +95,6 @@ public class Root extends ARoot {
                 return this.externalFunctions.get(name);
             }
 
-            if (this.externalClasses.containsKey(name)) {
-                return this.externalClasses.get(name);
-            }
 
             if (this.externalVars.containsKey(name)) {
                 return this.externalVars.get(name);
@@ -166,10 +160,6 @@ public class Root extends ARoot {
             return Paths.get(name);
         }
 
-        if (this.externalClasses.containsKey(name)) {
-            return Paths.get(name);
-        }
-
         if (this.externalVars.containsKey(name)) {
             return Paths.get(name);
         }
@@ -182,10 +172,6 @@ public class Root extends ARoot {
         if (path.getNameCount() == 1) {
             if (this.externalFunctions.containsKey(name)) {
                 return this.externalFunctions.get(name);
-            }
-
-            if (this.externalClasses.containsKey(name)) {
-                return this.externalClasses.get(name);
             }
 
             if (this.externalVars.containsKey(name)) {
@@ -215,7 +201,7 @@ public class Root extends ARoot {
         for(Construction construction : externalConstrs.values()) {
             construction.getCommonHints(prefix, listOfHints);
         }
-        getHintsFromMap(prefix, listOfHints, externalClasses.keySet());
+
         getHintsFromMap(prefix, listOfHints, externalFunctions.keySet());
         getHintsFromMap(prefix, listOfHints, externalVars.keySet());
 
@@ -272,10 +258,6 @@ public class Root extends ARoot {
 
     private Path search(String name, SearchMethodBuilder searchMethodBuilder) {
         if (externalFunctions.containsKey(name)) {
-            return Paths.get(name);
-        }
-
-        if (this.externalClasses.containsKey(name)) {
             return Paths.get(name);
         }
 

@@ -55,6 +55,15 @@ public class TreeBuilder {
                 case Func -> {
                     return new Func(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree));
                 }
+                case ErrorNode -> {
+                    String name;
+                    if ((name = plugin.getNameOfNode(parseTree)) != null){
+                        return new ErrorNode(plugin, pathToFile, pathToParent, parseTree, name);
+                    }
+                    else {
+                        return new ErrorNode(plugin, pathToFile, pathToParent, parseTree);
+                    }
+                }
             }
         }
 

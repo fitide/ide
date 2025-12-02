@@ -213,7 +213,7 @@ public abstract class AInternalCodeNode {
     public void setDefinition(Map<String, AInternalCodeNode> defInFIle, List<CommonFile> includedFiles) {
         if (defInFIle.containsKey(this.name)) this.definition = defInFIle.get(this.name);
         for (CommonFile file : includedFiles) {
-            if (file.defInFIle.containsKey(this.name)) this.definition = file.defInFIle.get(name);
+            if (file.defInFile.containsKey(this.name)) this.definition = file.defInFile.get(name);
         }
         this.definition = null;
     }

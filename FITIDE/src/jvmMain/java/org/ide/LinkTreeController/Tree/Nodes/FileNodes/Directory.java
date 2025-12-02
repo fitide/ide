@@ -12,8 +12,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 
 public class Directory extends FileNode {
 
-    public Directory(ReadWriteLock lock, String name) {
-        super(lock, name);
+    public Directory(ReadWriteLock lock, Path pathToFile, String name) {
+        super(lock, pathToFile, name);
     }
 
     @Override
