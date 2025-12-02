@@ -5,6 +5,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
+import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
 
@@ -43,7 +44,7 @@ public class ImportStatement extends AInternalCodeNode {
 
     @Override
     public void updateTree(ParseTree parseTree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, parseTree);
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, PathTools.deleteLast(pathToModule));
         this.updateCurNode(node);
     }
 

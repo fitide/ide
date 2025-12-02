@@ -77,7 +77,7 @@ public abstract class AInternalCodeNode {
         List<ParseTree> keyWordsOfModule = plugin.getKeyWordsOfModule(tree);
         List<KeyWord> keyWordList = new ArrayList<>();
         for (ParseTree key : keyWordsOfModule) {
-            keyWordList.add(new KeyWord(plugin, pathToFile, pathToModule, key));
+            keyWordList.add(new KeyWord(plugin, pathToFile, pathToModule, key, plugin.getNameOfNode(key)));
         }
         this.keyWords = keyWordList;
     }

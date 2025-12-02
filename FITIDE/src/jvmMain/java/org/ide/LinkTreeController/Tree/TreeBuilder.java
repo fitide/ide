@@ -2,9 +2,7 @@ package org.ide.LinkTreeController.Tree;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
-import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
-import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.ImportStatement;
-import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.*;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Tag;
 
@@ -22,7 +20,7 @@ public class TreeBuilder {
         Path nullPath = Paths.get("");
         while (tree.getChild(it) != null) {
             AInternalCodeNode node = buildOneChild(plugin, tree.getChild(it++), pathToFIle, nullPath);
-            resList.put(node.id, node);
+            if (node != null) resList.put(node.id, node);
         }
         return resList;
     }
@@ -32,7 +30,7 @@ public class TreeBuilder {
         List<ParseTree> childs = plugin.getBodeOfModule(parseTree);
         for (ParseTree tree : childs) {
             AInternalCodeNode node = buildOneChild(plugin, tree, pathToFile, pathToNode);
-            res.put(node.id, node);
+            if (node != null) res.put(node.id, node);
         }
         return res;
     }
@@ -51,7 +49,15 @@ public class TreeBuilder {
                 case Construction -> {
                     return new Construction(plugin, pathToFile, pathToParent, parseTree);
                 }
+                case KeyWord -> {
+                    return new KeyWord(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree));
+                }
+                case Func -> {
+                    return new Func(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree));
+                }
             }
         }
+
+        return null;
     }
 }

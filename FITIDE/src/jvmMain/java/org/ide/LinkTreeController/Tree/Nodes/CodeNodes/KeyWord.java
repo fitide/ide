@@ -6,6 +6,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
+import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Position;
@@ -16,8 +17,9 @@ import java.util.List;
 
 public class KeyWord extends AInternalCodeNode {
 
-    public KeyWord(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
-        super(plugin, pathToFile, path, tree);
+    public KeyWord(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
+        super(plugin, pathToFile, path, tree, name);
+        keyWords = List.of();
     }
 
     @Override
@@ -40,7 +42,7 @@ public class KeyWord extends AInternalCodeNode {
 
     @Override
     protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree);
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
         this.updateCurNode(node);
     }
 

@@ -26,7 +26,7 @@ public class Func extends AInternalCodeNode {
         super(plugin, pathToFile, path, tree, name);
         List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree);
         for (ParseTree parseTree : argsInTree) {
-            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree));
+            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule));
             args.put(arg.id, arg);
         }
         this.bodyPosition = new LinkTreePosition(plugin.getPositionOfModuleBody(tree));
@@ -35,7 +35,7 @@ public class Func extends AInternalCodeNode {
 
     @Override
     protected void setChilds(ParseTree curNode) {
-        this.childs = TreeBuilder.getChilds(plugin, curNode);
+        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
     }
 
 
@@ -140,7 +140,7 @@ public class Func extends AInternalCodeNode {
 
     @Override
     protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree);
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
         this.updateCurNode(node);
     }
 
