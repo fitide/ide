@@ -5,6 +5,7 @@ public enum Tag {
     ImportStatement,
     Func,
     Var,
+    KeyWord,
     Construction,
     Declaration,
     Definition,
