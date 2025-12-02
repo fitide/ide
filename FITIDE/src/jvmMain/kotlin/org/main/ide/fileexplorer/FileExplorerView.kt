@@ -14,13 +14,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
-import org.main.ide.editor.EditorState
+import org.ide.IdeController
 import java.nio.file.Path
 
 @Composable
 fun FileExplorerView(
-    fileExplorer: FileExplorer,
-    editorState: EditorState
+    ideController: IdeController,
+    fileExplorer: FileExplorer
 ) {
     val tree = fileExplorer.fileTree
     val focusRequester = FocusRequester()
@@ -94,9 +94,9 @@ fun FileExplorerView(
         LazyColumn {
             items(flatList) { item ->
                 FileExplorerNodeView(
+                    ideController = ideController,
                     item = item,
-                    explorer = fileExplorer,
-                    editorState = editorState
+                    explorer = fileExplorer
                 )
             }
         }

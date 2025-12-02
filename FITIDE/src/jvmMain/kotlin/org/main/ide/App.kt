@@ -9,11 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.ide.IdeController
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.main.ide.buttonbar.ButtonBarHorizontal
 import org.main.ide.buttonbar.ButtonBarVertical
-import org.main.ide.editor.Editor
-import org.main.ide.editor.EditorState
+import org.main.ide.editor.EditorView
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.fileexplorer.FileExplorerView
 import org.main.ide.terminal.Terminal
@@ -22,9 +22,9 @@ import org.main.ide.uistate.UIState
 @Composable
 @Preview
 fun App(
+    ideController: IdeController,
     fileExplorer: FileExplorer,
-    uiState: UIState,
-    editorState: EditorState
+    uiState: UIState
 ) {
     MaterialTheme {
         Box(
@@ -75,8 +75,8 @@ fun App(
                                     .fillMaxHeight()
                             ) {
                                 FileExplorerView(
-                                    fileExplorer = fileExplorer,
-                                    editorState = editorState
+                                    ideController = ideController,
+                                    fileExplorer = fileExplorer
                                 )
                             }
 
@@ -87,7 +87,7 @@ fun App(
                                     .weight(0.78f)
                                     .fillMaxHeight()
                             ) {
-                                Editor(editorState)
+                                EditorView(ideController)
                             }
                         }
 

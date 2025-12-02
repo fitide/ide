@@ -1,13 +1,16 @@
 package org.ide;
 
+import androidx.compose.runtime.MutableState;
+import androidx.compose.ui.text.input.TextFieldValue;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
-import org.ide.editor.Cursor;
 import org.ide.editor.EditorController;
+import org.ide.editor.OpenedFileInfo;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -81,7 +84,7 @@ public class IdeController {
         if (fileExplorer == null)
             throw new IllegalStateException("Project not opened");
 
-        List<String> list = fileExplorer.openFile(path);;
+        List<String> list = fileExplorer.openFile(path);
         editorController.openFile(path.toString(), list);
 
         return String.join("\n", list);
@@ -95,27 +98,37 @@ public class IdeController {
         return editorController.getContent(path.toString());
     }
 
-    public void updateCursor(Path path, Cursor cursor) {
-        editorController.updateCursor(path.toString(), cursor);
-    }
-
-    public Cursor getCursor(Path path) {
-        return editorController.getCursor(path.toString());
-    }
-
     public void save(Path path) throws Exception {
         String text = editorController.saveFile(path.toString());
         List<String> lines = Arrays.asList(text.split("\n"));
         fileExplorer.saveChangesToFile(path, lines);
     }
 
-    public String undo(Path path) {
-        editorController.undo(path.toString());
-        return editorController.getContent(path.toString());
+    //TODO: error handling!!!
+    public void save() throws Exception {
+        String currentFile = editorController.getCurrentFile();
+        String text = editorController.saveFile(currentFile);
+        List<String> lines = Arrays.asList(text.split("\n"));
+        fileExplorer.saveChangesToFile(Paths.get(currentFile), lines);
+    }
+
+    public void redo() {
+        String currentFile = editorController.getCurrentFile();
+        editorController.redo(currentFile);
+    }
+
+    public void undo() {
+        String currentFile = editorController.getCurrentFile();
+        editorController.undo(currentFile);
     }
 
     public String redo(Path path) {
         editorController.redo(path.toString());
+        return editorController.getContent(path.toString());
+    }
+
+    public String undo(Path path) {
+        editorController.undo(path.toString());
         return editorController.getContent(path.toString());
     }
 
@@ -129,5 +142,17 @@ public class IdeController {
 
     public boolean hasUnsavedChanges(Path path) {
         return editorController.hasUnsavedChanges(path.toString());
+    }
+
+    public OpenedFileInfo getOpenedFileInfo() {
+        return editorController.getOpenedFileInfo();
+    }
+
+    public MutableState<OpenedFileInfo> openedFileInfoState() {
+        return editorController.openedFileInfoState();
+    }
+
+    public void onTextChanged(TextFieldValue newValue) {
+        editorController.onTextChanged(newValue);
     }
 }

@@ -23,15 +23,15 @@ import org.ide.FileExplorerController.Node.FEFile
 import org.ide.FileExplorerController.Node.Node
 import org.jetbrains.compose.resources.painterResource
 import ide.fitide.generated.resources.*
+import org.ide.IdeController
 import org.jetbrains.compose.resources.DrawableResource
-import org.main.ide.editor.EditorState
 import java.nio.file.Path
 
 @Composable
 fun FileExplorerNodeView(
+    ideController: IdeController,
     item: FlatNode,
-    explorer: FileExplorer,
-    editorState: EditorState
+    explorer: FileExplorer
 ) {
     val node: Node = item.node
     val isDirectory = node is Directory
@@ -52,7 +52,7 @@ fun FileExplorerNodeView(
                 explorer.click(item.path, ctrl = false, shift = false)
 
                 if (!isDirectory) {
-                    editorState.openFile(Path.of(item.path))
+                    ideController.openFile(Path.of(item.path))
                 }
             }
             .pointerInput(Unit) {
