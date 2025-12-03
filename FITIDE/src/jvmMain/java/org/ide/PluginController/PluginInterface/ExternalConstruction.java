@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.util.List;
 
 public class ExternalConstruction {
-    List<String> keyWords;
-    List<ParseTree> body;
-    List<ParseTree> args;
+    public List<String> keyWords;
+    public List<ParseTree> body;
+    public List<ParseTree> args;
 }
