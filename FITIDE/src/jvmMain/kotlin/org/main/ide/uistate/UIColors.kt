@@ -13,6 +13,6 @@ object UIColors {
     val BorderFocused      = Color(0xFF8A8F9D)
     val BorderUnfocused    = Color(0xFF5C6270)
     val TextFieldContainer = Color(0xFF323438)
-    val ButtonBg   = Color(0xFF3A3C40)
-    val ButtonText = Color(0xFFE6E6E6)
+    val ButtonBg           = Color(0xFF3A3C40)
+    val ButtonText         = Color(0xFFE6E6E6)
 }

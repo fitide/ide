@@ -55,7 +55,8 @@ fun EditorView(ideController: IdeController) {
                     color = Color.White,
                     fontSize = 14.sp
                 ),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                cursorBrush = androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color.White, Color.Transparent))
             )
         } else {
             Text("No file opened", color = Color.White)
