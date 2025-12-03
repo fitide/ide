@@ -210,11 +210,5 @@ public abstract class AInternalCodeNode {
 
     protected abstract List<Path> getPaths(LinkTreePosition position);
 
-    public void setDefinition(Map<String, AInternalCodeNode> defInFIle, List<CommonFile> includedFiles) {
-        if (defInFIle.containsKey(this.name)) this.definition = defInFIle.get(this.name);
-        for (CommonFile file : includedFiles) {
-            if (file.defInFile.containsKey(this.name)) this.definition = file.defInFile.get(name);
-        }
-        this.definition = null;
-    }
+    public abstract void setDefinitions(Map<String, AInternalCodeNode> defs);
 }

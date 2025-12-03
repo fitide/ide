@@ -249,9 +249,19 @@ public class CommonFile extends FileNode {
             }
         }
 
-        Set<AInternalCodeNode> defs = new HashSet<>();
+        Map<String, AInternalCodeNode> defs = new HashMap();
         for (var file : files) {
-            defs.addAll(file.defInFile.values());
+            defs.putAll(file.defInFile);
+        }
+
+        for (var node : this.codeNodes.values()) {
+            if (node.codeType == CodeType.Definition) {
+                defs.put(node.name, node);
+            }
+        }
+
+        for (var node : this.codeNodes.values()) {
+            node.setDefinitions(defs);
         }
     }
 }

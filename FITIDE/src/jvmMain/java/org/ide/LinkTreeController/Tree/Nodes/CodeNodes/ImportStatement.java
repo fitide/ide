@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ImportStatement extends AInternalCodeNode {
 
@@ -56,6 +57,11 @@ public class ImportStatement extends AInternalCodeNode {
         paths.add(Paths.get(pathToFile.toString(), this.name));
         paths.add(Paths.get(this.name));
         return paths;
+    }
+
+    @Override
+    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
+        return;
     }
 
 }

@@ -14,6 +14,7 @@ import org.ide.PluginController.PluginInterface.Position;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KeyWord extends AInternalCodeNode {
 
@@ -49,5 +50,10 @@ public class KeyWord extends AInternalCodeNode {
     @Override
     protected List<Path> getPaths(LinkTreePosition position) {
         return List.of();
+    }
+
+    @Override
+    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
+        return;
     }
 }

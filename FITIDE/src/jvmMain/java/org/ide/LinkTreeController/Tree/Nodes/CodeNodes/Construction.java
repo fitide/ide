@@ -189,4 +189,21 @@ public class Construction extends AInternalCodeNode {
 
         return null;
     }
+
+    @Override
+    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
+        for (var arg : this.args.values()) {
+            if (arg.codeType == CodeType.Definition) {
+                defs.put(arg.name, arg);
+            }
+        }
+
+        for (var arg : args.values()) {
+            arg.setDefinitions(defs);
+        }
+
+        for(var node : this.childs.values()) {
+            node.setDefinitions(defs);
+        }
+    }
 }

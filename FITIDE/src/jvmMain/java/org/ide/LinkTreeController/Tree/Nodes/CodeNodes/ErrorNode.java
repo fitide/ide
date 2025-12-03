@@ -7,6 +7,7 @@ import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 public class ErrorNode extends AInternalCodeNode {
     public ErrorNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
@@ -32,5 +33,10 @@ public class ErrorNode extends AInternalCodeNode {
     @Override
     protected List<Path> getPaths(LinkTreePosition position) {
         return List.of();
+    }
+
+    @Override
+    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
+        return;
     }
 }

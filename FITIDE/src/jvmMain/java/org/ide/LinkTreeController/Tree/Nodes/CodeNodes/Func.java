@@ -204,4 +204,15 @@ public class Func extends AInternalCodeNode {
         return null;
     }
 
+    @Override
+    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
+        for (var arg : args.values()) {
+            defs.put(arg.name, arg);
+        }
+
+        for (var node : this.childs.values()) {
+            node.setDefinitions(defs);
+        }
+    }
+
 }
