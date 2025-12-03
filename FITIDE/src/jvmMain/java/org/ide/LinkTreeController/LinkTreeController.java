@@ -3,11 +3,13 @@ package org.ide.LinkTreeController;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.FileExplorerController.Node.Directory;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public interface LinkTreeController {
 
@@ -15,12 +17,10 @@ public interface LinkTreeController {
 
     void initFiles(Plugin plugin, List<Pair<Path, ParseTree>> path);
 
-    void getHintsForFile(Path pathToNodule);
+    Set<String> getHintsForFile(Path pathToNodule, String prefix);
 
     void getSyntaxHighlightning(Path pathToFile);
 
-    Pair<Path, LinkTreePosition> getDefinition();
-
-    Pair<Path, LinkTreePosition> getDeclaration();
+    ARoot getTree();
 
 }

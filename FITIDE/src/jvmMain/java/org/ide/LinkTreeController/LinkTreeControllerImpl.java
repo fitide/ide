@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.FileExplorerController.Node.FEFile;
+import org.ide.LinkTreeController.Exceptions.BadPathException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
@@ -12,15 +13,11 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Root;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.PluginController.PluginInterface.ExternalVar;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LinkTreeControllerImpl implements LinkTreeController {
@@ -95,14 +92,18 @@ public class LinkTreeControllerImpl implements LinkTreeController {
             }
         }
 
+        setExternalFiles(plugin);
+
         for (var file: filesByExtenstion.get(ext)) {
             if (file.isInited) file.setDefs(root);
         }
-
     }
 
     private void setExternals(Plugin plugin) {
-
+        setConstrs(plugin);
+        setFuncs(plugin);
+        setVars(plugin);
+        setExternalFiles(plugin);
     }
 
     private void setConstrs(Plugin plugin) {
@@ -136,27 +137,26 @@ public class LinkTreeControllerImpl implements LinkTreeController {
         var filesInfo = plugin.getStandartFiles();
         Map<String, CommonFile> files = new HashMap<>();
         for (var file : filesInfo) {
-            files.put(file.)
+            files.put(file.name, new CommonFile(file));
         }
     }
 
     @Override
-    public void getHintsForFile(Path pathToNodule) {
-
+    public Set<String> getHintsForFile(Path pathToNodule, String prefix) {
+        try {
+            return root.getHints(pathToNodule, prefix);
+        } catch (BadPathException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void getSyntaxHighlightning(Path pathToFile) {
-
+        root.getSyntaxHughlighting(pathToFile);
     }
 
     @Override
-    public Pair<Path, LinkTreePosition> getDefinition() {
-        return null;
-    }
-
-    @Override
-    public Pair<Path, LinkTreePosition> getDeclaration() {
-        return null;
+    public ARoot getTree() {
+        return root;
     }
 }

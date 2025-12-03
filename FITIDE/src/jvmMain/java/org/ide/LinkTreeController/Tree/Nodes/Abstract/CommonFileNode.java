@@ -31,6 +31,9 @@ public abstract class CommonFileNode {
         this.Treelock = lock;
     }
 
+    protected CommonFileNode() {
+    }
+
     public List<Path> getPathsToSearchDeclaration(Path pathToModule) {
         if (pathToModule.getNameCount() == 0) return null;
 

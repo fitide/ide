@@ -13,6 +13,7 @@ import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
+import org.ide.PluginController.PluginInterface.ExternalFile;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -27,10 +28,21 @@ public class CommonFile extends FileNode {
     public Map<String, AInternalCodeNode> defInFile = new HashMap<>();
     public Map<String, AInternalCodeNode> decInFile = new HashMap<>();
     public boolean isInited = false;
-
+    public boolean isForInfo = false;
 
     public CommonFile(ReadWriteLock lock, Path pathToFile, String name) {
         super(lock, pathToFile, name);
+    }
+
+    public CommonFile(ExternalFile file) {
+        super();
+        isForInfo = true;
+        for (var func : file.funcs) {
+            codeNodes.put(func.name, new Func(func.name, List.of(), func.args, func.type));
+        }
+        for (var vari : file.vars) {
+            codeNodes.put(vari.Name, new Var(vari.Name, List.of(), vari.Type.name));
+        }
     }
 
     @Override
