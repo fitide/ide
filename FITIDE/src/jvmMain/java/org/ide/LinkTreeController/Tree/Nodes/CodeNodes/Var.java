@@ -2,6 +2,7 @@ package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
@@ -61,6 +62,12 @@ public class Var extends AInternalCodeNode {
 
     @Override
     public void setDefinitions(Map<String, AInternalCodeNode> defs) {
-        return;
+        if (this.codeType != CodeType.Definition) {
+            this.definition = defs.getOrDefault(name, null);
+        }
+        else {
+            this.definition = this;
+            defs.put(name, this);
+        }
     }
 }

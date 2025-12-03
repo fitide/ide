@@ -208,6 +208,14 @@ public class Func extends AInternalCodeNode {
 
     @Override
     public void setDefinitions(Map<String, AInternalCodeNode> defs) {
+        if (this.codeType == CodeType.Definition) {
+            this.definition = this;
+            defs.put(this.name, this);
+        }
+        else {
+            this.definition = defs.getOrDefault(this.name, null);
+        }
+
         for (var arg : args.values()) {
             defs.put(arg.name, arg);
         }
