@@ -6,4 +6,5 @@ public class ExternalFile {
     public List<ExternalClass> classes;
     public List<ExternalFunc> funcs;
     public List<ExternalVar> vars;
+    public String name;
 }
