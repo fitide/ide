@@ -102,7 +102,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
         var constrsInfo = plugin.getStandartConstructionsLike();
         Map<String, Construction> constMap = new HashMap<>();
         for (var constr : constrsInfo) {
-            constMap.put()
+            constMap.put(constr.name, )
 
         }
     }

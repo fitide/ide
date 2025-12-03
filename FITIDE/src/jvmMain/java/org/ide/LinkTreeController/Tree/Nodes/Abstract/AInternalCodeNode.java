@@ -25,13 +25,18 @@ public abstract class AInternalCodeNode {
     public CodeType codeType = CodeType.Usage;
     public AInternalCodeNode definition = null;
     public Map<String, AInternalCodeNode> childs = new HashMap<>();
-
+    private boolean initedForInfo = false;
 
     public String name;
     public LinkTreePosition namePosition = new LinkTreePosition();
 
     public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
         setCommon(plugin, pathToFile, path, tree);
+    }
+
+    public AInternalCodeNode(String name, List<> ) {
+        initedForInfo = true;
+        this.name = name;
     }
 
     public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
