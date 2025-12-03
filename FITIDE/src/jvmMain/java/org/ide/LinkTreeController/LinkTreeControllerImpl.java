@@ -12,7 +12,6 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Func;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Root;
-import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -82,20 +81,24 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     public void initFiles(Plugin plugin, List<Pair<Path, ParseTree>> files) {
 
         String ext = plugin.fileExtension();
-        if (filesByExtenstion.containsKey(ext)) {
-            for (var filePathAndParseTree : files) {
-                var fileNode = root.getFileNode(filePathAndParseTree.a);
-                if (fileNode != null && fileNode instanceof CommonFile) {
-                    var file = (CommonFile) fileNode;
-                    file.initCode(plugin, filePathAndParseTree.b, filePathAndParseTree.a);
-                }
-            }
-        }
 
-        setExternalFiles(plugin);
+        initFilesCode(plugin, files);
+
+
+        setExternals(plugin);
 
         for (var file: filesByExtenstion.get(ext)) {
             if (file.isInited) file.setDefs(root);
+        }
+    }
+
+    private void initFilesCode(Plugin plugin, List<Pair<Path, ParseTree>> files) {
+        for (var filePathAndParseTree : files) {
+            var fileNode = root.getFileNode(filePathAndParseTree.a);
+            if (fileNode != null && fileNode instanceof CommonFile) {
+                var file = (CommonFile) fileNode;
+                file.initCode(plugin, filePathAndParseTree.b, filePathAndParseTree.a);
+            }
         }
     }
 
@@ -153,6 +156,11 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     @Override
     public void getSyntaxHighlightning(Path pathToFile) {
         root.getSyntaxHughlighting(pathToFile);
+    }
+
+    @Override
+    public void updateTree(Plugin plugin, List<Pair<Path, ParseTree>> files) {
+        initFiles(plugin, files);
     }
 
     @Override
