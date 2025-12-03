@@ -11,7 +11,7 @@ import static org.ide.editor.TextFieldValueHelperKt.*;
 class EditorFile {
     private MutableState<TextFieldValue> value = null;
     private boolean saved;
-    private List<String> versionsList;
+    private List<TextFieldValue> versionsList;
     private int currentVersion;
 
     public EditorFile(List<String> contentLines) {
@@ -24,7 +24,7 @@ class EditorFile {
         this.value = getMutableStateTextFieldValue(initial);
 
         versionsList = new ArrayList<>();
-        versionsList.add(initial);
+        versionsList.add(this.value.getValue());
         currentVersion = 0;
     }
 
@@ -35,7 +35,7 @@ class EditorFile {
     public void setContent(String newContent) {
         value.setValue(getTextFieldValue(newContent));
         versionsList = new ArrayList<>();
-        versionsList.add(newContent);
+        versionsList.add(value.getValue());
         currentVersion = 0;
         saved = false;
     }
@@ -59,14 +59,14 @@ class EditorFile {
     public void undo() {
         if (currentVersion > 0) {
             currentVersion--;
-            value.setValue(getTextFieldValue(versionsList.get(currentVersion)));
+            value.setValue(versionsList.get(currentVersion));
         }
     }
 
     public void redo() {
         if (currentVersion < versionsList.size() - 1) {
             currentVersion++;
-            value.setValue(getTextFieldValue(versionsList.get(currentVersion)));
+            value.setValue(versionsList.get(currentVersion));
         }
     }
 
@@ -75,7 +75,7 @@ class EditorFile {
             versionsList = new ArrayList<>(versionsList.subList(0, currentVersion + 1));
         }
 
-        versionsList.add(newValue.getText());
+        versionsList.add(newValue);
         currentVersion = versionsList.size() - 1;
 
         saved = false;
