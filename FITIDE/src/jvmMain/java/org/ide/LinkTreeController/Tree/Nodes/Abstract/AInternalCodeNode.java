@@ -104,7 +104,7 @@ public abstract class AInternalCodeNode {
         this.pathToModule = Paths.get(pathToModule.toString(), id);
     }
 
-    public void getCommonHints(String prefix, List<String> hints) {
+    public void getCommonHints(String prefix, Set<String> hints) {
         for (String keyWord : keyWordsNames) {
             if (keyWord.startsWith(prefix)) hints.add(keyWord);
         }
@@ -112,7 +112,7 @@ public abstract class AInternalCodeNode {
         if (name != null && name.startsWith(prefix)) hints.add(name);
     }
 
-    public abstract void getHint(String prefix, List<String> hints, Path pathToModule);
+    public abstract void getHint(String prefix, Set<String> hints, Path pathToModule);
 
     public void getHighlightning(List<CodeStrForColour> list) {
         for (AInternalCodeNode node : childs.values()) {

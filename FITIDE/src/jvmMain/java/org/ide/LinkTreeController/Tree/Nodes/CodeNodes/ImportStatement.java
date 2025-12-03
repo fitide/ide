@@ -11,10 +11,7 @@ import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ImportStatement extends AInternalCodeNode {
 
@@ -29,7 +26,7 @@ public class ImportStatement extends AInternalCodeNode {
     }
 
     @Override
-    public void getHint(String prefix, List<String> hints, Path pathToModule) {
+    public void getHint(String prefix, Set<String> hints, Path pathToModule) {
         return;
     }
 

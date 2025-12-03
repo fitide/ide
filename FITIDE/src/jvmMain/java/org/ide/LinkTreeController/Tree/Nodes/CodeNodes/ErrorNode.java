@@ -8,6 +8,7 @@ import org.ide.PluginController.PluginInterface.Plugin;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ErrorNode extends AInternalCodeNode {
     public ErrorNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
@@ -23,7 +24,7 @@ public class ErrorNode extends AInternalCodeNode {
     }
 
     @Override
-    public void getHint(String prefix, List<String> hints, Path pathToModule) {
+    public void getHint(String prefix, Set<String> hints, Path pathToModule) {
     }
 
     @Override

@@ -11,10 +11,7 @@ import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Func extends AInternalCodeNode {
     public Map<String, AInternalCodeNode> args;
@@ -42,7 +39,7 @@ public class Func extends AInternalCodeNode {
 
 
     @Override
-    public void getHint(String prefix, List<String> hints, Path pathToModule) {
+    public void getHint(String prefix, Set<String> hints, Path pathToModule) {
         if (pathToModule.getNameCount() == 0) {
             return;
         }

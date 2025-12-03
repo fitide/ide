@@ -2,6 +2,7 @@ package org.ide.LinkTreeController.Tree.Nodes.FileNodes;
 
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.Tree;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.*;
@@ -25,6 +26,8 @@ public class CommonFile extends FileNode {
     public Map<String, AInternalCodeNode> codeNodes = new HashMap<>();
     public Map<String, AInternalCodeNode> defInFile = new HashMap<>();
     public Map<String, AInternalCodeNode> decInFile = new HashMap<>();
+    public boolean isInited = false;
+
 
     public CommonFile(ReadWriteLock lock, Path pathToFile, String name) {
         super(lock, pathToFile, name);
@@ -179,7 +182,7 @@ public class CommonFile extends FileNode {
     }
 
     @Override
-    public void getHints(Path pathToModule, String prefix, List<String> listOfHints) {
+    public void getHints(Path pathToModule, String prefix, Set<String> listOfHints) {
         for (AInternalCodeNode node : this.codeNodes.values()) {
             node.getCommonHints(prefix, listOfHints);
         }
@@ -232,6 +235,11 @@ public class CommonFile extends FileNode {
             }
         }
         return decsDefs;
+    }
+
+    public void initCode(Plugin plugin, ParseTree tree, Path pathToFile) {
+        codeNodes = TreeBuilder.build(plugin, tree, pathToFile);
+        isInited = true;
     }
 
     public void setDefs(ARoot root) {

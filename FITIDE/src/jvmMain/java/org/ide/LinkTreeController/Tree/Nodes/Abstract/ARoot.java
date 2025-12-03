@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class ARoot extends CommonFileNode {
@@ -56,5 +57,5 @@ public abstract class ARoot extends CommonFileNode {
 
     public abstract Path searchForDefinition(String Name) throws NoDefinitionException;
 
-    public abstract List<String> getHints(Path pathToModule, String prefix) throws BadPathException;
+    public abstract Set<String> getHints(Path pathToModule, String prefix) throws BadPathException;
 }

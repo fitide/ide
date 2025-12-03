@@ -189,14 +189,14 @@ public class Root extends ARoot {
 
 
     @Override
-    public List<String> getHints(Path pathToModule, String prefix) throws BadPathException {
-        List<String> listOfHints = new ArrayList<>();
+    public Set<String> getHints(Path pathToModule, String prefix) throws BadPathException {
+        Set<String> listOfHints = new HashSet<>();
         getHints(pathToModule, prefix, listOfHints);
         return listOfHints;
     }
 
     @Override
-    public void getHints(Path pathToFile, String prefix, List<String> listOfHints) throws BadPathException {
+    public void getHints(Path pathToFile, String prefix, Set<String> listOfHints) throws BadPathException {
 
         for(Construction construction : externalConstrs.values()) {
             construction.getCommonHints(prefix, listOfHints);
@@ -212,7 +212,7 @@ public class Root extends ARoot {
         throw new BadPathException("Bad Path");
     }
 
-    private void getHintsFromMap(String prefix, List<String> listOfHints, Set<String> names) {
+    private void getHintsFromMap(String prefix, Set<String> listOfHints, Set<String> names) {
         for (String name : names) {
             if (name.startsWith(prefix)) {
                 listOfHints.add(name);

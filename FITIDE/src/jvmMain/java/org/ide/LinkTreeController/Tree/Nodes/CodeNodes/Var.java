@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Var extends AInternalCodeNode {
 
@@ -26,7 +27,7 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    public void getHint(String prefix, List<String> hints, Path pathToModule) {
+    public void getHint(String prefix, Set<String> hints, Path pathToModule) {
         return;
     }
 

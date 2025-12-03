@@ -1,11 +1,12 @@
 package org.ide.LinkTreeController;
 
 import org.antlr.v4.runtime.misc.Pair;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.FileExplorerController.Node.FEFile;
-import org.ide.FileExplorerController.Node.Node;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Root;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
@@ -78,8 +79,32 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     @Override
-    public void addPluginForFiles(Plugin plugin) {
+    public void initFiles(Plugin plugin, List<Pair<Path, ParseTree>> files) {
 
+        String ext = plugin.fileExtension();
+        if (filesByExtenstion.containsKey(ext)) {
+            for (var filePathAndParseTree : files) {
+                var fileNode = root.getFileNode(filePathAndParseTree.a);
+                if (fileNode != null && fileNode instanceof CommonFile) {
+                    var file = (CommonFile) fileNode;
+                    file.initCode(plugin, filePathAndParseTree.b, filePathAndParseTree.a);
+                }
+            }
+        }
+
+        for (var file: filesByExtenstion.get(ext)) {
+            if (file.isInited) file.setDefs(root);
+        }
+
+    }
+
+    private void setExternals(Plugin plugin) {
+        var constrsInfo = plugin.getStandartConstructionsLike();
+        Map<String, Construction> constMap = new HashMap<>();
+        for (var constr : constrsInfo) {
+            constMap.put()
+
+        }
     }
 
     @Override

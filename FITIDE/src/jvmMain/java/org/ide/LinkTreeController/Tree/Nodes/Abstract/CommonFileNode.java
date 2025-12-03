@@ -125,7 +125,7 @@ public abstract class CommonFileNode {
 
     public abstract AInternalCodeNode getDefinition(Path path) throws NoDefinitionException;
 
-    public abstract void getHints(Path pathToFile, String prefix, List<String> listOfHints) throws BadPathException;
+    public abstract void getHints(Path pathToFile, String prefix, Set<String> listOfHints) throws BadPathException;
 
     public List<CodeStrForColour> getSyntaxHughlighting(Path pathToFile) {
         if (pathToFile.getNameCount() > 0 && this.childs.containsKey(pathToFile.getRoot().toString())) {
