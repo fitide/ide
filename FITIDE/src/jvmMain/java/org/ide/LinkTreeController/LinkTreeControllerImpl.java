@@ -7,9 +7,12 @@ import org.ide.FileExplorerController.Node.FEFile;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Func;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Root;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
+import org.ide.PluginController.PluginInterface.ExternalVar;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -99,11 +102,41 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     private void setExternals(Plugin plugin) {
+
+    }
+
+    private void setConstrs(Plugin plugin) {
         var constrsInfo = plugin.getStandartConstructionsLike();
         Map<String, Construction> constMap = new HashMap<>();
         for (var constr : constrsInfo) {
-            constMap.put(constr.name, )
+            constMap.put(constr.name, new Construction(constr.name, constr.keyWords));
+        }
+        root.setExternalConstrs(constMap);
+    }
 
+    private void setFuncs(Plugin plugin) {
+        var funcInfo = plugin.getStandartFuncs();
+        Map<String, Func> funcs = new HashMap<>();
+        for (var externalFunc : funcInfo) {
+            funcs.put(externalFunc.name, new Func(externalFunc.name, List.of(), externalFunc.args, externalFunc.type));
+        }
+        root.setExternalFunctions(funcs);
+    }
+
+    private void setVars(Plugin plugin) {
+        var varInfo = plugin.getStandartVars();
+        Map<String, Var> vars = new HashMap<>();
+        for (var externalVar : varInfo) {
+            vars.put(externalVar.Name, new Var(externalVar.Name, List.of(), externalVar.Type.name));
+        }
+        root.setExternalVars(vars);
+    }
+
+    private void setExternalFiles(Plugin plugin) {
+        var filesInfo = plugin.getStandartFiles();
+        Map<String, CommonFile> files = new HashMap<>();
+        for (var file : filesInfo) {
+            files.put(file.)
         }
     }
 

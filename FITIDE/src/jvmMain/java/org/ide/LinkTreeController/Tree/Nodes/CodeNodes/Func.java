@@ -7,6 +7,8 @@ import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
+import org.ide.PluginController.PluginInterface.ExternalType;
+import org.ide.PluginController.PluginInterface.ExternalVar;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -14,8 +16,8 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class Func extends AInternalCodeNode {
-    public Map<String, AInternalCodeNode> args;
-    public AInternalCodeNode retType;
+    public Map<String, AInternalCodeNode> args = new HashMap<>();
+    public String retType;
     public LinkTreePosition bodyPosition;
     public LinkTreePosition argsPosition;
 
@@ -32,6 +34,14 @@ public class Func extends AInternalCodeNode {
         this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree));
     }
 
+    public Func(String name, List<String> keyWords, List<ExternalVar> externalArgs, ExternalType externalType) {
+        super(name, keyWords);
+        for (var arg : externalArgs) {
+            this.args.put(arg.Name, new Var(arg.Name, List.of(), arg.Type.name));
+        }
+        this.retType = externalType.name;
+    }
+
     @Override
     protected void setChilds(ParseTree curNode) {
         this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
@@ -44,10 +54,6 @@ public class Func extends AInternalCodeNode {
             return;
         }
 
-        if (Objects.equals(retType.id, PathTools.getRootStr(pathToModule))) {
-            retType.getCommonHints(prefix, hints);
-            retType.getHint(prefix, hints, PathTools.deleteRoot(pathToModule));
-        }
 
         if (args.containsKey(PathTools.getRootStr(pathToModule))) {
             var node = args.get(PathTools.getRootStr(pathToModule));
@@ -76,7 +82,6 @@ public class Func extends AInternalCodeNode {
         for (AInternalCodeNode arg : args.values()) {
             arg.getHighlightning(list);
         }
-        retType.getHighlightning(list);
     }
 
     @Override

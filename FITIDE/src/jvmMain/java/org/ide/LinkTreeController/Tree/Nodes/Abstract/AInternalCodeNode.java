@@ -34,9 +34,10 @@ public abstract class AInternalCodeNode {
         setCommon(plugin, pathToFile, path, tree);
     }
 
-    public AInternalCodeNode(String name, List<> ) {
+    public AInternalCodeNode(String name, List<String> keyWords) {
         initedForInfo = true;
         this.name = name;
+        this.keyWordsNames = keyWords;
     }
 
     public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {

@@ -16,9 +16,16 @@ import java.util.Map;
 import java.util.Set;
 
 public class Var extends AInternalCodeNode {
+    public String retType;
+
 
     public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
         super(plugin, pathToFile, path, tree, name);
+    }
+
+    public Var(String name, List<String> keyWords, String retType) {
+        super(name, keyWords);
+        this.retType = retType;
     }
 
     @Override

@@ -31,6 +31,10 @@ public class Construction extends AInternalCodeNode {
         this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree));
     }
 
+    public Construction(String name, List<String> keyWords) {
+        super(name, keyWords);
+    }
+
     @Override
     protected void setChilds(ParseTree curNode) {
         this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
