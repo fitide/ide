@@ -6,7 +6,5 @@ import java.util.List;
 
 public class ExternalConstruction {
     public List<String> keyWords;
-    public List<ParseTree> body;
-    public List<ParseTree> args;
     public String name;
 }
