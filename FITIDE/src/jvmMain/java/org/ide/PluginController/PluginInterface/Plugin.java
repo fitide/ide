@@ -8,12 +8,14 @@ import java.util.List;
 
 public interface Plugin {
 
+    String fileExtension();
+
     ParseTree getFileParseTree(File file);
 
     Tag[] getTagsOfNode(ParseTree tree);
 
     // for func/class/var/KeyWord/error
-    // Не очевидное: ImportStatement->name = importStatement->value (путь к сущности подключения)
+    // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: ImportStatement->name = importStatement->value (пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
     String getNameOfNode(ParseTree node);
 
     List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement);
