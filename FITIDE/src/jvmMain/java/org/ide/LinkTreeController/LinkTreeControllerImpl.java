@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LinkTreeControllerImpl implements LinkTreeController {
-    private Map<String, CommonFile> filesByExtenstion = new HashMap<>();
+    private Map<String, List<CommonFile>> filesByExtenstion = new HashMap<>();
     private ARoot root;
 
     @Override
@@ -55,18 +55,26 @@ public class LinkTreeControllerImpl implements LinkTreeController {
         Map<String, CommonFileNode> list = new HashMap<>();
 
         for (int i = 0; i < node.getFilesCnt(); i++) {
-            list.put(node.getFile(i).name, setFile(node.getFile(i), lock, pathToFile));
+            FEFile file = node.getFile(i);
+            list.put(file.name, setFile(file, lock, pathToFile));
         }
 
         return list;
     }
 
-    private CommonFileNode setFile(FEFile fileNode, ReentrantReadWriteLock lock, Path pathToFile) {
-        return new CommonFile(lock, Paths.get(pathToFile.toString(), fileNode.name), fileNode.name);
+    private String getExtension(String name) {
+        int lastP = name.lastIndexOf('.');
+        return name.substring(lastP);
     }
 
-    private setFilesByExtension() {
-
+    private CommonFileNode setFile(FEFile fileNode, ReentrantReadWriteLock lock, Path pathToFile) {
+        var file =  new CommonFile(lock, Paths.get(pathToFile.toString(), fileNode.name), fileNode.name);
+        String ext = getExtension(fileNode.name);
+        if (!filesByExtenstion.containsKey(ext)) {
+            filesByExtenstion.put(ext, new ArrayList<>());
+        }
+        filesByExtenstion.get(ext).add(file);
+        return file;
     }
 
     @Override
