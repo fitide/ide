@@ -142,6 +142,16 @@ public class LinkTreeControllerImpl implements LinkTreeController {
         for (var file : filesInfo) {
             files.put(file.name, new CommonFile(file));
         }
+        root.setExternalFiles(files);
+    }
+
+    private void setStandartTypes(Plugin plugin) {
+        var extTypes = plugin.getStandartTypes();
+        var types = new HashSet<String>();
+        for (var type : extTypes) {
+            types.add(type.name);
+        }
+        root.setStandartTypes(types);
     }
 
     @Override

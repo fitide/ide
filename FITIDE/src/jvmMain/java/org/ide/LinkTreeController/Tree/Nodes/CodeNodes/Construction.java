@@ -207,4 +207,12 @@ public class Construction extends AInternalCodeNode {
             node.setDefinitions(defs);
         }
     }
+
+    @Override
+    public void setTypes(Set<String> types) {
+        super.setTypes(types);
+        for (var arg : args.values()) {
+            arg.setTypes(types);
+        }
+    }
 }

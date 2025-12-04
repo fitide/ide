@@ -18,7 +18,8 @@ import java.util.*;
 
 public class Func extends AInternalCodeNode {
     public Map<String, AInternalCodeNode> args = new HashMap<>();
-    public String retType;
+    public String retType = null;
+    public boolean isTypeDef = false;
     public LinkTreePosition retTypePosition;
     public LinkTreePosition bodyPosition;
     public LinkTreePosition argsPosition;
@@ -80,14 +81,21 @@ public class Func extends AInternalCodeNode {
     @Override
     public void getHighlightning(List<CodeStrForColour> list) {
         super.getHighlightning(list);
+
         CodeStrForColour funcColour = new CodeStrForColour();
         funcColour.pos = this.namePosition;
-        funcColour.tag = LinkTreeCodeTag.Func;
-        CodeStrForColour typeColour = new CodeStrForColour();
-        typeColour.pos = this.retTypePosition;
-        typeColour.tag = LinkTreeCodeTag.Type;
+        if (definition != null) funcColour.tag = LinkTreeCodeTag.Func;
+        else funcColour.tag = LinkTreeCodeTag.Error;
 
-        list.add(typeColour);
+
+        if (retType != null) {
+            CodeStrForColour typeColour = new CodeStrForColour();
+            typeColour.pos = this.retTypePosition;
+            if (isTypeDef) typeColour.tag = LinkTreeCodeTag.Type;
+            else typeColour.tag = LinkTreeCodeTag.Error;
+            list.add(typeColour);
+        }
+
         list.add(funcColour);
         for (AInternalCodeNode arg : args.values()) {
             arg.getHighlightning(list);
@@ -232,6 +240,17 @@ public class Func extends AInternalCodeNode {
 
         for (var node : this.childs.values()) {
             node.setDefinitions(defs);
+        }
+    }
+
+    @Override
+    public void setTypes(Set<String> types) {
+        if (types.contains(retType)) isTypeDef = true;
+
+        super.setTypes(types);
+
+        for (var arg : args.values()) {
+            arg.setTypes(types);
         }
     }
 

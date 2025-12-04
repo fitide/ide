@@ -19,6 +19,7 @@ import java.util.Set;
 public class Var extends AInternalCodeNode {
     public String retType;
     public LinkTreePosition retPosition;
+    private boolean isTypeDef = false;
 
     public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
         super(plugin, pathToFile, path, tree, name);
@@ -51,9 +52,14 @@ public class Var extends AInternalCodeNode {
         code.tag = LinkTreeCodeTag.Var;
         list.add(code);
 
-        CodeStrForColour typeC = new CodeStrForColour(LinkTreeCodeTag.Type);
-        typeC.pos = this.retPosition.clone();
-        list.add(typeC);
+
+        if (retType != null) {
+            CodeStrForColour typeColour = new CodeStrForColour();
+            typeColour.pos = this.retPosition;
+            if (isTypeDef) typeColour.tag = LinkTreeCodeTag.Type;
+            else typeColour.tag = LinkTreeCodeTag.Error;
+            list.add(typeColour);
+        }
     }
 
     @Override
@@ -76,5 +82,10 @@ public class Var extends AInternalCodeNode {
             this.definition = this;
             defs.put(name, this);
         }
+    }
+
+    @Override
+    public void setTypes(Set<String> types) {
+        if (types.contains(retType)) isTypeDef = true;
     }
 }

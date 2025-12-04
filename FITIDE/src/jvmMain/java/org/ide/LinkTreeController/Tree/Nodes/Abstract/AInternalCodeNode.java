@@ -2,7 +2,6 @@ package org.ide.LinkTreeController.Tree.Nodes.Abstract;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
-import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
@@ -217,4 +216,10 @@ public abstract class AInternalCodeNode {
     protected abstract List<Path> getPaths(LinkTreePosition position);
 
     public abstract void setDefinitions(Map<String, AInternalCodeNode> defs);
+
+    public void setTypes(Set<String> types) {
+        for (var child : childs.values()) {
+            child.setTypes(types);
+        }
+    }
 }
