@@ -1,185 +1,339 @@
 package org.main.ide.config
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import org.ide.IdeController
 import org.main.ide.uistate.UIColors.Background
-import org.main.ide.uistate.UIColors.DividerColor
-import org.main.ide.uistate.UIColors.Panel
-import org.main.ide.uistate.UIColors.PanelElevated
-import org.main.ide.uistate.UIColors.TextPrimary
 import org.main.ide.uistate.UIColors.BorderFocused
 import org.main.ide.uistate.UIColors.BorderUnfocused
 import org.main.ide.uistate.UIColors.ButtonBg
 import org.main.ide.uistate.UIColors.ButtonText
+import org.main.ide.uistate.UIColors.DividerColor
+import org.main.ide.uistate.UIColors.Panel
+import org.main.ide.uistate.UIColors.PanelElevated
 import org.main.ide.uistate.UIColors.TextFieldContainer
+import org.main.ide.uistate.UIColors.TextPrimary
 import org.main.ide.uistate.UIColors.TextSecondary
-
+import javax.swing.JFileChooser
 
 class Config {
-    var name: String = ""
-    var pathToInterpreter: String = ""
-    var main: String = ""
-    var outputFile: String = ""
-    var args: String = ""
+    var name by mutableStateOf("")
+    var pathToInterpreter by mutableStateOf("")
+    var main by mutableStateOf("")
+    var outputFile by mutableStateOf("")
+    var args by mutableStateOf("")
 }
 
+fun parseConfigJson(json: String): Config {
+    fun extract(key: String): String {
+        val regex = Regex("\"$key\"\\s*:\\s*\"(.*?)\"")
+        val match = regex.find(json) ?: return ""
+        return match.groupValues[1]
+            .replace("\\n", "\n")
+            .replace("\\r", "\r")
+            .replace("\\\"", "\"")
+            .replace("\\\\", "\\")
+    }
+
+    return Config().apply {
+        name = extract("name")
+        pathToInterpreter = extract("pathToInterpreter")
+        main = extract("main")
+        outputFile = extract("outputFile")
+        args = extract("args")
+    }
+}
+
+fun parseConfigsJson(json: String): List<Config> {
+    val trimmed = json.trim()
+    if (trimmed.isEmpty() || trimmed == "{}" || trimmed == "[]") {
+        return listOf(Config())
+    }
+
+    return if (trimmed.startsWith("[")) {
+        val objectRegex = Regex("\\{[^}]*\\}")
+        objectRegex.findAll(trimmed)
+            .map { match -> parseConfigJson(match.value) }
+            .toList()
+            .ifEmpty { listOf(Config()) }
+    } else {
+        listOf(parseConfigJson(trimmed))
+    }
+}
+
+private val textFieldColors
+    @Composable get() = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = BorderFocused,
+        unfocusedBorderColor = BorderUnfocused,
+        focusedLabelColor = TextPrimary,
+        unfocusedLabelColor = TextSecondary,
+        cursorColor = TextPrimary,
+        focusedTextColor = TextPrimary,
+        unfocusedTextColor = TextPrimary,
+        disabledTextColor = TextSecondary,
+        disabledLabelColor = TextSecondary,
+        disabledBorderColor = BorderUnfocused,
+        focusedContainerColor = TextFieldContainer,
+        unfocusedContainerColor = TextFieldContainer,
+        disabledContainerColor = TextFieldContainer
+    )
+
 @Composable
-fun ConfigView(config: Config) {
+fun ConfigView(
+    configs: List<Config>,
+    selectedIndex: Int,
+    onSelectedChange: (Int) -> Unit,
+    ideController: IdeController,
+    onCancel: () -> Unit,
+) {
+    var localConfigs by remember(configs) { mutableStateOf(configs.toMutableList()) }
+    var localSelectedIndex by remember(selectedIndex, configs) {
+        mutableStateOf(selectedIndex.coerceIn(0, localConfigs.lastIndex))
+    }
+
+    val selectedConfig = localConfigs.getOrNull(localSelectedIndex) ?: return
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Background)
             .padding(16.dp)
     ) {
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(10.dp))
                 .background(Panel)
-                .padding(16.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .width(220.dp)
+                    .fillMaxHeight()
+                    .background(PanelElevated)
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                Text(
+                    text = "Configurations",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                localConfigs.forEachIndexed { index, cfg ->
+                    val isSelected = index == localSelectedIndex
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(
+                                if (isSelected) TextFieldContainer
+                                else PanelElevated
+                            )
+                            .clickable {
+                                localSelectedIndex = index
+                                onSelectedChange(index)
+                            }
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (cfg.name.isNotBlank()) cfg.name else "Unnamed",
+                            color = if (isSelected) TextPrimary else TextSecondary,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            val newConfig = Config()
+                            localConfigs = (localConfigs + newConfig).toMutableList()
+                            localSelectedIndex = localConfigs.lastIndex
+                            onSelectedChange(localSelectedIndex)
+
+                            persistConfigs(localConfigs, ideController)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ButtonBg,
+                            contentColor = ButtonText
+                        )
+                    ) {
+                        Text("+")
+                    }
+
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (localConfigs.size <= 1) {
+                                val cfg = localConfigs.first()
+                                cfg.name = ""
+                                cfg.pathToInterpreter = ""
+                                cfg.main = ""
+                                cfg.outputFile = ""
+                                cfg.args = ""
+                            } else {
+                                val idx = localSelectedIndex.coerceIn(0, localConfigs.lastIndex)
+                                localConfigs = localConfigs.toMutableList().also { it.removeAt(idx) }
+                                localSelectedIndex =
+                                    (idx - 1).coerceAtLeast(0).coerceAtMost(localConfigs.lastIndex)
+                                onSelectedChange(localSelectedIndex)
+                            }
+
+                            persistConfigs(localConfigs, ideController)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ButtonBg,
+                            contentColor = ButtonText
+                        )
+                    ) {
+                        Text("-")
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .background(DividerColor)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Run/Build Configuration",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier
                         .weight(1f, fill = true)
-                        .background(PanelElevated)
+                        .background(PanelElevated, RoundedCornerShape(6.dp))
                         .padding(12.dp)
                 ) {
-                    OutlinedTextField(
-                        value = config.name,
-                        onValueChange = { config.name = it },
-                        label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BorderFocused,
-                            unfocusedBorderColor = BorderUnfocused,
-                            focusedLabelColor = TextPrimary,
-                            unfocusedLabelColor = TextSecondary,
-                            cursorColor = TextPrimary,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            disabledTextColor = TextSecondary,
-                            disabledLabelColor = TextSecondary,
-                            disabledBorderColor = BorderUnfocused,
-                            focusedContainerColor = TextFieldContainer,
-                            unfocusedContainerColor = TextFieldContainer,
-                            disabledContainerColor = TextFieldContainer
+                    LabeledField(label = "Name") {
+                        OutlinedTextField(
+                            value = selectedConfig.name,
+                            onValueChange = { selectedConfig.name = it },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                            colors = textFieldColors
                         )
-                    )
+                    }
 
-                    OutlinedTextField(
-                        value = config.pathToInterpreter,
-                        onValueChange = { config.pathToInterpreter = it },
-                        label = { Text("Path to interpreter") },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BorderFocused,
-                            unfocusedBorderColor = BorderUnfocused,
-                            focusedLabelColor = TextPrimary,
-                            unfocusedLabelColor = TextSecondary,
-                            cursorColor = TextPrimary,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            disabledTextColor = TextSecondary,
-                            disabledLabelColor = TextSecondary,
-                            disabledBorderColor = BorderUnfocused,
-                            focusedContainerColor = TextFieldContainer,
-                            unfocusedContainerColor = TextFieldContainer,
-                            disabledContainerColor = TextFieldContainer
-                        )
-                    )
+                    LabeledField(label = "Interpreter") {
+                        Row(Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = selectedConfig.pathToInterpreter,
+                                onValueChange = { selectedConfig.pathToInterpreter = it },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f),
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                                colors = textFieldColors
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    val chooser = JFileChooser()
+                                    chooser.fileSelectionMode = JFileChooser.FILES_ONLY;
+                                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                                        selectedConfig.pathToInterpreter = chooser.selectedFile.absolutePath
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ButtonBg,
+                                    contentColor = ButtonText
+                                )
+                            ) {
+                                Text("...")
+                            }
+                        }
+                    }
 
-                    OutlinedTextField(
-                        value = config.main,
-                        onValueChange = { config.main = it },
-                        label = { Text("Main file") },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BorderFocused,
-                            unfocusedBorderColor = BorderUnfocused,
-                            focusedLabelColor = TextPrimary,
-                            unfocusedLabelColor = TextSecondary,
-                            cursorColor = TextPrimary,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            disabledTextColor = TextSecondary,
-                            disabledLabelColor = TextSecondary,
-                            disabledBorderColor = BorderUnfocused,
-                            focusedContainerColor = TextFieldContainer,
-                            unfocusedContainerColor = TextFieldContainer,
-                            disabledContainerColor = TextFieldContainer
-                        )
-                    )
+                    LabeledField(label = "Main file") {
+                        Row(Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = selectedConfig.main,
+                                onValueChange = { selectedConfig.main = it },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f),
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                                colors = textFieldColors
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = { val chooser = JFileChooser()
+                                    chooser.fileSelectionMode = JFileChooser.FILES_ONLY;
+                                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                                        selectedConfig.pathToInterpreter = chooser.selectedFile.absolutePath
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ButtonBg,
+                                    contentColor = ButtonText
+                                )
+                            ) {
+                                Text("...")
+                            }
+                        }
+                    }
 
-                    OutlinedTextField(
-                        value = config.outputFile,
-                        onValueChange = { config.outputFile = it },
-                        label = { Text("Output") },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BorderFocused,
-                            unfocusedBorderColor = BorderUnfocused,
-                            focusedLabelColor = TextPrimary,
-                            unfocusedLabelColor = TextSecondary,
-                            cursorColor = TextPrimary,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            disabledTextColor = TextSecondary,
-                            disabledLabelColor = TextSecondary,
-                            disabledBorderColor = BorderUnfocused,
-                            focusedContainerColor = TextFieldContainer,
-                            unfocusedContainerColor = TextFieldContainer,
-                            disabledContainerColor = TextFieldContainer
+                    LabeledField(label = "Output") {
+                        OutlinedTextField(
+                            value = selectedConfig.outputFile,
+                            onValueChange = { selectedConfig.outputFile = it },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                            colors = textFieldColors
                         )
-                    )
+                    }
 
-                    OutlinedTextField(
-                        value = config.args,
-                        onValueChange = { config.args = it },
-                        label = { Text("Args") },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BorderFocused,
-                            unfocusedBorderColor = BorderUnfocused,
-                            focusedLabelColor = TextPrimary,
-                            unfocusedLabelColor = TextSecondary,
-                            cursorColor = TextPrimary,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            disabledTextColor = TextSecondary,
-                            disabledLabelColor = TextSecondary,
-                            disabledBorderColor = BorderUnfocused,
-                            focusedContainerColor = TextFieldContainer,
-                            unfocusedContainerColor = TextFieldContainer,
-                            disabledContainerColor = TextFieldContainer
+                    LabeledField(label = "Program arguments") {
+                        OutlinedTextField(
+                            value = selectedConfig.args,
+                            onValueChange = { selectedConfig.args = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 60.dp),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                            colors = textFieldColors
                         )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        thickness = 1.dp,
+                        color = DividerColor
                     )
                 }
 
                 HorizontalDivider(
-                    modifier = Modifier
-                        .padding(vertical = 12.dp),
+                    modifier = Modifier.padding(vertical = 12.dp),
                     thickness = 2.dp,
                     color = DividerColor
                 )
@@ -190,7 +344,7 @@ fun ConfigView(config: Config) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
-                        onClick = { /* TODO: cancel/close */ },
+                        onClick = { onCancel() },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ButtonBg,
                             contentColor = ButtonText
@@ -200,7 +354,9 @@ fun ConfigView(config: Config) {
                     }
                     Spacer(Modifier.width(8.dp))
                     Button(
-                        onClick = { /* TODO: apply */ },
+                        onClick = {
+                            persistConfigs(localConfigs, ideController)
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ButtonBg,
                             contentColor = ButtonText
@@ -210,7 +366,9 @@ fun ConfigView(config: Config) {
                     }
                     Spacer(Modifier.width(8.dp))
                     Button(
-                        onClick = { /* TODO: apply & build & run */ },
+                        onClick = {
+                            // TODO: build & run с selectedConfig
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ButtonBg,
                             contentColor = ButtonText
@@ -221,5 +379,40 @@ fun ConfigView(config: Config) {
                 }
             }
         }
+    }
+}
+
+private fun persistConfigs(configs: List<Config>, ideController: IdeController) {
+    val json = buildString {
+        append("[\n")
+        configs.forEachIndexed { index, cfg ->
+            append("  {\n")
+            append("    \"name\": \"${cfg.name}\",\n")
+            append("    \"pathToInterpreter\": \"${cfg.pathToInterpreter}\",\n")
+            append("    \"main\": \"${cfg.main}\",\n")
+            append("    \"outputFile\": \"${cfg.outputFile}\",\n")
+            append("    \"args\": \"${cfg.args}\"\n")
+            append("  }")
+            if (index != configs.lastIndex) append(",")
+            append("\n")
+        }
+        append("]")
+    }
+    ideController.applyConfig(listOf(json))
+}
+
+@Composable
+private fun LabeledField(
+    label: String,
+    content: @Composable () -> Unit
+) {
+    Column {
+        Text(
+            text = label,
+            color = TextSecondary,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(bottom = 2.dp)
+        )
+        content()
     }
 }

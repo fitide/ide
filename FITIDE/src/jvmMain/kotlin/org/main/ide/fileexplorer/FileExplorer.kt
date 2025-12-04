@@ -8,7 +8,7 @@ import java.nio.file.Path
 import javax.swing.JFileChooser
 
 class FileExplorer(
-    private val ide: IdeController
+    private val ideController: IdeController
 ) {
 
     var currentProject: Path? by mutableStateOf(null)
@@ -38,8 +38,8 @@ class FileExplorer(
 
     fun openProject(dir: Path) {
         currentProject = dir
-        ide.openProject(dir)
-        fileTree = ide.getFileTree()
+        ideController.openProject(dir)
+        fileTree = ideController.getFileTree()
 
         selected = emptySet()
         lastClicked = null
@@ -48,12 +48,12 @@ class FileExplorer(
     }
 
     fun refresh() {
-        fileTree = ide.refreshTree()
+        fileTree = ideController.refreshTree()
     }
 
     fun createFile(dir: Path, name: String) {
         try {
-            ide.createFile(dir, name)
+            ideController.createFile(dir, name)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -62,7 +62,7 @@ class FileExplorer(
 
     fun createDirectory(dir: Path, name: String) {
         try {
-            ide.createDir(dir, name)
+            ideController.createDir(dir, name)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -71,8 +71,8 @@ class FileExplorer(
 
     fun delete(path: Path, isDirectory: Boolean) {
         try {
-            if (isDirectory) ide.deleteDir(path)
-            else ide.deleteFile(path)
+            if (isDirectory) ideController.deleteDir(path)
+            else ideController.deleteFile(path)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -98,9 +98,9 @@ class FileExplorer(
 
         try {
             if (isDirectory) {
-                ide.renameDir(path, newName)
+                ideController.renameDir(path, newName)
             } else {
-                ide.renameFile(path, newName)
+                ideController.renameFile(path, newName)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -111,8 +111,8 @@ class FileExplorer(
 
     fun move(from: Path, toDir: Path, isDirectory: Boolean) {
         try {
-            if (isDirectory) ide.moveDir(from, toDir)
-            else ide.moveFile(from, toDir)
+            if (isDirectory) ideController.moveDir(from, toDir)
+            else ideController.moveFile(from, toDir)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -121,8 +121,8 @@ class FileExplorer(
 
     fun copy(from: Path, toDir: Path, isDirectory: Boolean) {
         try {
-            if (isDirectory) ide.copyDir(from, toDir)
-            else ide.copyFile(from, toDir)
+            if (isDirectory) ideController.copyDir(from, toDir)
+            else ideController.copyFile(from, toDir)
         } catch (e: Exception) {
             e.printStackTrace()
         }

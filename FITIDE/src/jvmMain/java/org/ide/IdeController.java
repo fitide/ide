@@ -4,11 +4,14 @@ import androidx.compose.runtime.MutableState;
 import androidx.compose.ui.text.input.TextFieldValue;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.ide.FileExplorerController.Exceptions.UnnableToWriteInFileException;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -22,11 +25,17 @@ public class IdeController {
     private final EditorController editorController = new EditorController();
 
     private Path projectRoot;
+    private File config;
 
     public void openProject(Path root) throws Exception {
         logger.info("Opening project: " + root);
         this.projectRoot = root;
         this.fileExplorer = new FileExplorerController(root.toString(), logger);
+        this.config = fileExplorer.getConfig();
+    }
+
+    public File getConfig() {
+        return config;
     }
 
     public Directory getFileTree() {
@@ -154,5 +163,9 @@ public class IdeController {
 
     public void onTextChanged(TextFieldValue newValue) {
         editorController.onTextChanged(newValue);
+    }
+
+    public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException{
+        this.config = fileExplorer.applyConfig(config);
     }
 }
