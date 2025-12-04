@@ -25,6 +25,7 @@ public interface Plugin {
     // node is a class/func/var
     Position getNamePositionOfModule(ParseTree node);
 
+    String getType(ParseTree tree);
     // node is a class/func/var
     Position getTypePositionOfModule(ParseTree node);
 
