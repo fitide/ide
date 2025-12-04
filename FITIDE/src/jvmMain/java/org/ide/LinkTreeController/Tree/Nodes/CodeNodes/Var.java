@@ -21,7 +21,7 @@ public class Var extends AInternalCodeNode {
     public LinkTreePosition retPosition;
     private boolean isTypeDef = false;
 
-    public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
+    public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, String retType) {
         super(plugin, pathToFile, path, tree, name);
         this.retPosition = new LinkTreePosition(plugin.getTypePositionOfModule(tree));
         this.retType = retType;
@@ -75,7 +75,7 @@ public class Var extends AInternalCodeNode {
 
     @Override
     public void setDefinitions(Map<String, AInternalCodeNode> defs) {
-        if (this.codeType != CodeType.Definition) {
+        if (this.codeType != CodeType.Definition && this.codeType != CodeType.Declaration) {
             this.definition = defs.getOrDefault(name, null);
         }
         else {

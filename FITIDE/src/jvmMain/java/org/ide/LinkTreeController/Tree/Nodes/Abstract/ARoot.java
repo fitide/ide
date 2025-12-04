@@ -25,7 +25,7 @@ public abstract class ARoot extends CommonFileNode {
     }
 
     public ARoot(ReentrantReadWriteLock lock, Path pathToFile, int cntSearches) {
-        super(lock, pathToFile);
+        super(lock, pathToFile, null);
         this.cntSearches = cntSearches;
     }
 
@@ -60,4 +60,24 @@ public abstract class ARoot extends CommonFileNode {
     public abstract Path searchForDefinition(String Name) throws NoDefinitionException;
 
     public abstract Set<String> getHints(Path pathToModule, String prefix) throws BadPathException;
+
+    public Set<String> getStandartTypes() {
+        return standartTypes;
+    }
+
+    public Map<String, Construction> getExternalConstrs() {
+        return externalConstrs;
+    }
+
+    public Map<String, CommonFile> getExternalFiles() {
+        return externalFiles;
+    }
+
+    public Map<String, Var> getExternalVars() {
+        return externalVars;
+    }
+
+    public Map<String, Func> getExternalFunctions() {
+        return externalFunctions;
+    }
 }

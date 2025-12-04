@@ -6,6 +6,7 @@ import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
+import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
@@ -27,8 +28,10 @@ public abstract class CommonFileNode {
     public Map<String, CommonFileNode> childs = new HashMap<>();
     public ReadWriteLock Treelock;
 
-    public CommonFileNode(ReadWriteLock lock, Path pathToFile) {
+    public CommonFileNode(ReadWriteLock lock, Path pathToFile, String name) {
+        this.pathToFile = pathToFile;
         this.Treelock = lock;
+        this.name = name;
     }
 
     protected CommonFileNode() {
@@ -131,9 +134,9 @@ public abstract class CommonFileNode {
     public abstract void getHints(Path pathToFile, String prefix, Set<String> listOfHints) throws BadPathException;
 
     public List<CodeStrForColour> getSyntaxHughlighting(Path pathToFile) {
-        if (pathToFile.getNameCount() > 0 && this.childs.containsKey(pathToFile.getRoot().toString())) {
-            return childs.get(pathToFile.getRoot().toString()).getSyntaxHughlighting(pathToFile.subpath(1, pathToFile.getNameCount()));
-        }
+        CommonFileNode node = getFileNode(pathToFile);
+
+        if (node != null && node instanceof CommonFile) return ((CommonFile) node).getSyntaxHughlighting(pathToFile.getFileName());
         return new ArrayList<>();
     }
 
@@ -177,11 +180,14 @@ public abstract class CommonFileNode {
     }
 
     public CommonFileNode getFileNode(Path pathToFile) {
-        if (pathToFile.getNameCount() == 0) {
-            return this;
+        if (pathToFile.getNameCount() == 1) {
+            if (pathToFile.toString().equals(this.name))
+                return this;
+            else
+                return null;
         }
 
-        String nextName = PathTools.getRootStr(pathToFile);
+        String nextName = PathTools.getRootStr(PathTools.deleteRoot(pathToFile));
         if (this.childs.containsKey(nextName)) {
             return childs.get(nextName).getFileNode(PathTools.deleteRoot(pathToFile));
         }

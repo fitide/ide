@@ -224,18 +224,6 @@ public class CommonFile extends FileNode {
 
 
 
-    public void setPlugin(Plugin plugin, ParseTree tree) {
-        codeNodes = TreeBuilder.build(plugin, tree, pathToFile);
-        var decsDefs = getDecsAndDefs();
-        for (AInternalCodeNode dec : decsDefs.a) {
-            this.decInFile.put(dec.name, dec);
-        }
-        for (AInternalCodeNode def : decsDefs.b) {
-            this.decInFile.put(def.name, def);
-            this.defInFile.put(def.name, def);
-        }
-    }
-
     private Pair<List<AInternalCodeNode>, List<AInternalCodeNode>> getDecsAndDefs() {
         Pair<List<AInternalCodeNode>, List<AInternalCodeNode>> decsDefs = new Pair<>(new ArrayList<>(), new ArrayList<>());
         for (AInternalCodeNode codeNode : codeNodes.values()) {
@@ -251,12 +239,35 @@ public class CommonFile extends FileNode {
 
     public void initCode(Plugin plugin, ParseTree tree, Path pathToFile) {
         codeNodes = TreeBuilder.build(plugin, tree, pathToFile);
+        var decsDefs = getDecsAndDefs();
+        for (AInternalCodeNode dec : decsDefs.a) {
+            this.decInFile.put(dec.name, dec);
+        }
+        for (AInternalCodeNode def : decsDefs.b) {
+            this.decInFile.put(def.name, def);
+            this.defInFile.put(def.name, def);
+        }
         isInited = true;
     }
 
-    public void setDefs(ARoot root) {
-        List<CommonFile> files = new ArrayList<>();
-        files.add(this);
+    public void setLinks(ARoot root) {
+        setTypes(root);
+        setDefs(root);
+    }
+
+    private void setTypes(ARoot root) {
+        var types = root.getStandartTypes();
+        addTypesOfFiles(types);
+        for (var node : this.codeNodes.values()) {
+            node.setTypes(types);
+        }
+    }
+
+    private void addTypesOfFiles(Set<String> types) {};
+
+    private void setDefs(ARoot root) {
+        var files = root.getExternalFiles();
+        files.put(this.name, this);
         for (AInternalCodeNode node : codeNodes.values()) {
             if (node instanceof ImportStatement) {
                 ImportStatement importStatement = (ImportStatement) node;
@@ -264,20 +275,14 @@ public class CommonFile extends FileNode {
                 for (var path : paths) {
                     CommonFileNode commonFileNode = root.getFileNode(path);
                     if (commonFileNode != null && commonFileNode instanceof CommonFile)
-                        files.add((CommonFile) commonFileNode);
+                        files.put(commonFileNode.name, (CommonFile) commonFileNode);
                 }
             }
         }
 
         Map<String, AInternalCodeNode> defs = new HashMap();
-        for (var file : files) {
+        for (var file : files.values()) {
             defs.putAll(file.defInFile);
-        }
-
-        for (var node : this.codeNodes.values()) {
-            if (node.codeType == CodeType.Definition) {
-                defs.put(node.name, node);
-            }
         }
 
         for (var node : this.codeNodes.values()) {

@@ -22,7 +22,7 @@ public class Construction extends AInternalCodeNode {
         super(plugin, pathToFile, path, tree);
         if (codeType == CodeType.Error) return;
 
-        List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree);
+        List<ParseTree> argsInTree = plugin.getConstructionArgs(tree);
         for (ParseTree parseTree : argsInTree) {
             AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, this.pathToModule));
             args.put(arg.id, arg);

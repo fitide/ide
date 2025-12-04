@@ -12,6 +12,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Func;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Root;
+import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -35,7 +36,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     private Map<String, CommonFileNode> setDirsOfNode(Directory node, ReentrantReadWriteLock lock, Path pathToFile) {
         Map<String, CommonFileNode> list = new HashMap<>();
 
-        for (int i = 0; i > node.getDirsCnt(); i++) {
+        for (int i = 0; i < node.getDirsCnt(); i++) {
             list.put(node.getDir(i).name, setDir(node.getDir(i), lock, pathToFile));
         }
 
@@ -46,8 +47,9 @@ public class LinkTreeControllerImpl implements LinkTreeController {
         org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory curDir = new org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory(
                 lock, Paths.get(pathToFile.toString(), node.name), node.name);
 
-        curDir.childs.putAll(setDirsOfNode(node, lock, curDir.pathToFile));
-        curDir.childs.putAll(setFilesOfNode(node, lock, curDir.pathToFile));
+        Path newPath = Paths.get(curDir.pathToFile.toString(), node.name);
+        curDir.childs.putAll(setDirsOfNode(node, lock, newPath));
+        curDir.childs.putAll(setFilesOfNode(node, lock, newPath));
         return curDir;
     }
 
@@ -64,7 +66,8 @@ public class LinkTreeControllerImpl implements LinkTreeController {
 
     private String getExtension(String name) {
         int lastP = name.lastIndexOf('.');
-        return name.substring(lastP);
+        if (lastP != -1) return name.substring(lastP);
+        else return "";
     }
 
     private CommonFileNode setFile(FEFile fileNode, ReentrantReadWriteLock lock, Path pathToFile) {
@@ -84,11 +87,10 @@ public class LinkTreeControllerImpl implements LinkTreeController {
 
         initFilesCode(plugin, files);
 
-
         setExternals(plugin);
 
         for (var file: filesByExtenstion.get(ext)) {
-            if (file.isInited) file.setDefs(root);
+            if (file.isInited) file.setLinks(root);
         }
     }
 
@@ -103,6 +105,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     private void setExternals(Plugin plugin) {
+        setStandartTypes(plugin);
         setConstrs(plugin);
         setFuncs(plugin);
         setVars(plugin);
@@ -164,8 +167,8 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     @Override
-    public void getSyntaxHighlightning(Path pathToFile) {
-        root.getSyntaxHughlighting(pathToFile);
+    public List<CodeStrForColour> getSyntaxHighlightning(Path pathToFile) {
+        return root.getSyntaxHughlighting(pathToFile);
     }
 
     @Override

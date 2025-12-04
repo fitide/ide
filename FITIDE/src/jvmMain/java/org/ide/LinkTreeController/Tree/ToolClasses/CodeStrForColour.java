@@ -18,5 +18,9 @@ public class CodeStrForColour {
         this.tag = tag;
     }
 
+    @Override
+    public String toString() {
+        return tag.toString() + "\tPos: " + pos.rowS + ":" + pos.colS + " " + pos.rowE + ":" + pos.colE;
+    }
 
 }

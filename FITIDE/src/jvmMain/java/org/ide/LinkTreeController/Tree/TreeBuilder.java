@@ -16,10 +16,10 @@ public class TreeBuilder {
 
     public static Map<String, AInternalCodeNode> build(Plugin plugin, ParseTree tree, Path pathToFIle) {
         Map<String, AInternalCodeNode> resList = new HashMap<>();
-        int it = 0;
+
         Path nullPath = Paths.get("");
-        while (tree.getChild(it) != null) {
-            AInternalCodeNode node = buildOneChild(plugin, tree.getChild(it++), pathToFIle, nullPath);
+        for (int it = 0; it < tree.getChildCount(); it++) {
+            AInternalCodeNode node = buildOneChild(plugin, tree.getChild(it), pathToFIle, nullPath);
             if (node != null) resList.put(node.id, node);
         }
         return resList;
@@ -41,7 +41,7 @@ public class TreeBuilder {
         for (Tag tag : tags) {
             switch (tag) {
                 case Var -> {
-                    return new Var(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree));
+                    return new Var(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree), plugin.getType(parseTree));
                 }
                 case ImportStatement -> {
                     return new ImportStatement(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree));
