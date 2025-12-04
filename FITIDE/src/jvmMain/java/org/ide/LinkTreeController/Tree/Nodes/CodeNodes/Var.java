@@ -18,15 +18,18 @@ import java.util.Set;
 
 public class Var extends AInternalCodeNode {
     public String retType;
-
+    public LinkTreePosition retPosition;
 
     public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
         super(plugin, pathToFile, path, tree, name);
+        this.retPosition = new LinkTreePosition(plugin.getTypePositionOfModule(tree));
+        this.retType = retType;
     }
 
     public Var(String name, List<String> keyWords, String retType) {
         super(name, keyWords);
         this.retType = retType;
+
     }
 
     @Override
@@ -47,6 +50,10 @@ public class Var extends AInternalCodeNode {
         code.pos = this.namePosition.clone();
         code.tag = LinkTreeCodeTag.Var;
         list.add(code);
+
+        CodeStrForColour typeC = new CodeStrForColour(LinkTreeCodeTag.Type);
+        typeC.pos = this.retPosition.clone();
+        list.add(typeC);
     }
 
     @Override

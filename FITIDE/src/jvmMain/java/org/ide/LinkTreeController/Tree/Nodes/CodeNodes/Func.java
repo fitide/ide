@@ -3,6 +3,7 @@ package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
@@ -18,6 +19,7 @@ import java.util.*;
 public class Func extends AInternalCodeNode {
     public Map<String, AInternalCodeNode> args = new HashMap<>();
     public String retType;
+    public LinkTreePosition retTypePosition;
     public LinkTreePosition bodyPosition;
     public LinkTreePosition argsPosition;
 
@@ -32,6 +34,7 @@ public class Func extends AInternalCodeNode {
         }
         this.bodyPosition = new LinkTreePosition(plugin.getPositionOfModuleBody(tree));
         this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree));
+        this.retTypePosition = new LinkTreePosition(plugin.getTypePositionOfModule(tree));
     }
 
     public Func(String name, List<String> keyWords, List<ExternalVar> externalArgs, ExternalType externalType) {
@@ -79,6 +82,13 @@ public class Func extends AInternalCodeNode {
         super.getHighlightning(list);
         CodeStrForColour funcColour = new CodeStrForColour();
         funcColour.pos = this.namePosition;
+        funcColour.tag = LinkTreeCodeTag.Func;
+        CodeStrForColour typeColour = new CodeStrForColour();
+        typeColour.pos = this.retTypePosition;
+        typeColour.tag = LinkTreeCodeTag.Type;
+
+        list.add(typeColour);
+        list.add(funcColour);
         for (AInternalCodeNode arg : args.values()) {
             arg.getHighlightning(list);
         }
