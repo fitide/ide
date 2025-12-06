@@ -280,12 +280,14 @@ public class CommonFile extends FileNode {
         }
 
         Map<String, AInternalCodeNode> defs = new HashMap();
+        Map<String, AInternalCodeNode> decs = new HashMap<>();
         for (var file : files.values()) {
             defs.putAll(file.defInFile);
+            decs.putAll(file.decInFile);
         }
 
         for (var node : this.codeNodes.values()) {
-            node.setDefinitionsAndDeclarations(defs, );
+            node.setDefinitionsAndDeclarations(defs, decs);
         }
     }
 }
