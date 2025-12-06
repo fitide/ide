@@ -6,11 +6,13 @@ import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationByPathFinder;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionByPathFinder;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 
 import java.nio.file.Path;
@@ -189,39 +191,39 @@ public class Root extends ARoot {
 
 
     @Override
-    public Set<String> getHints(Path pathToModule, String prefix) throws BadPathException {
-        Set<String> listOfHints = new HashSet<>();
+    public Set<HintNode> getHints(Path pathToModule, String prefix) throws BadPathException {
+        Set<HintNode> listOfHints = new HashSet<>();
         getHints(pathToModule, prefix, listOfHints);
         return listOfHints;
     }
 
     @Override
-    public void getHints(Path pathToFile, String prefix, Set<String> listOfHints) throws BadPathException {
+    public void getHints(Path pathToFile, String prefix, Set<HintNode> listOfHints) throws BadPathException {
 
         for(Construction construction : externalConstrs.values()) {
             construction.getCommonHints(prefix, listOfHints);
         }
 
-        getHintsFromMap(prefix, listOfHints, externalFunctions.keySet());
-        getHintsFromMap(prefix, listOfHints, externalVars.keySet());
+        getHintsFromMap(prefix, listOfHints, externalFunctions.keySet(), LinkTreeCodeTag.Func);
+        getHintsFromMap(prefix, listOfHints, externalVars.keySet(), LinkTreeCodeTag.Var);
 
-        if (pathToFile.getNameCount() > 0 && this.childs.containsKey(pathToFile.getRoot().toString())) {
-            childs.get(pathToFile.getRoot().toString()).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
+        String nextNode = PathTools.getRootStr(PathTools.deleteRoot(pathToFile));
+
+        if (pathToFile.getNameCount() > 0 && this.childs.containsKey(nextNode)) {
+            childs.get(nextNode).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
+            return;
         }
 
         throw new BadPathException("Bad Path");
     }
 
-    private void getHintsFromMap(String prefix, Set<String> listOfHints, Set<String> names) {
+    private void getHintsFromMap(String prefix, Set<HintNode> listOfHints, Set<String> names, LinkTreeCodeTag codeType) {
         for (String name : names) {
             if (name.startsWith(prefix)) {
-                listOfHints.add(name);
+                listOfHints.add(new HintNode(codeType, name));
             }
         }
     }
-
-
-
 
     private interface SearchByPathMethodBuilder {
         Callable<Path> makeSearchMethod (CommonFileNode commonFileNode, Path path, String name);

@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -17,7 +18,7 @@ public interface LinkTreeController {
 
     void initFiles(Plugin plugin, List<Pair<Path, ParseTree>> files);
 
-    Set<String> getHintsForFile(Path pathToNodule, String prefix);
+    Set<HintNode> getHintsForFile(Path pathToNodule, String prefix);
 
     List<CodeStrForColour> getSyntaxHighlightning(Path pathToFile);
 

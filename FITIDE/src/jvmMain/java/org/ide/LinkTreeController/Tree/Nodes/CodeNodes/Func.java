@@ -5,6 +5,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
@@ -51,29 +52,36 @@ public class Func extends AInternalCodeNode {
         this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
     }
 
+    @Override
+    public void getCommonHints(String prefix, Set<HintNode> hints) {
+        super.getCommonHints(prefix, hints);
+
+        if (name != null && name.startsWith(prefix)) hints.add(new HintNode(LinkTreeCodeTag.Func, name));
+    }
+
 
     @Override
-    public void getHint(String prefix, Set<String> hints, Path pathToModule) {
+    public void getHint(String prefix, Set<HintNode> hints, Path pathToModule) {
         if (pathToModule.getNameCount() == 0) {
             return;
         }
 
 
-        if (args.containsKey(PathTools.getRootStr(pathToModule))) {
-            var node = args.get(PathTools.getRootStr(pathToModule));
-            node.getCommonHints(prefix, hints);
-            node.getHint(prefix, hints, PathTools.deleteRoot(pathToModule));
-        }
-
-        for (AInternalCodeNode node : args.values()) {
-            node.getCommonHints(prefix, hints);
-        }
-
-        for (AInternalCodeNode node : childs.values()) {
-            node.getCommonHints(prefix, hints);
-        }
-
         if (childs.containsKey(PathTools.getRootStr(pathToModule))) {
+            if (args.containsKey(PathTools.getRootStr(pathToModule))) {
+                var node = args.get(PathTools.getRootStr(pathToModule));
+                node.getCommonHints(prefix, hints);
+                node.getHint(prefix, hints, PathTools.deleteRoot(pathToModule));
+            }
+
+            for (AInternalCodeNode node : args.values()) {
+                node.getCommonHints(prefix, hints);
+            }
+
+            for (AInternalCodeNode node : childs.values()) {
+                node.getCommonHints(prefix, hints);
+            }
+
             childs.get(PathTools.getRootStr(pathToModule)).getHint(prefix, hints, PathTools.deleteRoot(pathToModule));
         }
     }

@@ -9,6 +9,7 @@ import org.ide.LinkTreeController.Tree.Finders.DefinitionFinder;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
@@ -131,7 +132,7 @@ public abstract class CommonFileNode {
 
     public abstract AInternalCodeNode getDefinition(Path path) throws NoDefinitionException;
 
-    public abstract void getHints(Path pathToFile, String prefix, Set<String> listOfHints) throws BadPathException;
+    public abstract void getHints(Path pathToFile, String prefix, Set<HintNode> listOfHints) throws BadPathException;
 
     public List<CodeStrForColour> getSyntaxHughlighting(Path pathToFile) {
         CommonFileNode node = getFileNode(pathToFile);

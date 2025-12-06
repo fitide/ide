@@ -5,9 +5,9 @@ import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -36,7 +36,7 @@ public class Directory extends FileNode {
     }
 
     @Override
-    public void getHints(Path pathToFile, String prefix, Set<String> listOfHints) throws BadPathException {
+    public void getHints(Path pathToFile, String prefix, Set<HintNode> listOfHints) throws BadPathException {
         if (pathToFile.getNameCount() > 0 && this.childs.containsKey(pathToFile.getRoot().toString())) {
             childs.get(pathToFile.getRoot().toString()).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
         }

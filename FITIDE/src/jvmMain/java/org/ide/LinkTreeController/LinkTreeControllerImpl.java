@@ -13,6 +13,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Root;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
@@ -158,7 +159,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     @Override
-    public Set<String> getHintsForFile(Path pathToNodule, String prefix) {
+    public Set<HintNode> getHintsForFile(Path pathToNodule, String prefix) {
         try {
             return root.getHints(pathToNodule, prefix);
         } catch (BadPathException e) {

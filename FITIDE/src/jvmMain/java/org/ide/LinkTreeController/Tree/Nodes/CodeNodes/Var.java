@@ -2,9 +2,9 @@ package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
-import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
@@ -38,8 +38,15 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    public void getHint(String prefix, Set<String> hints, Path pathToModule) {
-        return;
+    public void getCommonHints(String prefix, Set<HintNode> hints) {
+        super.getCommonHints(prefix, hints);
+
+        if (name != null && name.startsWith(prefix)) hints.add(new HintNode(LinkTreeCodeTag.Var, name));
+    }
+
+    @Override
+    public void getHint(String prefix, Set<HintNode> hints, Path pathToModule) {
+        if (name != null && name.startsWith(prefix)) hints.add(new HintNode(LinkTreeCodeTag.Var, name));
     }
 
     @Override

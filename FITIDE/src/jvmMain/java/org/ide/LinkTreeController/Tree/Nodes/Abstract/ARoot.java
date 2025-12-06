@@ -5,6 +5,7 @@ import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.*;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.CommonFile;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,7 +60,7 @@ public abstract class ARoot extends CommonFileNode {
 
     public abstract Path searchForDefinition(String Name) throws NoDefinitionException;
 
-    public abstract Set<String> getHints(Path pathToModule, String prefix) throws BadPathException;
+    public abstract Set<HintNode> getHints(Path pathToModule, String prefix) throws BadPathException;
 
     public Set<String> getStandartTypes() {
         return standartTypes;

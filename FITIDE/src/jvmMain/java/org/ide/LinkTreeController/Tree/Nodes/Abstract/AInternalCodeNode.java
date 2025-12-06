@@ -3,6 +3,7 @@ package org.ide.LinkTreeController.Tree.Nodes.Abstract;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
@@ -19,8 +20,8 @@ public abstract class AInternalCodeNode {
     public Path pathToModule;
     public Path pathToFile;
     public LinkTreePosition wholePos = new LinkTreePosition();
-    public List<String> keyWordsNames;
-    public List<KeyWord> keyWords;
+    public List<String> keyWordsNames = new ArrayList<>();
+    public List<KeyWord> keyWords = new ArrayList<>();
     public CodeType codeType = CodeType.Usage;
     public AInternalCodeNode definition = null;
     public AInternalCodeNode declaration = null;
@@ -110,15 +111,13 @@ public abstract class AInternalCodeNode {
         this.pathToModule = Paths.get(pathToModule.toString(), id);
     }
 
-    public void getCommonHints(String prefix, Set<String> hints) {
+    public void getCommonHints(String prefix, Set<HintNode> hints) {
         for (String keyWord : keyWordsNames) {
-            if (keyWord.startsWith(prefix)) hints.add(keyWord);
+            if (keyWord.startsWith(prefix)) hints.add(new HintNode(LinkTreeCodeTag.KeyWord, name));
         }
-
-        if (name != null && name.startsWith(prefix)) hints.add(name);
     }
 
-    public abstract void getHint(String prefix, Set<String> hints, Path pathToModule);
+    public abstract void getHint(String prefix, Set<HintNode> hints, Path pathToModule);
 
     public void getHighlightning(List<CodeStrForColour> list) {
         for (AInternalCodeNode node : childs.values()) {

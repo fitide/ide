@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
@@ -47,7 +48,7 @@ public class Construction extends AInternalCodeNode {
 
 
     @Override
-    public void getHint(String prefix, Set<String> hints, Path pathToModule) {
+    public void getHint(String prefix, Set<HintNode> hints, Path pathToModule) {
         if (pathToModule.getNameCount() == 0) {
             return;
         }

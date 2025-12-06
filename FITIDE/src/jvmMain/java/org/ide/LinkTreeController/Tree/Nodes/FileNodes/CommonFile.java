@@ -9,6 +9,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Func;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.ImportStatement;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
@@ -193,12 +194,13 @@ public class CommonFile extends FileNode {
     }
 
     @Override
-    public void getHints(Path pathToModule, String prefix, Set<String> listOfHints) {
+    public void getHints(Path pathToModule, String prefix, Set<HintNode> listOfHints) {
         for (AInternalCodeNode node : this.codeNodes.values()) {
             node.getCommonHints(prefix, listOfHints);
         }
-        if (this.codeNodes.containsKey(PathTools.getRootStr(pathToModule))) {
-            this.codeNodes.get(PathTools.getRootStr(pathToModule)).getHint(prefix, listOfHints, PathTools.deleteRoot(pathToModule));
+        String nextNode = PathTools.getRootStr(PathTools.deleteRoot(pathToModule));
+        if (this.codeNodes.containsKey(nextNode)) {
+            this.codeNodes.get(nextNode).getHint(prefix, listOfHints, PathTools.deleteRoot(pathToModule));
         }
     }
 
