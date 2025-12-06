@@ -8,7 +8,6 @@ import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
-import org.ide.PluginController.PluginInterface.Position;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -74,13 +73,20 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
-        if (this.codeType != CodeType.Definition && this.codeType != CodeType.Declaration) {
-            this.definition = defs.getOrDefault(name, null);
-        }
-        else {
-            this.definition = this;
-            defs.put(name, this);
+    public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+        switch (codeType) {
+            case Definition -> {
+                defs.put(this.name, this);
+                decs.put(this.name, this);
+            }
+            case Declaration -> {
+                defs.put(this.name, this);
+                decs.put(this.name, this);
+            }
+            case Usage -> {
+                this.definition = defs.getOrDefault(this.name, null);
+                this.declaration = decs.getOrDefault(this.name, null);
+            }
         }
     }
 

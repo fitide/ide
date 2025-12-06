@@ -23,6 +23,7 @@ public abstract class AInternalCodeNode {
     public List<KeyWord> keyWords;
     public CodeType codeType = CodeType.Usage;
     public AInternalCodeNode definition = null;
+    public AInternalCodeNode declaration = null;
     public Map<String, AInternalCodeNode> childs = new HashMap<>();
     private boolean initedForInfo = false;
 
@@ -215,7 +216,7 @@ public abstract class AInternalCodeNode {
 
     protected abstract List<Path> getPaths(LinkTreePosition position);
 
-    public abstract void setDefinitions(Map<String, AInternalCodeNode> defs);
+    public abstract void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs);
 
     public void setTypes(Set<String> types) {
         for (var child : childs.values()) {

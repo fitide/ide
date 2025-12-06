@@ -9,7 +9,6 @@ import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
-import org.ide.PluginController.PluginInterface.Position;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -54,7 +53,7 @@ public class KeyWord extends AInternalCodeNode {
     }
 
     @Override
-    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
+    public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
         return;
     }
 }

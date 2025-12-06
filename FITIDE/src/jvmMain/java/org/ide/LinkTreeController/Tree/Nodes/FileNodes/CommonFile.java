@@ -2,7 +2,6 @@ package org.ide.LinkTreeController.Tree.Nodes.FileNodes;
 
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.Tree;
 import org.ide.LinkTreeController.Exceptions.NoDeclarationException;
 import org.ide.LinkTreeController.Exceptions.NoDefinitionException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.*;
@@ -286,7 +285,7 @@ public class CommonFile extends FileNode {
         }
 
         for (var node : this.codeNodes.values()) {
-            node.setDefinitions(defs);
+            node.setDefinitionsAndDeclarations(defs, );
         }
     }
 }

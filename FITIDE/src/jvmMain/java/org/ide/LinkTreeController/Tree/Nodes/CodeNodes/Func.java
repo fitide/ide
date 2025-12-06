@@ -225,21 +225,26 @@ public class Func extends AInternalCodeNode {
     }
 
     @Override
-    public void setDefinitions(Map<String, AInternalCodeNode> defs) {
-        if (this.codeType == CodeType.Definition) {
-            this.definition = this;
-            defs.put(this.name, this);
-        }
-        else {
-            this.definition = defs.getOrDefault(this.name, null);
-        }
-
-        for (var arg : args.values()) {
-            defs.put(arg.name, arg);
-        }
-
-        for (var node : this.childs.values()) {
-            node.setDefinitions(defs);
+    public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+        switch (codeType) {
+            case Definition -> {
+                defs.put(this.name, this);
+                decs.put(this.name, this);
+                for (var arg : args.values()) {
+                    decs.put(arg.name, arg);
+                }
+                for (var node : this.childs.values()) {
+                    node.setDefinitionsAndDeclarations(defs, decs);
+                }
+            }
+            case Declaration -> {
+                this.definition = defs.getOrDefault(this.name, null);
+                decs.put(this.name, this);
+            }
+            case Usage -> {
+                this.definition = defs.getOrDefault(this.name, null);
+                this.declaration = decs.getOrDefault(this.name, null);
+            }
         }
     }
 
