@@ -43,6 +43,10 @@ kotlin {
             implementation("org.jetbrains.pty4j:pty4j:0.13.11")
             implementation("org.jetbrains:annotations:24.1.0")
             implementation("org.jetbrains.compose.ui:ui-graphics")
+            implementation("org.apache.logging.log4j:log4j-api:2.23.1")
+            implementation("org.antlr:antlr4-runtime:4.13.2")
+            runtimeOnly("org.apache.logging.log4j:log4j-core:2.23.1")
+            implementation("com.googlecode.json-simple:json-simple:1.1.1")
         }
         jvmTest.dependencies {
             implementation(project.dependencies.platform("org.junit:junit-bom:5.10.0"))
