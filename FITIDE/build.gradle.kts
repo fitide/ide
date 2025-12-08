@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    kotlin("plugin.serialization") version "2.2.21"
 }
 
 repositories {
@@ -43,6 +44,7 @@ kotlin {
             implementation("org.jetbrains.pty4j:pty4j:0.13.11")
             implementation("org.jetbrains:annotations:24.1.0")
             implementation("org.jetbrains.compose.ui:ui-graphics")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
         }
         jvmTest.dependencies {
             implementation(project.dependencies.platform("org.junit:junit-bom:5.10.0"))

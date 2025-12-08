@@ -10,6 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.ide.IdeController
 import org.main.ide.uistate.UIColors.Background
 import org.main.ide.uistate.UIColors.BorderFocused
@@ -32,24 +35,34 @@ class Config {
     var args by mutableStateOf("")
 }
 
-fun parseConfigJson(json: String): Config {
-    fun extract(key: String): String {
-        val regex = Regex("\"$key\"\\s*:\\s*\"(.*?)\"")
-        val match = regex.find(json) ?: return ""
-        return match.groupValues[1]
-            .replace("\\n", "\n")
-            .replace("\\r", "\r")
-            .replace("\\\"", "\"")
-            .replace("\\\\", "\\")
-    }
+@Serializable
+private data class ConfigDto(
+    val name: String = "",
+    val pathToInterpreter: String = "",
+    val main: String = "",
+    val outputFile: String = "",
+    val args: String = "",
+)
 
-    return Config().apply {
-        name = extract("name")
-        pathToInterpreter = extract("pathToInterpreter")
-        main = extract("main")
-        outputFile = extract("outputFile")
-        args = extract("args")
-    }
+private fun ConfigDto.toState(): Config = Config().also { cfg ->
+    cfg.name = name
+    cfg.pathToInterpreter = pathToInterpreter
+    cfg.main = main
+    cfg.outputFile = outputFile
+    cfg.args = args
+}
+
+private fun Config.toDto(): ConfigDto = ConfigDto(
+    name = name,
+    pathToInterpreter = pathToInterpreter,
+    main = main,
+    outputFile = outputFile,
+    args = args,
+)
+
+private val jsonFormat = Json {
+    prettyPrint = true
+    ignoreUnknownKeys = true
 }
 
 fun parseConfigsJson(json: String): List<Config> {
@@ -59,13 +72,13 @@ fun parseConfigsJson(json: String): List<Config> {
     }
 
     return if (trimmed.startsWith("[")) {
-        val objectRegex = Regex("\\{[^}]*\\}")
-        objectRegex.findAll(trimmed)
-            .map { match -> parseConfigJson(match.value) }
-            .toList()
+        jsonFormat.decodeFromString<List<ConfigDto>>(trimmed)
+            .map { it.toState() }
             .ifEmpty { listOf(Config()) }
     } else {
-        listOf(parseConfigJson(trimmed))
+        listOf(
+            jsonFormat.decodeFromString<ConfigDto>(trimmed).toState()
+        )
     }
 }
 
@@ -259,7 +272,7 @@ fun ConfigView(
                             Button(
                                 onClick = {
                                     val chooser = JFileChooser()
-                                    chooser.fileSelectionMode = JFileChooser.FILES_ONLY;
+                                    chooser.fileSelectionMode = JFileChooser.FILES_ONLY
                                     if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                                         selectedConfig.pathToInterpreter = chooser.selectedFile.absolutePath
                                     }
@@ -286,10 +299,11 @@ fun ConfigView(
                             )
                             Spacer(Modifier.width(8.dp))
                             Button(
-                                onClick = { val chooser = JFileChooser()
-                                    chooser.fileSelectionMode = JFileChooser.FILES_ONLY;
+                                onClick = {
+                                    val chooser = JFileChooser()
+                                    chooser.fileSelectionMode = JFileChooser.FILES_ONLY
                                     if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                        selectedConfig.pathToInterpreter = chooser.selectedFile.absolutePath
+                                        selectedConfig.main = chooser.selectedFile.absolutePath
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(
@@ -374,7 +388,7 @@ fun ConfigView(
                             contentColor = ButtonText
                         )
                     ) {
-                        Text("Run ▶\uFE0E")
+                        Text("Run ▶︎")
                     }
                 }
             }
@@ -383,21 +397,8 @@ fun ConfigView(
 }
 
 private fun persistConfigs(configs: List<Config>, ideController: IdeController) {
-    val json = buildString {
-        append("[\n")
-        configs.forEachIndexed { index, cfg ->
-            append("  {\n")
-            append("    \"name\": \"${cfg.name}\",\n")
-            append("    \"pathToInterpreter\": \"${cfg.pathToInterpreter}\",\n")
-            append("    \"main\": \"${cfg.main}\",\n")
-            append("    \"outputFile\": \"${cfg.outputFile}\",\n")
-            append("    \"args\": \"${cfg.args}\"\n")
-            append("  }")
-            if (index != configs.lastIndex) append(",")
-            append("\n")
-        }
-        append("]")
-    }
+    val dtoList = configs.map { it.toDto() }
+    val json = jsonFormat.encodeToString(dtoList)
     ideController.applyConfig(listOf(json))
 }
 
