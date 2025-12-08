@@ -34,3 +34,4 @@ plugins {
 }
 
 include(":FITIDE")
+include("plugins")
