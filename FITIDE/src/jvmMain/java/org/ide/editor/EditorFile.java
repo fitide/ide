@@ -1,42 +1,42 @@
 package org.ide.editor;
 
+import androidx.compose.runtime.MutableState;
+import androidx.compose.ui.text.input.TextFieldValue;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.ide.editor.TextFieldValueHelperKt.*;
+
 class EditorFile {
-    private final StringBuilder content;
+    private MutableState<TextFieldValue> value = null;
     private boolean saved;
-    private List<String> versionsList;
+    private List<TextFieldValue> versionsList;
     private int currentVersion;
-    private Cursor cursor;
 
     public EditorFile(List<String> contentLines) {
         saved = true;
-        this.content = new StringBuilder();
-        for (String s : contentLines) {
-            this.content.append(s).append('\n');
+        StringBuilder s = new StringBuilder();
+        for (String line : contentLines) {
+            s.append(line).append('\n');
         }
+        String initial = s.toString();
+        this.value = getMutableStateTextFieldValue(initial);
+
         versionsList = new ArrayList<>();
+        versionsList.add(this.value.getValue());
         currentVersion = 0;
-        cursor = new Cursor();
-        cursor.line = 0;
-        cursor.position = 0;
     }
 
     public String getContent() {
-        return content.toString();
+        return this.value.getValue().getText();
     }
 
     public void setContent(String newContent) {
-        if (!versionsList.isEmpty()) {
-            versionsList = new ArrayList<>(versionsList.subList(0, currentVersion + 1));
-        }
-
-        versionsList.add(content.toString());
-        currentVersion = versionsList.size() - 1;
-
-        content.setLength(0);
-        content.append(newContent);
+        value.setValue(getTextFieldValue(newContent));
+        versionsList = new ArrayList<>();
+        versionsList.add(value.getValue());
+        currentVersion = 0;
         saved = false;
     }
 
@@ -59,24 +59,30 @@ class EditorFile {
     public void undo() {
         if (currentVersion > 0) {
             currentVersion--;
-            content.setLength(0);
-            content.append(versionsList.get(currentVersion));
+            value.setValue(versionsList.get(currentVersion));
         }
     }
 
     public void redo() {
         if (currentVersion < versionsList.size() - 1) {
             currentVersion++;
-            content.setLength(0);
-            content.append(versionsList.get(currentVersion));
+            value.setValue(versionsList.get(currentVersion));
         }
     }
 
-    public Cursor getCursor() {
-        return cursor;
+    public void onTextChanged(TextFieldValue newValue) {
+        if (currentVersion < versionsList.size() - 1) {
+            versionsList = new ArrayList<>(versionsList.subList(0, currentVersion + 1));
+        }
+
+        versionsList.add(newValue);
+        currentVersion = versionsList.size() - 1;
+
+        saved = false;
+        value.setValue(newValue);
     }
 
-    public void setCursor(Cursor cursor) {
-        this.cursor = cursor;
+    public MutableState<TextFieldValue> getTextField() {
+        return value;
     }
 }

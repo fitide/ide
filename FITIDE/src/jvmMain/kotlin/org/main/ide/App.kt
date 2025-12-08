@@ -4,26 +4,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.rememberDialogState
+import org.ide.IdeController
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.main.ide.buttonbar.ButtonBarHorizontal
 import org.main.ide.buttonbar.ButtonBarVertical
-import org.main.ide.editor.Editor
-import org.main.ide.editor.EditorState
+import org.main.ide.config.Config
+import org.main.ide.config.ConfigView
+import org.main.ide.editor.EditorView
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.fileexplorer.FileExplorerView
 import org.main.ide.terminal.Terminal
+import org.main.ide.uistate.UIColors.Background
+import org.main.ide.uistate.UIColors.DividerColor
+import org.main.ide.uistate.UIColors.EditorBg
+import org.main.ide.uistate.UIColors.Panel
+import org.main.ide.uistate.UIColors.PanelElevated
 import org.main.ide.uistate.UIState
-
-private val Background    = Color(0xFF2B2D30)
-private val Panel         = Color(0xFF323438)
-private val PanelElevated = Color(0xFF3A3C40)
-private val EditorBg      = Color(0xFF282A2D)
-private val DividerColor  = Color(0xFF45474B)
 
 @Composable
 private fun RoundedPanel(
@@ -65,27 +69,30 @@ private fun ThinDivider(
 @Composable
 @Preview
 fun App(
+    ideController: IdeController,
     fileExplorer: FileExplorer,
     uiState: UIState,
-    editorState: EditorState
 ) {
-    MaterialTheme {
+    var isConfigOpen by remember { mutableStateOf(false) }
+    val config = remember { Config() }
 
+    MaterialTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Background)
         ) {
-
             Column(modifier = Modifier.fillMaxSize()) {
                 Box(
                     Modifier
                         .fillMaxWidth()
                         .height(48.dp)
-                        .background(Color(0xFF2B2D30))
+                        .background(Background)
                         .padding(horizontal = 12.dp)
                 ) {
-                    ButtonBarHorizontal()
+                    ButtonBarHorizontal(
+                        onConfigClick = { isConfigOpen = true }
+                    )
                 }
 
                 ThinDivider(vertical = false)
@@ -95,7 +102,7 @@ fun App(
                         Modifier
                             .width(56.dp)
                             .fillMaxHeight()
-                            .background(Color(0xFF2B2D30))
+                            .background(Background)
                     ) {
                         ButtonBarVertical(uiState)
                     }
@@ -123,8 +130,8 @@ fun App(
                                     bg = Panel
                                 ) {
                                     FileExplorerView(
-                                        fileExplorer = fileExplorer,
-                                        editorState = editorState
+                                        ideController = ideController,
+                                        fileExplorer = fileExplorer
                                     )
                                 }
                             }
@@ -135,7 +142,7 @@ fun App(
                                     .fillMaxHeight(),
                                 bg = EditorBg
                             ) {
-                                Editor(editorState)
+                                EditorView(ideController)
                             }
                         }
 
@@ -153,6 +160,19 @@ fun App(
                             }
                         }
                     }
+                }
+            }
+
+            if (isConfigOpen) {
+                DialogWindow(
+                    onCloseRequest = { isConfigOpen = false },
+                    title = "CDM-8 Build / Run Configuration",
+                    state = rememberDialogState(
+                        size = DpSize(900.dp, 700.dp)
+                    ),
+                    resizable = false
+                ) {
+                    ConfigView(config = config)
                 }
             }
         }

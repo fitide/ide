@@ -12,7 +12,9 @@ import ide.fitide.generated.resources.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ButtonBarHorizontal() {
+fun ButtonBarHorizontal(
+    onConfigClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -22,7 +24,11 @@ fun ButtonBarHorizontal() {
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconWithTooltip(Res.drawable.config, "Config")
+        IconWithTooltip(
+            Res.drawable.config,
+            "Config",
+            onClick = { onConfigClick() }
+        )
         Spacer(Modifier.width(4.dp))
         IconWithTooltip(Res.drawable.run, "Run")
     }

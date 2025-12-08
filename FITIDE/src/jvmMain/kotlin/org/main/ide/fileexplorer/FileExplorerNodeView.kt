@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -15,23 +18,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import ide.fitide.generated.resources.*
 import org.ide.FileExplorerController.Node.Directory
 import org.ide.FileExplorerController.Node.FEFile
 import org.ide.FileExplorerController.Node.Node
-import org.jetbrains.compose.resources.painterResource
-import ide.fitide.generated.resources.*
+import org.ide.IdeController
 import org.jetbrains.compose.resources.DrawableResource
-import org.main.ide.editor.EditorState
+import org.jetbrains.compose.resources.painterResource
 import java.nio.file.Path
+import javax.swing.JOptionPane
 
 @Composable
 fun FileExplorerNodeView(
+    ideController: IdeController,
     item: FlatNode,
-    explorer: FileExplorer,
-    editorState: EditorState
+    explorer: FileExplorer
 ) {
     val node: Node = item.node
     val isDirectory = node is Directory
@@ -52,7 +53,7 @@ fun FileExplorerNodeView(
                 explorer.click(item.path, ctrl = false, shift = false)
 
                 if (!isDirectory) {
-                    editorState.openFile(Path.of(item.path))
+                    ideController.openFile(Path.of(item.path))
                 }
             }
             .pointerInput(Unit) {
@@ -81,7 +82,7 @@ fun FileExplorerNodeView(
                     }
             )
         } else {
-            Spacer(Modifier.width(20.dp)) // чтобы выровнять по иконкам
+            Spacer(Modifier.width(20.dp))
         }
 
         if (isDirectory) {
@@ -108,6 +109,49 @@ fun FileExplorerNodeView(
         )
 
         DropdownMenu(expanded = menuVisible, onDismissRequest = { menuVisible = false }) {
+            DropdownMenuItem(
+                text = { Text("Новый файл") },
+                onClick = {
+                    val name = JOptionPane.showInputDialog("Имя файла:")?.trim()
+                    if (!name.isNullOrEmpty()) {
+                        val targetDir =
+                            if (isDirectory) Path.of(item.path)
+                            else Path.of(item.path).parent ?: Path.of(item.path)
+                        explorer.createFile(targetDir, name)
+                    }
+                    menuVisible = false
+                }
+            )
+
+            DropdownMenuItem(
+                text = { Text("Новая папка") },
+                onClick = {
+                    val name = JOptionPane.showInputDialog("Имя папки:")?.trim()
+                    if (!name.isNullOrEmpty()) {
+                        val targetDir =
+                            if (isDirectory) Path.of(item.path)
+                            else Path.of(item.path).parent ?: Path.of(item.path)
+                        explorer.createDirectory(targetDir, name)
+                    }
+                    menuVisible = false
+                }
+            )
+
+            DropdownMenuItem(
+                text = { Text("Переименовать") },
+                onClick = {
+                    val currentName = node.name
+                    val name = JOptionPane.showInputDialog(
+                        null,
+                        "Новое имя:",
+                        currentName
+                    )?.trim()
+                    if (!name.isNullOrEmpty() && name != currentName) {
+                        explorer.rename(Path.of(item.path), name, isDirectory)
+                    }
+                    menuVisible = false
+                }
+            )
 
             DropdownMenuItem(
                 text = { Text("Удалить") },

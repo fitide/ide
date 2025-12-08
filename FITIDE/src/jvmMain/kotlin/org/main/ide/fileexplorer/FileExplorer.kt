@@ -3,6 +3,7 @@ package org.main.ide.fileexplorer
 import androidx.compose.runtime.*
 import org.ide.IdeController
 import org.ide.FileExplorerController.Node.Directory
+import java.nio.file.Files
 import java.nio.file.Path
 import javax.swing.JFileChooser
 
@@ -19,6 +20,7 @@ class FileExplorer(
     var selected by mutableStateOf(setOf<String>())
     var lastClicked: String? by mutableStateOf(null)
     var expandedDirs by mutableStateOf(setOf<String>())
+    var selectionAnchor: String? by mutableStateOf(null)
 
     data class ClipboardItem(val path: Path, val isDirectory: Boolean, val cut: Boolean)
     var clipboard: List<ClipboardItem> by mutableStateOf(emptyList())
@@ -42,6 +44,7 @@ class FileExplorer(
         selected = emptySet()
         lastClicked = null
         expandedDirs = emptySet()
+        selectionAnchor = null
     }
 
     fun refresh() {
@@ -49,36 +52,80 @@ class FileExplorer(
     }
 
     fun createFile(dir: Path, name: String) {
-        ide.createFile(dir, name)
+        try {
+            ide.createFile(dir, name)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         refresh()
     }
 
     fun createDirectory(dir: Path, name: String) {
-        ide.createDir(dir, name)
+        try {
+            ide.createDir(dir, name)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         refresh()
     }
 
     fun delete(path: Path, isDirectory: Boolean) {
-        if (isDirectory) ide.deleteDir(path)
-        else ide.deleteFile(path)
+        try {
+            if (isDirectory) ide.deleteDir(path)
+            else ide.deleteFile(path)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         refresh()
     }
 
     fun rename(path: Path, newName: String, isDirectory: Boolean) {
-        if (isDirectory) ide.renameDir(path, newName)
-        else ide.renameFile(path, newName)
-        refresh()
+
+        if (newName.isBlank()) {
+            return
+        }
+
+        val currentName = path.fileName?.toString() ?: ""
+        if (newName == currentName) {
+            return
+        }
+
+        val targetPath = path.parent?.resolve(newName)
+
+        if (targetPath != null && Files.exists(targetPath)) {
+            return
+        }
+
+        try {
+            if (isDirectory) {
+                ide.renameDir(path, newName)
+            } else {
+                ide.renameFile(path, newName)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            refresh()
+        }
     }
 
     fun move(from: Path, toDir: Path, isDirectory: Boolean) {
-        if (isDirectory) ide.moveDir(from, toDir)
-        else ide.moveFile(from, toDir)
+        try {
+            if (isDirectory) ide.moveDir(from, toDir)
+            else ide.moveFile(from, toDir)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         refresh()
     }
 
     fun copy(from: Path, toDir: Path, isDirectory: Boolean) {
-        if (isDirectory) ide.copyDir(from, toDir)
-        else ide.copyFile(from, toDir)
+        try {
+            if (isDirectory) ide.copyDir(from, toDir)
+            else ide.copyFile(from, toDir)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         refresh()
     }
 
@@ -92,21 +139,63 @@ class FileExplorer(
 
     fun paste(targetDir: Path) {
         clipboard.forEach {
-            if (it.cut) move(it.path, targetDir, it.isDirectory)
-            else copy(it.path, targetDir, it.isDirectory)
+            if (it.isDirectory && targetDir.startsWith(it.path)) {
+                return@forEach
+            }
+
+            if (!it.cut && it.isDirectory) {
+                val targetChild = targetDir.resolve(it.path.fileName)
+                if (Files.exists(targetChild)) {
+                    return@forEach
+                }
+            }
+
+            if (it.cut) {
+                move(it.path, targetDir, it.isDirectory)
+            } else {
+                copy(it.path, targetDir, it.isDirectory)
+            }
         }
         clipboard = emptyList()
         refresh()
     }
 
     fun pasteToSelection() {
-        val first = selected.firstOrNull() ?: return
-        val firstPath = Path.of(first)
+        if (clipboard.isEmpty()) return
 
-        val targetDir: Path = if (isDir(first)) {
-            firstPath
-        } else {
-            firstPath.parent ?: return
+        if (selected.isEmpty()) {
+            val root = currentProject ?: return
+            paste(root)
+            return
+        }
+
+        val selectedList = selected.toList()
+
+        val targetDir: Path = when {
+            selectedList.size == 1 -> {
+                val only = selectedList.first()
+                val onlyPath = Path.of(only)
+                if (isDir(only)) {
+                    onlyPath
+                } else {
+                    onlyPath.parent ?: onlyPath
+                }
+            }
+
+            else -> {
+                val selectedPaths = selectedList.map { Path.of(it) }
+                val parents = selectedPaths.mapNotNull { it.parent }.toSet()
+
+                when {
+                    parents.size == 1 -> parents.first()
+
+                    else -> {
+                        val anchorStr = lastClicked ?: selectedList.first()
+                        val anchorPath = Path.of(anchorStr)
+                        anchorPath.parent ?: anchorPath
+                    }
+                }
+            }
         }
 
         paste(targetDir)
@@ -135,6 +224,7 @@ class FileExplorer(
 
         selected = newSelection
         lastClicked = path
+        selectionAnchor = path
     }
 
     fun deleteSelected() {
