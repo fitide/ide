@@ -152,12 +152,12 @@ public class CdmPluginTest implements Plugin {
 
     @Override
     public List<ExternalFunc> getStandartFuncs() {
-        return List.of();
+        return new ArrayList<>(externalFuncs.values());
     }
 
     @Override
     public List<ExternalVar> getStandartVars() {
-        return List.of();
+        return externalVars;
     }
 
     @Override
