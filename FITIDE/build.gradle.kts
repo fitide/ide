@@ -45,6 +45,8 @@ kotlin {
             implementation("org.jetbrains:annotations:24.1.0")
             implementation("org.jetbrains.compose.ui:ui-graphics")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+            implementation("org.antlr:antlr4-runtime:4.13.2")
+            implementation("com.googlecode.json-simple:json-simple:1.1.1")
         }
         jvmTest.dependencies {
             implementation(project.dependencies.platform("org.junit:junit-bom:5.10.0"))
@@ -59,12 +61,22 @@ tasks.named<Test>("jvmTest") {
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "org.main.ide.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "FITIDE"
             packageVersion = "1.0.0"
+
+            macOS {
+                iconFile.set(project.file("src/jvmMain/resources/icons/fitide.icns"))
+            }
+            windows {
+                iconFile.set(project.file("src/jvmMain/resources/icons/fitide.ico"))
+            }
+            linux {
+                iconFile.set(project.file("src/jvmMain/resources/icons/fitide.png"))
+            }
         }
     }
 }
