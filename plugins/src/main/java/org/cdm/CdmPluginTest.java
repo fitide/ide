@@ -83,11 +83,11 @@ public class CdmPluginTest implements Plugin {
     @Override
     public String getNameOfNode(ParseTree tree) {
         if (tree instanceof TestCdmParser.InstructionWithArgContext) {
-            return "instruction";
+            return tree.getChild(0).getText();
         }
 
         if (tree instanceof TestCdmParser.ArgumentContext) {
-            return "argument";
+            return tree.getText();
         }
 
         if (tree instanceof TerminalNode node) {
@@ -95,6 +95,8 @@ public class CdmPluginTest implements Plugin {
                 return "end";
             }
         }
+
+        return null;
     }
 
     @Override
