@@ -90,7 +90,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
 
         setExternals(plugin);
 
-        for (var file: filesByExtenstion.get(ext)) {
+        for (var file : filesByExtenstion.get(ext)) {
             if (file.isInited) file.setLinks(root);
         }
     }
@@ -174,7 +174,11 @@ public class LinkTreeControllerImpl implements LinkTreeController {
 
     @Override
     public void updateTree(Plugin plugin, List<Pair<Path, ParseTree>> files) {
-        initFiles(plugin, files);
+        String ext = plugin.fileExtension();
+        initFilesCode(plugin, files);
+        for (var file : filesByExtenstion.get(ext)) {
+            if (file.isInited) file.setLinks(root);
+        }
     }
 
     @Override

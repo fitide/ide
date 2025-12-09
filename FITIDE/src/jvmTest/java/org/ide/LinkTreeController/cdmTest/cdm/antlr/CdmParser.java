@@ -1,4 +1,4 @@
-package org.cdm.antlr;// Generated from CdmParser.g4 by ANTLR 4.13.1
+package org.ide.LinkTreeController.cdmTest.cdm.antlr;// Generated from CdmParser.g4 by ANTLR 4.13.1
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;

@@ -1,8 +1,8 @@
-package org.cdm;
+package org.ide.LinkTreeController.cdmTest.cdm;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import org.cdm.antlr.*;
+import org.ide.LinkTreeController.cdmTest.cdm.antlr.*;
 import org.ide.PluginController.PluginInterface.*;
 
 import java.io.File;
