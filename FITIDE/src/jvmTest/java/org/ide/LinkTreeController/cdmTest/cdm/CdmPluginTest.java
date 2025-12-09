@@ -1,14 +1,12 @@
-package org.cdm;
+package org.ide.LinkTreeController.cdmTest.cdm;
 
-import jdk.incubator.vector.VectorOperators;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.cdm.antlr.CdmLexer;
-import org.cdm.antlr.TestCdmParser;
+import org.ide.LinkTreeController.cdmTest.cdm.antlr.*;
 import org.ide.PluginController.PluginInterface.*;
 
 import java.io.File;
@@ -133,7 +131,7 @@ public class CdmPluginTest implements Plugin {
     @Override
     public List<ParseTree> getBodeOfModule(ParseTree module) {
         if (module instanceof TestCdmParser.ProgramContext prog) {
-            return List.of(module.getChild(0), module.getChild(2));
+            return List.of(module.getChild(0), module.getChild(1));
         }
 
         if (module instanceof TestCdmParser.InstructionWithArgContext) {

@@ -12,6 +12,7 @@ import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.ExternalType;
 import org.ide.PluginController.PluginInterface.ExternalVar;
 import org.ide.PluginController.PluginInterface.Plugin;
+import org.ide.PluginController.PluginInterface.Position;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,9 +35,10 @@ public class Func extends AInternalCodeNode {
             AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule));
             args.put(arg.id, arg);
         }
-        this.bodyPosition = new LinkTreePosition(plugin.getPositionOfModuleBody(tree));
-        this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree));
-        this.retTypePosition = new LinkTreePosition(plugin.getTypePositionOfModule(tree));
+        Position pos;
+        if ((pos = plugin.getPositionOfModuleBody(tree)) != null) this.bodyPosition = new LinkTreePosition(pos);
+        if ((pos = plugin.getPositionOfArgsOfFunc(tree)) != null) this.argsPosition = new LinkTreePosition(pos);
+        if ((pos = plugin.getTypePositionOfModule(tree)) != null) this.retTypePosition = new LinkTreePosition(pos);
     }
 
     public Func(String name, List<String> keyWords, List<ExternalVar> externalArgs, ExternalType externalType) {
@@ -246,15 +248,26 @@ public class Func extends AInternalCodeNode {
                 }
             }
             case Declaration -> {
-                this.definition = defs.getOrDefault(this.name, null);
+                this.definition = setDefDec(decs);
                 decs.put(this.name, this);
             }
             case Usage -> {
-                this.definition = defs.getOrDefault(this.name, null);
-                this.declaration = decs.getOrDefault(this.name, null);
+                this.definition = setDefDec(defs);
+                this.declaration = setDefDec(decs);
             }
         }
     }
+
+    private AInternalCodeNode setDefDec(Map<String, AInternalCodeNode> map) {
+        var node = map.getOrDefault(this.name, null);
+        if (node != null && node instanceof Func && checkArgs(node)) {
+            return node;
+        }
+        return null;
+    }
+
+    //TODO: implement
+    private boolean checkArgs(AInternalCodeNode de) { return true;}
 
     @Override
     public void setTypes(Set<String> types) {

@@ -22,8 +22,11 @@ public class Var extends AInternalCodeNode {
 
     public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, String retType) {
         super(plugin, pathToFile, path, tree, name);
-        this.retPosition = new LinkTreePosition(plugin.getTypePositionOfModule(tree));
-        this.retType = retType;
+        var pos = plugin.getTypePositionOfModule(tree);
+        if (pos != null) {
+            this.retPosition = new LinkTreePosition(pos);
+            this.retType = retType;
+        }
     }
 
     public Var(String name, List<String> keyWords, String retType) {
