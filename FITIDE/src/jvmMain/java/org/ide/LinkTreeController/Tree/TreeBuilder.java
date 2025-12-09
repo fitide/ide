@@ -18,8 +18,8 @@ public class TreeBuilder {
         Map<String, AInternalCodeNode> resList = new HashMap<>();
 
         Path nullPath = Paths.get("");
-        for (int it = 0; it < tree.getChildCount(); it++) {
-            AInternalCodeNode node = buildOneChild(plugin, tree.getChild(it), pathToFIle, nullPath);
+        for (var child : plugin.getBodeOfModule(tree)) {
+            AInternalCodeNode node = buildOneChild(plugin, child, pathToFIle, nullPath);
             if (node != null) resList.put(node.id, node);
         }
         return resList;
