@@ -65,6 +65,10 @@ public class CdmPluginTest implements Plugin {
             return new Tag[]{Tag.Func};
         }
 
+        if (tree instanceof TestCdmParser.ArgumentContext) {
+            return new Tag[]{Tag.Var};
+        }
+
         return new Tag[0];
     }
 
