@@ -1,5 +1,6 @@
 package org.cdm.antlr;// Generated from CdmParser.g4 by ANTLR 4.13.1
 
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -227,6 +228,18 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitInstructionLine(CdmParser.InstructionLineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInstructionWithArg(CdmParser.InstructionWithArgContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstructionWithArg(CdmParser.InstructionWithArgContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

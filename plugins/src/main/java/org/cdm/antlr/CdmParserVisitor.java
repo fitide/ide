@@ -124,6 +124,12 @@ public interface CdmParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstructionLine(CdmParser.InstructionLineContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CdmParser#instructionWithArg}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstructionWithArg(CdmParser.InstructionWithArgContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CdmParser#labels_declaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

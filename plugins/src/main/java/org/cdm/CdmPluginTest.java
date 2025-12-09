@@ -1,8 +1,12 @@
 package org.cdm;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
-import org.cdm.antlr.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.cdm.antlr.CdmLexer;
+import org.cdm.antlr.TestCdmParser;
 import org.ide.PluginController.PluginInterface.*;
 
 import java.io.File;
@@ -11,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class CdmPlugin implements Plugin {
+public class CdmPluginTest implements Plugin {
     ExternalType registerType = null;
     ExternalType immediateType = null;
     ExternalType voidType = null;
@@ -19,7 +23,7 @@ public class CdmPlugin implements Plugin {
     Map<String, ExternalFunc> externalFuncs = null;
     List<ExternalConstruction> standardConstructs = null;
 
-    public CdmPlugin() {
+    public CdmPluginTest() {
         immediateType = new ExternalType("immediate");
         registerType = new ExternalType("register");
         voidType = new ExternalType("void");
@@ -50,12 +54,85 @@ public class CdmPlugin implements Plugin {
         CharStream charStream = CharStreams.fromString(fileContent);
         CdmLexer lexer = new CdmLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        CdmParser parser = new CdmParser(tokens);
+        TestCdmParser parser = new TestCdmParser(tokens);
 
         return parser.program();
     }
 
-    //cdm doesn't have standard files
+    @Override
+    public Tag[] getTagsOfNode(ParseTree tree) {
+        if (tree instanceof TestCdmParser.InstructionWithArgContext) {
+            return new Tag[]{Tag.Func};
+        }
+
+        return new Tag[0];
+    }
+
+    @Override
+    public String getNameOfNode(ParseTree node) {
+        return "";
+    }
+
+    @Override
+    public List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement) {
+        return List.of();
+    }
+
+    @Override
+    public Position getBounds(ParseTree node) {
+        var ctx = (ParserRuleContext)node;
+        return new Position(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
+    }
+
+    @Override
+    public Position getNamePositionOfModule(ParseTree node) {
+        return new Position(0, 0, 0, 3); //костыль под add!!
+    }
+
+    @Override
+    public String getType(ParseTree tree) {
+        return "void";
+    }
+
+    @Override
+    public Position getTypePositionOfModule(ParseTree node) {
+        return null;
+    }
+
+    @Override
+    public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
+        return List.of();
+    }
+
+    @Override
+    public List<ParseTree> getArgsOfFunc(ParseTree func) {
+        return List.of(func.getChild(1).getChild(0), func.getChild(1).getChild(2));
+    }
+
+    @Override
+    public List<ParseTree> getConstructionArgs(ParseTree constr) {
+        return List.of();
+    }
+
+    @Override
+    public List<ParseTree> getBodeOfModule(ParseTree module) {
+        if (module instanceof TestCdmParser.ProgramContext prog) {
+            return List.of(module.getChild(0));
+        }
+
+        if (module instanceof TestCdmParser.InstructionWithArgContext) {
+            return List.of();
+        }
+
+
+        return List.of();
+    }
+
+    @Override
+    public List<ParseTree> getFuncsOfClass(ParseTree classNode) {
+        return List.of();
+    }
+
     @Override
     public List<ExternalFile> getStandartFiles() {
         return List.of();
@@ -63,15 +140,14 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ExternalFunc> getStandartFuncs() {
-        return new ArrayList<>(externalFuncs.values());
+        return List.of();
     }
 
     @Override
     public List<ExternalVar> getStandartVars() {
-        return externalVars;
+        return List.of();
     }
 
-    //cdm8 doesn't have any standard classes
     @Override
     public List<ExternalClass> getStandartClasses() {
         return List.of();
@@ -88,142 +164,13 @@ public class CdmPlugin implements Plugin {
     }
 
     @Override
-    public Position getPositionOfArgsOfFunc(ParseTree tree) {
-        if (!(tree instanceof CdmParser.InstructionWithArgContext)) {
-            return null;
-        }
-
-        var count = tree.getChildCount();
-        if (count < 1 || count != externalFuncs.get(tree.getChild(0).getText()).args.size() - 1) {
-            return null;
-        }
-
-        if (count == 1) {
-            var sym = ((TerminalNode) tree.getChild(0)).getSymbol();
-            return new Position(sym.getLine(), sym.getCharPositionInLine(), sym.getLine(), sym.getCharPositionInLine());
-        }
-
-        var symStart = ((TerminalNode) tree.getChild(1)).getSymbol();
-        var symEnd = ((TerminalNode) tree.getChild(count - 1)).getSymbol();
-        return new Position(symStart.getLine(), symStart.getCharPositionInLine(), symEnd.getLine(), symEnd.getCharPositionInLine());
-    }
-
-    @Override
     public Position getPositionOfModuleBody(ParseTree tree) {
-        if (tree instanceof CdmParser.ConditionalContext) {
-            //надо вернуть cdm начало
-        }
-
-        return null;//для функций (кроме случая макросов) поля просто не будет
-    }
-
-    @Override
-    public List<ParseTree> getFuncsOfClass(ParseTree classNode) {
-        return List.of();
-    }
-
-    //нам нужно вернуть объекты, являющиеся **смысловыми** детьми ноды
-    //TODO: переименовать, название не очень
-    @Override
-    public List<ParseTree> getBodeOfModule(ParseTree module) {
-        if (module instanceof CdmParser.Program_nomacrosContext) {
-            return List.of(module.getChild(0));
-        }
-
-        if (module instanceof CdmParser.LineContext) {
-            return List.of(module.getChild(1)); //TODO: костыль
-        }
-
-        if (module instanceof CdmParser.InstructionWithArgContext) {
-            return List.of();
-        }
-
-        if (module instanceof CdmParser.ArgumentContext) {
-            List<ParseTree> ret = new ArrayList<>();
-            for (int i = 0; i < module.getChildCount(); i++) {
-                ret.add(module.getChild(i));
-            }
-            return ret;
-        }
-
-        return List.of();
-    }
-
-    @Override
-    public List<ParseTree> getConstructionArgs(ParseTree constr) {
-        return List.of(); //TODO: сделать
-    }
-
-    @Override
-    public List<ParseTree> getArgsOfFunc(ParseTree func) {
-        if (func instanceof CdmParser.InstructionWithArgContext) {
-            return List.of(func.getChild(1).getChild(0), func.getChild(1).getChild(2)); //только для add!!! костыль
-        }
-
-        return List.of();
-    }
-
-    @Override
-    public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
-        return List.of(); //пока без этого
-    }
-
-    @Override
-    public Position getTypePositionOfModule(ParseTree node) {
         return null;
     }
 
     @Override
-    public String getType(ParseTree tree) {
-        if (tree instanceof CdmParser.InstructionWithArgContext) {
-            return "void";
-        } else if (tree instanceof CdmParser.LabelContext) {
-            return "integer";
-        } else if (tree instanceof CdmParser.RegisterContext) {
-            return "register";
-        }
-
-        return null;
-    }
-
-    @Override
-    public Position getNamePositionOfModule(ParseTree node) {
-        return null;
-    }
-
-    @Override
-    public Position getBounds(ParseTree node) {
-        var ctx = (ParserRuleContext)node;
-        return new Position(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
-    }
-
-    @Override
-    public List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement) {
-        return List.of();
-    }
-
-    //TODO:: доделать для всех нод
-    //нужно для хинтов
-    @Override
-    public String getNameOfNode(ParseTree node) {
-        switch (node) {
-            case CdmParser.ConditionContext ignored -> {
-                return "condition";
-            }
-            case null -> {
-                return null;
-            }
-
-            default -> {
-                return "default";
-            }
-        }
-    }
-
-
-    @Override
-    public Tag[] getTagsOfNode(ParseTree tree) {
-        return new Tag[0];
+    public Position getPositionOfArgsOfFunc(ParseTree tree) {
+        return new Position(0, 0, 0, 4);
     }
 
     private List<ExternalVar> initExternalVars() {
@@ -410,3 +357,4 @@ public class CdmPlugin implements Plugin {
         return ret;
     }
 }
+

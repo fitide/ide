@@ -28,6 +28,7 @@ class LinkTreeControllerSimpleTest {
     static void setUp() {
         controller = new LinkTreeControllerImpl();
         try {
+            //TODO: надо класть в resources
             FEController = new FileExplorerController("C:\\Users\\user\\IdeaProjects\\ide\\FITIDE\\src\\jvmTest\\java\\org\\ide\\LinkTreeController");
         } catch (UnnableToCreateFileException e) {
             System.out.println(e.toString());

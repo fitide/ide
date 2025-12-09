@@ -198,6 +198,16 @@ public interface CdmParserListener extends ParseTreeListener {
 	 */
 	void exitInstructionLine(CdmParser.InstructionLineContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CdmParser#instructionWithArg}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstructionWithArg(CdmParser.InstructionWithArgContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#instructionWithArg}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstructionWithArg(CdmParser.InstructionWithArgContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CdmParser#labels_declaration}.
 	 * @param ctx the parse tree
 	 */

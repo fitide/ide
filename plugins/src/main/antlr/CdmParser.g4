@@ -3,13 +3,17 @@ parser grammar CdmParser;
 options { tokenVocab=CdmLexer; }
 
 @header {
-from base64 import b64decode
+import java.util.Base64;
 }
 
 @members {
-    self.current_file = ''
-    self.current_line = 0
-    self.current_offset = 0
+    private String currentFile = "";
+    private int currentLine = 0;
+    private int currentOffset = 0;
+
+    public String getCurrentFile() { return currentFile; }
+    public int getCurrentLine() { return currentLine; }
+    public int getCurrentOffset() { return currentOffset; }
 }
 
 program_nomacros : NEWLINE* top_line* section* End ;
@@ -39,15 +43,14 @@ code_block
     )*
     ;
 
-line_mark locals [
-source_file = '',
-source_line = 0
-] : LINE_MARK_MARKER  line_number filepath WORD? NEWLINE+
-    {self.current_line = int($line_number.text)}
-    {self.current_file =  b64decode($filepath.text[3:]).decode()}
-    {$source_file = self.current_file}
-    {$source_line = self.current_line}
-    {self.current_offset = $line_number.start.line - self.current_line + 1}
+line_mark
+    : LINE_MARK_MARKER line_number filepath WORD? NEWLINE+
+      {
+        currentLine = Integer.parseInt($line_number.text);
+        String encoded = $filepath.text.substring(3);
+        currentFile = new String(Base64.getDecoder().decode(encoded));
+        currentOffset = $line_number.start.getLine() - currentLine + 1;
+      }
     ;
 
 line_number: DECIMAL_NUMBER;
@@ -60,8 +63,10 @@ top_line: line;
 
 line
     : labels_declaration Ext? NEWLINE+                    # standaloneLabels
-    | labels_declaration? instruction arguments? NEWLINE+ # instructionLine
+    | labels_declaration? instructionWithArg NEWLINE+ # instructionLine
     ;
+
+instructionWithArg: instruction arguments? ;
 
 labels_declaration: labels (COLON | ANGLE_BRACKET) ;
 labels: label (COMMA label)*;

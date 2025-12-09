@@ -110,7 +110,7 @@ public class SimplePlugin implements Plugin {
         String []types = new String[] {"int", "double", "char"};
         List<ExternalType> list = new ArrayList<>();
         for (var type : types) {
-            var extType = new ExternalType();
+            var extType = new ExternalType(type);
             extType.name = type;
             list.add(extType);
         }
