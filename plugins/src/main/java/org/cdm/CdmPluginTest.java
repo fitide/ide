@@ -1,10 +1,12 @@
 package org.cdm;
 
+import jdk.incubator.vector.VectorOperators;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.cdm.antlr.CdmLexer;
 import org.cdm.antlr.TestCdmParser;
 import org.ide.PluginController.PluginInterface.*;
@@ -69,6 +71,12 @@ public class CdmPluginTest implements Plugin {
             return new Tag[]{Tag.Var};
         }
 
+        if (tree instanceof TerminalNode node) {
+            if (node.getSymbol().getType() == TestCdmParser.End) {
+                return new Tag[]{Tag.KeyWord};
+            }
+        }
+
         return new Tag[0];
     }
 
@@ -121,7 +129,7 @@ public class CdmPluginTest implements Plugin {
     @Override
     public List<ParseTree> getBodeOfModule(ParseTree module) {
         if (module instanceof TestCdmParser.ProgramContext prog) {
-            return List.of(module.getChild(0));
+            return List.of(module.getChild(0), module.getChild(2));
         }
 
         if (module instanceof TestCdmParser.InstructionWithArgContext) {
