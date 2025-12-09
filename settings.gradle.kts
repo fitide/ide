@@ -11,6 +11,7 @@ pluginManagement {
             }
         }
         mavenCentral()
+        maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
         gradlePluginPortal()
     }
 }
@@ -33,3 +34,4 @@ plugins {
 }
 
 include(":FITIDE")
+include("plugins")

@@ -7,10 +7,14 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
+repositories {
+    mavenCentral()
+    google()
+    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
+}
+
 kotlin {
-    jvm() {
-        withJava()
-    }
+    jvm()
 
     sourceSets {
         commonMain.dependencies {
@@ -28,7 +32,17 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(compose.components.resources)
+            implementation("org.apache.logging.log4j:log4j-api:2.23.1")
+            implementation(libs.androidx.runtime.desktop)
+            implementation("org.jetbrains.jediterm:jediterm-core:3.57")
+            implementation("org.jetbrains.jediterm:jediterm-ui:3.57")
+            implementation("org.jetbrains.pty4j:pty4j:0.13.11")
+            implementation("org.jetbrains:annotations:24.1.0")
+            implementation("org.jetbrains.compose.ui:ui-graphics")
             implementation("org.apache.logging.log4j:log4j-api:2.23.1")
             implementation("org.antlr:antlr4-runtime:4.13.2")
             runtimeOnly("org.apache.logging.log4j:log4j-core:2.23.1")
@@ -47,11 +61,11 @@ tasks.named<Test>("jvmTest") {
 
 compose.desktop {
     application {
-        mainClass = "org.main.ide.MainKt"
+        mainClass = "MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.main.ide"
+            packageName = "FITIDE"
             packageVersion = "1.0.0"
         }
     }

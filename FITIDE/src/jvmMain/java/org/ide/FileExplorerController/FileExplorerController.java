@@ -32,7 +32,7 @@ public class FileExplorerController {
 
         File recycleBin = new File(pathToDir + File.separator + ".ide" + File.separator + "recycle_bin");
         if (!recycleBin.exists()) {
-            if (!recycleBin.mkdir()) {
+            if (!recycleBin.mkdirs()) {
                 throw new UnnableToCreateFileException("Unable to create file in conf");
             }
         }
@@ -252,9 +252,21 @@ public class FileExplorerController {
 
     private void tryRename(Path pathToFile, String newName) throws UnnableToRenameException {
         File prevFile = new File(pathToFile.toString());
-        File newFile = new File(pathToFile.subpath(0, pathToFile.getNameCount() - 1) + File.separator + newName);
+        File parent = prevFile.getParentFile();
+        if (parent == null) {
+            throw new UnnableToRenameException("No parent directory for: " + pathToFile);
+        }
+
+        File newFile = new File(parent, newName);
+
+        if (newFile.exists()) {
+            throw new UnnableToRenameException("Target already exists: " + newFile.getAbsolutePath());
+        }
+
         if (!prevFile.renameTo(newFile)) {
-            throw new UnnableToRenameException("");
+            throw new UnnableToRenameException(
+                    "Failed to rename " + prevFile.getAbsolutePath() + " to " + newFile.getAbsolutePath()
+            );
         }
     }
 
