@@ -94,7 +94,7 @@ public class Func extends AInternalCodeNode {
 
         CodeStrForColour funcColour = new CodeStrForColour();
         funcColour.pos = this.namePosition;
-        if (definition != null) funcColour.tag = LinkTreeCodeTag.Func;
+        if (codeType != CodeType.Error) funcColour.tag = LinkTreeCodeTag.Func;
         else funcColour.tag = LinkTreeCodeTag.Error;
 
 
@@ -254,6 +254,9 @@ public class Func extends AInternalCodeNode {
             case Usage -> {
                 this.definition = setDefDec(defs);
                 this.declaration = setDefDec(decs);
+                if (this.definition == null && this.declaration == null) {
+                    codeType = CodeType.Error;
+                }
             }
         }
     }
