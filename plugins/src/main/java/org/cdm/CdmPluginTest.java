@@ -81,8 +81,20 @@ public class CdmPluginTest implements Plugin {
     }
 
     @Override
-    public String getNameOfNode(ParseTree node) {
-        return "";
+    public String getNameOfNode(ParseTree tree) {
+        if (tree instanceof TestCdmParser.InstructionWithArgContext) {
+            return "instruction";
+        }
+
+        if (tree instanceof TestCdmParser.ArgumentContext) {
+            return "argument";
+        }
+
+        if (tree instanceof TerminalNode node) {
+            if (node.getSymbol().getType() == TestCdmParser.End) {
+                return "end";
+            }
+        }
     }
 
     @Override
