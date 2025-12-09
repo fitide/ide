@@ -92,8 +92,12 @@ public class CdmPluginTest implements Plugin {
 
     @Override
     public Position getBounds(ParseTree node) {
-        var ctx = (ParserRuleContext)node;
-        return new Position(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
+        if (node instanceof ParserRuleContext ctx) {
+            return new Position(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
+        }
+
+        var sym = ((TerminalNode)node).getSymbol();
+        return new Position(sym.getLine(), sym.getCharPositionInLine(), sym.getLine(), sym.getCharPositionInLine() + sym.getText().length());
     }
 
     @Override
