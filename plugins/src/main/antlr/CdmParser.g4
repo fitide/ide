@@ -16,21 +16,42 @@ import java.util.Base64;
     public int getCurrentOffset() { return currentOffset; }
 }
 
-program_nomacros : NEWLINE* top_line* section* End ;
-
-program : NEWLINE* line_mark+ top_line* section* End ;
+program : NEWLINE* section* End ;
 
 section
-    :  asect_header section_body # absoluteSection
-    |  rsect_header section_body # relocatableSection
-    | tplate_header section_body # templateSection
+    :  asect_header code_block #absoluteSection
+    |  rsect_header code_block #relocatableSection
+    | tplate_header code_block #templateSection
     ;
 
 asect_header  :  Asect number NEWLINE+ ;
 rsect_header  :  Rsect name   NEWLINE+ ;
 tplate_header : Tplate name   NEWLINE+ ;
 
-section_body : code_block ;
+
+//macros
+macro : macro_header macro_body MACRO_FOOTER ;
+macro_header : WS? Macro WS? WORD WS? SLASH WS? DECIMAL_NUMBER WS? NEWLINE ;
+macro_body : ((WS? NEWLINE) | macro_line)*? ;
+
+macro_line :macro_labels (macro_instruction macro_first_param)? (COMMA macro_param)* NEWLINE;
+
+macro_labels : macro_label* WS? ;
+macro_first_param : WS macro_param | ;
+
+macro_label :       (macro_piece | macro_variable+ macro_l_sep | macro_l_sep)* macro_variable* LABEL_END ;
+macro_param :       (macro_piece | macro_variable+ macro_p_sep | macro_p_sep)* macro_variable* ;
+macro_instruction : (macro_piece | macro_variable+ OTHER | OTHER)+ macro_variable* | macro_variable+ ;
+macro_l_sep : OTHER | WS | COMMA ;
+macro_p_sep : OTHER | WS ;
+
+macro_piece : macro_text | macro_param_sign | macro_nonce ;
+macro_variable : QUESTION_MARK macro_piece+ ;
+macro_text : Macro | WORD | DECIMAL_NUMBER | STRING | CHAR ;
+macro_param_sign : DOLLAR_SIGN DECIMAL_NUMBER ;
+macro_nonce : APOSTROPHE;
+
+
 code_block
     :
     ( break_statement
@@ -39,52 +60,33 @@ code_block
     | conditional
     | while_loop
     | until_loop
-    | line_mark
     )*
     ;
 
-line_mark
-    : LINE_MARK_MARKER line_number filepath WORD? NEWLINE+
-      {
-        currentLine = Integer.parseInt($line_number.text);
-        String encoded = $filepath.text.substring(3);
-        currentFile = new String(Base64.getDecoder().decode(encoded));
-        currentOffset = $line_number.start.getLine() - currentLine + 1;
-      }
-    ;
-
-line_number: DECIMAL_NUMBER;
-filepath: BASE64;
-
 break_statement : Break NEWLINE+ ;
 continue_statement : Continue NEWLINE+ ;
-
-top_line: line;
 
 line
     : labels_declaration Ext? NEWLINE+                    # standaloneLabels
     | labels_declaration? instructionWithArg NEWLINE+ # instructionLine
     ;
 
-instructionWithArg: instruction arguments? ;
+instructionWithArg: WORD arguments? ;
 
 labels_declaration: labels (COLON | ANGLE_BRACKET) ;
-labels: label (COMMA label)*;
+labels: name (COMMA name)*;
 arguments : argument (COMMA argument)* ;
 
 conditional : If NEWLINE+ conditions code_block else_clause? Fi NEWLINE+ ;
 conditions : connective_condition* condition NEWLINE+ (Then NEWLINE+)? ;
-connective_condition : condition COMMA conjunction NEWLINE+ ;
-condition : code_block Is branch_mnemonic ;
+connective_condition : condition COMMA WORD NEWLINE+ ;
+condition : code_block Is WORD ;
 else_clause : Else NEWLINE+ code_block ;
 
-branch_mnemonic : WORD ;
-conjunction : WORD ;
 
-while_loop : While NEWLINE+ while_condition Stays branch_mnemonic NEWLINE+ code_block Wend NEWLINE+ ;
-while_condition : code_block ;
+while_loop : While NEWLINE+ code_block Stays WORD NEWLINE+ code_block Wend NEWLINE+ ;
 
-until_loop : Do NEWLINE+ code_block Until branch_mnemonic NEWLINE+ ;
+until_loop : Do NEWLINE+ code_block Until WORD NEWLINE+ ;
 
 argument
     : character
@@ -94,15 +96,12 @@ argument
     | byte_expr
     ;
 
-byte_expr : byte_specifier OPEN_PAREN addr_expr CLOSE_PAREN ;
+byte_expr : name OPEN_PAREN addr_expr CLOSE_PAREN ;
 addr_expr : first_term add_term* ;
 first_term : (PLUS | MINUS)? term ;
 add_term : (PLUS | MINUS) term ;
-term : number | label ;
-byte_specifier : name;
+term : number | name ;
 
-label : name ;
-instruction : WORD ;
 string : STRING ;
 register : REGISTER ;
 character : CHAR ;
