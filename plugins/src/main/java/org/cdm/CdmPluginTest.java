@@ -116,7 +116,24 @@ public class CdmPluginTest implements Plugin {
 
     @Override
     public Position getNamePositionOfModule(ParseTree node) {
-        return new Position(0, 0, 0, 3); //костыль под add!!
+        if (node instanceof TestCdmParser.InstructionWithArgContext) {
+            return new Position(0, 0, 0, 3); //костыль под add!!
+        }
+
+        if (node instanceof TestCdmParser.ArgumentContext arg) {
+            var sym = arg.getStart();
+            var end = arg.getStop();
+            return new Position(sym.getLine(), sym.getCharPositionInLine(), end.getLine(), end.getCharPositionInLine());
+        }
+
+        if (node instanceof TerminalNode) {
+            if (((TerminalNode) node).getSymbol().getType() == TestCdmParser.End) {
+                var sym = ((TerminalNode) node).getSymbol();
+                return new Position(sym.getLine(), sym.getCharPositionInLine(), sym.getLine(), sym.getCharPositionInLine() + 3);
+            }
+        }
+
+        return null;
     }
 
     @Override
