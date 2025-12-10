@@ -4,15 +4,24 @@ import androidx.compose.runtime.MutableState;
 import androidx.compose.ui.text.input.TextFieldValue;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.antlr.v4.runtime.misc.Pair;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.ide.FileExplorerController.Exceptions.UnnableToWriteInFileException;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
+import org.ide.LinkTreeController.LinkTreeController;
+import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
+import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
+import org.ide.PluginController.PluginController;
+import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class IdeController {
 
@@ -20,13 +29,59 @@ public class IdeController {
 
     private FileExplorerController fileExplorer;
     private final EditorController editorController = new EditorController();
+    private PluginController pluginController;
+    private LinkTreeController linkTreeController;
 
     private Path projectRoot;
+    private File config;
+
+    private Plugin languagePlugin;
+
+
+    public void setPluginController(PluginController pluginController) {
+        this.pluginController = pluginController;
+    }
+
+    public void setLinkTreeController(LinkTreeController linkTreeController) {
+        this.linkTreeController = linkTreeController;
+        if (this.fileExplorer != null) {
+            Directory rootCopy = this.fileExplorer.getTreeCopy();
+            this.linkTreeController.setFilesAndDirectoriesData(rootCopy);
+        }
+    }
+
+    public void setLanguagePlugin(Plugin plugin) {
+        this.languagePlugin = plugin;
+    }
+
 
     public void openProject(Path root) throws Exception {
         logger.info("Opening project: " + root);
         this.projectRoot = root;
         this.fileExplorer = new FileExplorerController(root.toString(), logger);
+        this.config = fileExplorer.getConfig();
+
+        loadPluginsForProject();
+
+        if (linkTreeController != null) {
+            Directory rootCopy = fileExplorer.getTreeCopy();
+            linkTreeController.setFilesAndDirectoriesData(rootCopy);
+        }
+    }
+
+    private void loadPluginsForProject() {
+        try {
+            Path confDir = projectRoot.resolve("conf");
+            this.pluginController = new PluginController(projectRoot.toString());
+
+            logger.info("Plugins loaded from: " + confDir);
+        } catch (Exception e) {
+            logger.error("Failed to load plugins for project: " + projectRoot, e);
+        }
+    }
+
+    public File getConfig() {
+        return config;
     }
 
     public Directory getFileTree() {
@@ -36,47 +91,61 @@ public class IdeController {
 
     public Directory refreshTree() {
         if (fileExplorer == null) return null;
-        return fileExplorer.updateTree(projectRoot.toString());
+        Directory updated = fileExplorer.updateTree(projectRoot.toString());
+        if (linkTreeController != null) {
+            linkTreeController.setFilesAndDirectoriesData(updated);
+        }
+        return updated;
     }
 
     public void createFile(Path dir, String name) throws Exception {
         fileExplorer.createFile(dir, name);
+        refreshTree();
     }
 
     public void createDir(Path dir, String name) throws Exception {
         fileExplorer.createDir(dir, name);
+        refreshTree();
     }
 
     public void deleteFile(Path path) throws Exception {
         fileExplorer.deleteFile(path);
+        refreshTree();
     }
 
     public void deleteDir(Path path) throws Exception {
         fileExplorer.deleteDirectory(path);
+        refreshTree();
     }
 
     public void renameFile(Path path, String newName) throws Exception {
         fileExplorer.renameFile(path, newName);
+        refreshTree();
     }
 
     public void renameDir(Path path, String newName) throws Exception {
         fileExplorer.renameDirectory(path, newName);
+        refreshTree();
     }
 
     public void moveFile(Path from, Path toDir) throws Exception {
         fileExplorer.moveFile(from, toDir);
+        refreshTree();
     }
 
     public void moveDir(Path from, Path toDir) throws Exception {
         fileExplorer.moveDir(from, toDir);
+        refreshTree();
     }
 
     public void copyFile(Path from, Path toDir) throws Exception {
         fileExplorer.copyFile(from, toDir);
+        refreshTree();
     }
 
     public void copyDir(Path from, Path toDir) throws Exception {
         fileExplorer.copyDir(from, toDir);
+        refreshTree();
     }
 
 
@@ -86,6 +155,8 @@ public class IdeController {
 
         List<String> list = fileExplorer.openFile(path);
         editorController.openFile(path.toString(), list);
+
+        analyzeAndUpdateLinkTree(path);
 
         return String.join("\n", list);
     }
@@ -104,9 +175,9 @@ public class IdeController {
         fileExplorer.saveChangesToFile(path, lines);
     }
 
-    //TODO: error handling!!!
     public void save() throws Exception {
         String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return;
         String text = editorController.saveFile(currentFile);
         List<String> lines = Arrays.asList(text.split("\n"));
         fileExplorer.saveChangesToFile(Paths.get(currentFile), lines);
@@ -114,11 +185,13 @@ public class IdeController {
 
     public void redo() {
         String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return;
         editorController.redo(currentFile);
     }
 
     public void undo() {
         String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return;
         editorController.undo(currentFile);
     }
 
@@ -154,5 +227,79 @@ public class IdeController {
 
     public void onTextChanged(TextFieldValue newValue) {
         editorController.onTextChanged(newValue);
+
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile != null) {
+            analyzeAndUpdateLinkTree(Paths.get(currentFile));
+        }
+    }
+
+    public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException {
+        this.config = fileExplorer.applyConfig(config);
+    }
+
+    public List<CodeStrForColour> getSyntaxHighlightingForCurrentFile() {
+        if (linkTreeController == null) {
+            return Collections.emptyList();
+        }
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) {
+            return Collections.emptyList();
+        }
+        Path path = Paths.get(currentFile);
+        try {
+            return linkTreeController.getSyntaxHighlightning(path);
+        } catch (Exception e) {
+            logger.error("Failed to get syntax highlighting for " + path, e);
+            return Collections.emptyList();
+        }
+    }
+
+    public List<HintNode> getHintsForCurrentFile(String prefix) {
+        if (linkTreeController == null) {
+            return Collections.emptyList();
+        }
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) {
+            return Collections.emptyList();
+        }
+        Path path = Paths.get(currentFile);
+        try {
+            return new ArrayList<>(linkTreeController.getHintsForFile(path, prefix));
+        } catch (Exception e) {
+            logger.error("Failed to get hints for " + path, e);
+            return Collections.emptyList();
+        }
+    }
+
+
+    private void analyzeAndUpdateLinkTree(Path path) {
+        if (pluginController == null || linkTreeController == null || languagePlugin == null) {
+            return;
+        }
+
+        try {
+            String lang = detectLang(path);
+            if (lang == null || lang.isEmpty()) {
+                return;
+            }
+
+            File file = path.toFile();
+            ParseTree tree = pluginController.getTree(lang, file);
+
+            List<Pair<Path, ParseTree>> files = List.of(new Pair<>(path, tree));
+            linkTreeController.updateTree(languagePlugin, files);
+        } catch (Exception e) {
+            logger.error("Failed to analyze file " + path, e);
+        }
+    }
+
+    private String detectLang(Path path) {
+        String fileName = path.getFileName().toString();
+        int dot = fileName.lastIndexOf('.');
+        if (dot == -1 || dot == fileName.length() - 1) {
+            return "";
+        }
+        return fileName.substring(dot + 1);
     }
 }

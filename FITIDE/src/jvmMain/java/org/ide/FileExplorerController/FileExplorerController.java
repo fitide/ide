@@ -17,6 +17,7 @@ public class FileExplorerController {
     private Directory workingDir;
     private final Logger logger;
     private final File recycleBin;
+    private File config;
     private int binIt;
 
     public FileExplorerController(String pathToDir) throws UnnableToCreateFileException {
@@ -38,6 +39,19 @@ public class FileExplorerController {
         }
         this.recycleBin = recycleBin;
 
+        File config = new File(pathToDir + File.separator + ".ide" + File.separator + "config.json");
+        if (!config.exists()) {
+            try {
+                config.createNewFile();
+                BufferedWriter writer = new BufferedWriter(new FileWriter(config));
+                writer.write("{}");
+                writer.close();
+            } catch (IOException e) {
+                throw new UnnableToCreateFileException("Unable to create config file");
+            }
+        }
+        this.config = config;
+
         for (File bin : Objects.requireNonNull(recycleBin.listFiles())) {
             try {
                 int binIt = Integer.parseInt(bin.getName());
@@ -48,6 +62,14 @@ public class FileExplorerController {
         }
     }
 
+    public File getConfig() {
+        return config;
+    }
+
+    public File applyConfig(List<String> jsonLines) throws UnnableToWriteInFileException, IOException {
+        saveChangesToFile(config.toPath(), jsonLines);
+        return config;
+    }
     Directory getFileTree() {
         return workingDir;
     }

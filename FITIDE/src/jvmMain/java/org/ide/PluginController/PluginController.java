@@ -14,10 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class PluginController {
     private final Map<String, Lang> langs;
@@ -30,7 +27,7 @@ public class PluginController {
 
         this.IDEConfigDir = new File(IDEDir + File.separator + "conf");
         if (!IDEConfigDir.exists()) {
-            if (IDEConfigDir.mkdir()) throw new RuntimeException("Unable to create config");
+            if (!IDEConfigDir.mkdir()) throw new RuntimeException("Unable to create config");
         }
         langs = new HashMap<>();
         List<Lang> langsList = PluginsLoader.loadLangsFromConfig(Paths.get(IDEConfigDir.getAbsolutePath(), "plugins.json"));
@@ -55,8 +52,6 @@ public class PluginController {
             throw new DirectoryForLangAlreadyExistException(newLangPath.getFileName().toString() + " already exist");
 
         copyDir(pathToPluginDir, newLangPath);
-
-
         Lang lang = new Lang(langStr, newLangPath, extensions);
     }
 
