@@ -195,4 +195,12 @@ public abstract class CommonFileNode {
 
         return null;
     }
+
+    public void updateFilePath(Path curPath, Path pathToNewDir) {
+        CommonFileNode file = getFileNode(pathToFile);
+        if (!(file instanceof Directory)) throw new RuntimeException("path to dir leads to another file");
+        getFileNode(curPath).updateFilePath((Directory) file);
+    }
+
+    public abstract void updateFilePath(Directory newDir);
 }

@@ -223,6 +223,13 @@ public class CommonFile extends FileNode {
         codeNodes = TreeBuilder.build(plugin, tree, pathToFile);
     }
 
+    @Override
+    public void updateFilePath(Directory newDir) {
+        this.pathToFile = Paths.get(newDir.pathToFile.toString(), this.name);
+        for (var node : codeNodes.values()) {
+            node.updateFilePath(pathToFile);
+        }
+    }
 
 
     private Pair<List<AInternalCodeNode>, List<AInternalCodeNode>> getDecsAndDefs() {
