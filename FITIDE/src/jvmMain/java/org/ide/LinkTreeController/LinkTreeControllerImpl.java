@@ -187,7 +187,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     @Override
-    public void updateFilePath(Path pathToFileToChange, Path pathToDirToInsert) {
-        root.updateFilePath(pathToFileToChange, pathToDirToInsert);
+    public void updateFilePath(Path pathToDirWithFileToChange, Path pathToDirToInsert, String fileName) {
+        root.updateFilePath(pathToDirWithFileToChange, pathToDirToInsert, fileName);
     }
 }

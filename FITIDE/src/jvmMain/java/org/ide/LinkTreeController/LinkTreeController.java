@@ -26,5 +26,5 @@ public interface LinkTreeController {
 
     ARoot getTree();
 
-    void updateFilePath(Path pathToFileToChange, Path pathToDirToInsert);
+    void updateFilePath(Path pathToDirWithFileToChange, Path pathToDirToInsert, String fileName);
 }
