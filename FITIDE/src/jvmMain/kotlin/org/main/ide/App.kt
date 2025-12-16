@@ -3,7 +3,11 @@ package org.main.ide
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,16 +22,22 @@ import org.main.ide.buttonbar.ButtonBarHorizontal
 import org.main.ide.buttonbar.ButtonBarVertical
 import org.main.ide.config.Config
 import org.main.ide.config.ConfigView
+import org.main.ide.config.parseConfigsJson
 import org.main.ide.editor.EditorView
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.fileexplorer.FileExplorerView
 import org.main.ide.terminal.Terminal
 import org.main.ide.uistate.UIColors.Background
+import org.main.ide.uistate.UIColors.ButtonBg
+import org.main.ide.uistate.UIColors.ButtonText
 import org.main.ide.uistate.UIColors.DividerColor
 import org.main.ide.uistate.UIColors.EditorBg
 import org.main.ide.uistate.UIColors.Panel
 import org.main.ide.uistate.UIColors.PanelElevated
+import org.main.ide.uistate.UIColors.TextPrimary
+import org.main.ide.uistate.UIColors.TextSecondary
 import org.main.ide.uistate.UIState
+import java.io.File
 
 @Composable
 private fun RoundedPanel(
@@ -74,7 +84,29 @@ fun App(
     uiState: UIState,
 ) {
     var isConfigOpen by remember { mutableStateOf(false) }
-    val config = remember { Config() }
+    var showNoProjectDialog by remember { mutableStateOf(false) }
+    var configs by remember { mutableStateOf(listOf(Config())) }
+    var selectedConfigIndex by remember { mutableStateOf(0) }
+
+    LaunchedEffect(isConfigOpen) {
+        if (isConfigOpen) {
+            val file: File? = ideController.config
+            if (file != null && file.exists() && file.length() > 0) {
+                runCatching {
+                    val json = file.readText()
+                    val parsed = parseConfigsJson(json)
+                    configs = parsed
+                    selectedConfigIndex = 0.coerceAtMost(parsed.lastIndex)
+                }.onFailure {
+                    configs = listOf(Config())
+                    selectedConfigIndex = 0
+                }
+            } else {
+                configs = listOf(Config())
+                selectedConfigIndex = 0
+            }
+        }
+    }
 
     MaterialTheme {
         Box(
@@ -91,7 +123,13 @@ fun App(
                         .padding(horizontal = 12.dp)
                 ) {
                     ButtonBarHorizontal(
-                        onConfigClick = { isConfigOpen = true }
+                        onConfigClick = {
+                            if (fileExplorer.currentProject == null) {
+                                showNoProjectDialog = true
+                            } else {
+                                isConfigOpen = true
+                            }
+                        }
                     )
                 }
 
@@ -172,8 +210,54 @@ fun App(
                     ),
                     resizable = false
                 ) {
-                    ConfigView(config = config)
+                    ConfigView(
+                        configs = configs,
+                        selectedIndex = selectedConfigIndex,
+                        onSelectedChange = { newIndex ->
+                            selectedConfigIndex = newIndex
+                        },
+                        ideController = ideController,
+                        onCancel = {
+                            isConfigOpen = false
+                        }
+                    )
                 }
+            }
+
+            if (showNoProjectDialog) {
+                AlertDialog(
+                    onDismissRequest = { showNoProjectDialog = false },
+                    containerColor = PanelElevated,
+                    titleContentColor = TextPrimary,
+                    textContentColor = TextSecondary,
+                    shape = RoundedCornerShape(10.dp),
+                    title = {
+                        Text(
+                            text = "No project opened",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = TextPrimary
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "Open a directory first to use Run/Build configurations.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { showNoProjectDialog = false },
+                            colors = ButtonDefaults.textButtonColors(
+                                containerColor = ButtonBg,
+                                contentColor = ButtonText
+                            )
+                        ) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {}
+                )
             }
         }
     }

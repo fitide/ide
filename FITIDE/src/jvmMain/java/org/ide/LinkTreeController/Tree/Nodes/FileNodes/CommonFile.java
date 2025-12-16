@@ -283,6 +283,8 @@ public class CommonFile extends FileNode {
 
         Map<String, AInternalCodeNode> defs = new HashMap();
         Map<String, AInternalCodeNode> decs = new HashMap<>();
+        root.getStandartDecs(decs);
+
         for (var file : files.values()) {
             defs.putAll(file.defInFile);
             decs.putAll(file.decInFile);

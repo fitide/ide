@@ -9,6 +9,7 @@ import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Tag;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -21,12 +22,17 @@ public class Lang {
     public final HashMap<String, LangConf> confs;
 
     public Lang(String language, Path pathToDirWithPlugin, String[] filesExtensions)
-            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NotInstanceOfPluginException {
+            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
+            InstantiationException, IllegalAccessException, NotInstanceOfPluginException, IOException {
         this.language = language;
         this.pathToDirWithPlugin = pathToDirWithPlugin;
         this.plugin = PluginsLoader.loadPlugin(language, pathToDirWithPlugin);
         this.filesExtensions = filesExtensions;
         confs = new HashMap<>();
+    }
+
+    public Plugin getPlugin() {
+        return plugin;
     }
 
     public void addConf(String name, Path pathToCompile, String[] compileArgs) throws ConfAlreadyExistException {

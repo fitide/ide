@@ -198,6 +198,12 @@ public class Root extends ARoot {
     }
 
     @Override
+    public void getStandartDecs(Map<String, AInternalCodeNode> decs) {
+        decs.putAll(externalFunctions);
+        decs.putAll(externalVars);
+    }
+
+    @Override
     public void getHints(Path pathToFile, String prefix, Set<HintNode> listOfHints) throws BadPathException {
 
         for(Construction construction : externalConstrs.values()) {

@@ -26,7 +26,7 @@ public abstract class AInternalCodeNode {
     public AInternalCodeNode definition = null;
     public AInternalCodeNode declaration = null;
     public Map<String, AInternalCodeNode> childs = new HashMap<>();
-    private boolean initedForInfo = false;
+    public boolean initedForInfo = false;
 
     public String name;
     public LinkTreePosition namePosition = new LinkTreePosition();

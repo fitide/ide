@@ -5,6 +5,7 @@ import org.ide.PluginController.Exceptions.*;
 import org.ide.PluginController.LangsInfo.Lang;
 import org.ide.PluginController.PluginControllerConfigurator.PluginsLoader;
 import org.ide.PluginController.PluginControllerConfigurator.PluginsSaver;
+import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Tag;
 import org.json.simple.parser.ParseException;
 
@@ -14,10 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class PluginController {
     private final Map<String, Lang> langs;
@@ -30,7 +28,7 @@ public class PluginController {
 
         this.IDEConfigDir = new File(IDEDir + File.separator + "conf");
         if (!IDEConfigDir.exists()) {
-            if (IDEConfigDir.mkdir()) throw new RuntimeException("Unable to create config");
+            if (!IDEConfigDir.mkdir()) throw new RuntimeException("Unable to create config");
         }
         langs = new HashMap<>();
         List<Lang> langsList = PluginsLoader.loadLangsFromConfig(Paths.get(IDEConfigDir.getAbsolutePath(), "plugins.json"));
@@ -55,8 +53,6 @@ public class PluginController {
             throw new DirectoryForLangAlreadyExistException(newLangPath.getFileName().toString() + " already exist");
 
         copyDir(pathToPluginDir, newLangPath);
-
-
         Lang lang = new Lang(langStr, newLangPath, extensions);
     }
 
@@ -181,6 +177,25 @@ public class PluginController {
         checkLang(lang);
 
         langs.get(lang).deleteConfig(confName);
+    }
+
+    public Plugin getPluginByExtension(String extension) {
+        if (!extension.startsWith(".")) {
+            extension = "." + extension;
+        }
+
+        String finalExtension = extension;
+        for (Lang lang : langs.values()) {
+            for (String ext : lang.filesExtensions) {
+                if (ext.equals(finalExtension)) {
+                    System.out.println("[DEBUG] Found plugin for extension " + finalExtension + ": " + lang.language);
+                    return lang.getPlugin();
+                }
+            }
+        }
+
+        System.out.println("[DEBUG] No plugin found for extension: " + finalExtension);
+        return null;
     }
 
     private void checkLang(String lang) throws LangDoesntExistException {

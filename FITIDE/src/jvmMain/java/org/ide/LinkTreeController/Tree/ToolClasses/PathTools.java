@@ -6,8 +6,11 @@ import java.nio.file.Paths;
 public class PathTools {
 
     public static String getRootStr(Path path) {
-        if (path.getNameCount() > 1) return path.getRoot().toString();
-        else return path.getFileName().toString();
+        Path root = path.getRoot();
+        if (root == null) {
+            return "/";
+        }
+        return root.toString();
     }
 
     public static Path deleteRoot(Path path) {

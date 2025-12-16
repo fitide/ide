@@ -137,7 +137,9 @@ public abstract class CommonFileNode {
     public List<CodeStrForColour> getSyntaxHughlighting(Path pathToFile) {
         CommonFileNode node = getFileNode(pathToFile);
 
-        if (node != null && node instanceof CommonFile) return ((CommonFile) node).getSyntaxHughlighting(pathToFile.getFileName());
+        if (node != null && node instanceof CommonFile) {
+            return ((CommonFile) node).getSyntaxHughlighting(null);
+        }
         return new ArrayList<>();
     }
 
@@ -181,16 +183,36 @@ public abstract class CommonFileNode {
     }
 
     public CommonFileNode getFileNode(Path pathToFile) {
-        if (pathToFile.getNameCount() == 1) {
-            if (pathToFile.toString().equals(this.name))
-                return this;
-            else
+        if (pathToFile == null || pathToFile.getNameCount() == 0) {
+            return null;
+        }
+        if (this.pathToFile != null && pathToFile.isAbsolute()) {
+            try {
+                pathToFile = this.pathToFile.relativize(pathToFile);
+            } catch (IllegalArgumentException e) {
                 return null;
+            }
+
+            if (pathToFile.getNameCount() == 0) {
+                return this;
+            }
         }
 
-        String nextName = PathTools.getRootStr(PathTools.deleteRoot(pathToFile));
-        if (this.childs.containsKey(nextName)) {
-            return childs.get(nextName).getFileNode(PathTools.deleteRoot(pathToFile));
+        String firstName = pathToFile.getName(0).toString();
+        if (pathToFile.getNameCount() == 1) {
+            if (firstName.equals(this.name)) {
+                return this;
+            }
+            if (this.childs.containsKey(firstName)) {
+                var child = this.childs.get(firstName);
+                return child;
+            }
+            return null;
+        }
+
+        if (this.childs.containsKey(firstName)) {
+            Path remainingPath = pathToFile.subpath(1, pathToFile.getNameCount());
+            return this.childs.get(firstName).getFileNode(remainingPath);
         }
 
         return null;

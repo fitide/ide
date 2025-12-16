@@ -81,4 +81,6 @@ public abstract class ARoot extends CommonFileNode {
     public Map<String, Func> getExternalFunctions() {
         return externalFunctions;
     }
+
+    public abstract void getStandartDecs(Map<String, AInternalCodeNode> decs);
 }

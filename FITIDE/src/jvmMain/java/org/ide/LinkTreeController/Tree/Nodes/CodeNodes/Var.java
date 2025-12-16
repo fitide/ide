@@ -2,6 +2,7 @@ package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
@@ -22,8 +23,11 @@ public class Var extends AInternalCodeNode {
 
     public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, String retType) {
         super(plugin, pathToFile, path, tree, name);
-        this.retPosition = new LinkTreePosition(plugin.getTypePositionOfModule(tree));
-        this.retType = retType;
+        var pos = plugin.getTypePositionOfModule(tree);
+        if (pos != null) {
+            this.retPosition = new LinkTreePosition(pos);
+            this.retType = retType;
+        }
     }
 
     public Var(String name, List<String> keyWords, String retType) {
@@ -55,7 +59,8 @@ public class Var extends AInternalCodeNode {
 
         CodeStrForColour code = new CodeStrForColour();
         code.pos = this.namePosition.clone();
-        code.tag = LinkTreeCodeTag.Var;
+        if (codeType != CodeType.Error) code.tag = LinkTreeCodeTag.Var;
+        else code.tag = LinkTreeCodeTag.Error;
         list.add(code);
 
 
@@ -91,10 +96,18 @@ public class Var extends AInternalCodeNode {
                 decs.put(this.name, this);
             }
             case Usage -> {
-                this.definition = defs.getOrDefault(this.name, null);
-                this.declaration = decs.getOrDefault(this.name, null);
+                this.definition = validatePointer(defs.getOrDefault(this.name, null));
+                this.declaration = validatePointer(decs.getOrDefault(this.name, null));
+                if (definition == null && declaration == null) {
+                    codeType = CodeType.Error;
+                }
             }
         }
+    }
+
+    private AInternalCodeNode validatePointer(AInternalCodeNode node) {
+        if (node instanceof Var) return node;
+        return null;
     }
 
     @Override
