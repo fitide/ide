@@ -349,4 +349,27 @@ public class IdeController {
         }
         return fileName.substring(dot + 1);
     }
+
+    public String getCompileString(List<Path> pathsToFiles, String confName) throws Exception {
+        StringBuilder compileStringBuilder = new StringBuilder();
+
+        if (pathsToFiles.isEmpty()) throw new RuntimeException("No files to compile");
+        var ext = detectLang(pathsToFiles.getFirst());
+        var lang = pluginController.getLangNameByExtension(ext);
+        var confs = pluginController.getLangsConfs(lang);
+        if (confs.isEmpty()) throw new Exception("No conf to compile");
+        if (confs.containsKey(confName)) {
+            compileStringBuilder.append(pluginController.getCompileString(lang, confName));
+        } else {
+            compileStringBuilder.append(pluginController.getCompileString(lang, confs.values().iterator().next().name));
+        }
+
+        // TODO: add build controller string
+
+        for (var path : pathsToFiles) {
+            compileStringBuilder.append(path.toString()).append(" ");
+        }
+
+        return compileStringBuilder.toString();
+    }
 }

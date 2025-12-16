@@ -3,6 +3,7 @@ package org.ide.PluginController;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.PluginController.Exceptions.*;
 import org.ide.PluginController.LangsInfo.Lang;
+import org.ide.PluginController.LangsInfo.LangConf;
 import org.ide.PluginController.PluginControllerConfigurator.PluginsLoader;
 import org.ide.PluginController.PluginControllerConfigurator.PluginsSaver;
 import org.ide.PluginController.PluginInterface.Plugin;
@@ -196,6 +197,30 @@ public class PluginController {
 
         System.out.println("[DEBUG] No plugin found for extension: " + finalExtension);
         return null;
+    }
+
+    public String getLangNameByExtension(String extension) {
+        if (!extension.startsWith(".")) {
+            extension = "." + extension;
+        }
+
+        for (Lang lang : langs.values()) {
+            for (String ext : lang.filesExtensions) {
+                if (ext.equals(extension)) {
+                    return lang.language;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Map<String, LangConf> getLangsConfs(String lang) {
+        if (!langs.containsKey(lang)) {
+            return Map.of();
+        }
+
+        return langs.get(lang).confs;
     }
 
     private void checkLang(String lang) throws LangDoesntExistException {
