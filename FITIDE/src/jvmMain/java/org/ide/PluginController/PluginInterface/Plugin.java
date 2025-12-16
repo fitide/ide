@@ -35,7 +35,7 @@ public interface Plugin {
 
     List<ParseTree> getConstructionArgs(ParseTree constr);
     //module is func/while/for/if etc
-    List<ParseTree> getBodeOfModule(ParseTree module);
+    List<ParseTree> getChildsOfNode(ParseTree module);
 
     List<ParseTree> getFuncsOfClass(ParseTree classNode);
 

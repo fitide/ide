@@ -27,7 +27,7 @@ public class TreeBuilder {
 
     public static Map<String, AInternalCodeNode> getChilds(Plugin plugin, ParseTree parseTree, Path pathToFile, Path pathToNode) {
         Map<String, AInternalCodeNode> res = new HashMap<>();
-        List<ParseTree> childs = plugin.getBodeOfModule(parseTree);
+        List<ParseTree> childs = plugin.getChildsOfNode(parseTree);
         for (ParseTree tree : childs) {
             AInternalCodeNode node = buildOneChild(plugin, tree, pathToFile, pathToNode);
             if (node != null) res.put(node.id, node);

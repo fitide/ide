@@ -16,12 +16,13 @@ import java.util.Base64;
     public int getCurrentOffset() { return currentOffset; }
 }
 
-program : NEWLINE* section* End ;
+program : NEWLINE* (section NEWLINE*)* End ;
 
 section
     :  asect_header code_block #absoluteSection
     |  rsect_header code_block #relocatableSection
     | tplate_header code_block #templateSection
+    | macro  #macroSection
     ;
 
 asect_header  :  Asect number NEWLINE+ ;
@@ -60,6 +61,7 @@ code_block
     | conditional
     | while_loop
     | until_loop
+    | macro
     )*
     ;
 

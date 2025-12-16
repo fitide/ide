@@ -17,18 +17,6 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterProgram_nomacros(CdmParser.Program_nomacrosContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitProgram_nomacros(CdmParser.Program_nomacrosContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterProgram(CdmParser.ProgramContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -77,6 +65,18 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterMacroSection(CdmParser.MacroSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacroSection(CdmParser.MacroSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAsect_header(CdmParser.Asect_headerContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -113,13 +113,193 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSection_body(CdmParser.Section_bodyContext ctx) { }
+	@Override public void enterMacro(CdmParser.MacroContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSection_body(CdmParser.Section_bodyContext ctx) { }
+	@Override public void exitMacro(CdmParser.MacroContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_header(CdmParser.Macro_headerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_header(CdmParser.Macro_headerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_body(CdmParser.Macro_bodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_body(CdmParser.Macro_bodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_line(CdmParser.Macro_lineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_line(CdmParser.Macro_lineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_labels(CdmParser.Macro_labelsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_labels(CdmParser.Macro_labelsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_first_param(CdmParser.Macro_first_paramContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_first_param(CdmParser.Macro_first_paramContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_label(CdmParser.Macro_labelContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_label(CdmParser.Macro_labelContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_param(CdmParser.Macro_paramContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_param(CdmParser.Macro_paramContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_instruction(CdmParser.Macro_instructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_instruction(CdmParser.Macro_instructionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_l_sep(CdmParser.Macro_l_sepContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_l_sep(CdmParser.Macro_l_sepContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_p_sep(CdmParser.Macro_p_sepContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_p_sep(CdmParser.Macro_p_sepContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_piece(CdmParser.Macro_pieceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_piece(CdmParser.Macro_pieceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_variable(CdmParser.Macro_variableContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_variable(CdmParser.Macro_variableContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_text(CdmParser.Macro_textContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_text(CdmParser.Macro_textContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_param_sign(CdmParser.Macro_param_signContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_param_sign(CdmParser.Macro_param_signContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMacro_nonce(CdmParser.Macro_nonceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMacro_nonce(CdmParser.Macro_nonceContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -132,42 +312,6 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCode_block(CdmParser.Code_blockContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLine_mark(CdmParser.Line_markContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLine_mark(CdmParser.Line_markContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLine_number(CdmParser.Line_numberContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLine_number(CdmParser.Line_numberContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFilepath(CdmParser.FilepathContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFilepath(CdmParser.FilepathContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -192,18 +336,6 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitContinue_statement(CdmParser.Continue_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTop_line(CdmParser.Top_lineContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTop_line(CdmParser.Top_lineContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -341,30 +473,6 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterConjunction(CdmParser.ConjunctionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConjunction(CdmParser.ConjunctionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterWhile_loop(CdmParser.While_loopContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -372,18 +480,6 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitWhile_loop(CdmParser.While_loopContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterWhile_condition(CdmParser.While_conditionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitWhile_condition(CdmParser.While_conditionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -468,42 +564,6 @@ public class CdmParserBaseListener implements CdmParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTerm(CdmParser.TermContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterByte_specifier(CdmParser.Byte_specifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitByte_specifier(CdmParser.Byte_specifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLabel(CdmParser.LabelContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLabel(CdmParser.LabelContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterInstruction(CdmParser.InstructionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInstruction(CdmParser.InstructionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -8,16 +8,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface CdmParserListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link CdmParser#program_nomacros}.
-	 * @param ctx the parse tree
-	 */
-	void enterProgram_nomacros(CdmParser.Program_nomacrosContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#program_nomacros}.
-	 * @param ctx the parse tree
-	 */
-	void exitProgram_nomacros(CdmParser.Program_nomacrosContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link CdmParser#program}.
 	 * @param ctx the parse tree
 	 */
@@ -64,6 +54,18 @@ public interface CdmParserListener extends ParseTreeListener {
 	 */
 	void exitTemplateSection(CdmParser.TemplateSectionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code macroSection}
+	 * labeled alternative in {@link CdmParser#section}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacroSection(CdmParser.MacroSectionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code macroSection}
+	 * labeled alternative in {@link CdmParser#section}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacroSection(CdmParser.MacroSectionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CdmParser#asect_header}.
 	 * @param ctx the parse tree
 	 */
@@ -94,15 +96,165 @@ public interface CdmParserListener extends ParseTreeListener {
 	 */
 	void exitTplate_header(CdmParser.Tplate_headerContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link CdmParser#section_body}.
+	 * Enter a parse tree produced by {@link CdmParser#macro}.
 	 * @param ctx the parse tree
 	 */
-	void enterSection_body(CdmParser.Section_bodyContext ctx);
+	void enterMacro(CdmParser.MacroContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link CdmParser#section_body}.
+	 * Exit a parse tree produced by {@link CdmParser#macro}.
 	 * @param ctx the parse tree
 	 */
-	void exitSection_body(CdmParser.Section_bodyContext ctx);
+	void exitMacro(CdmParser.MacroContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_header}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_header(CdmParser.Macro_headerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_header}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_header(CdmParser.Macro_headerContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_body}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_body(CdmParser.Macro_bodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_body}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_body(CdmParser.Macro_bodyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_line}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_line(CdmParser.Macro_lineContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_line}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_line(CdmParser.Macro_lineContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_labels}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_labels(CdmParser.Macro_labelsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_labels}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_labels(CdmParser.Macro_labelsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_first_param}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_first_param(CdmParser.Macro_first_paramContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_first_param}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_first_param(CdmParser.Macro_first_paramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_label}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_label(CdmParser.Macro_labelContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_label}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_label(CdmParser.Macro_labelContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_param}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_param(CdmParser.Macro_paramContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_param}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_param(CdmParser.Macro_paramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_instruction}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_instruction(CdmParser.Macro_instructionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_instruction}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_instruction(CdmParser.Macro_instructionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_l_sep}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_l_sep(CdmParser.Macro_l_sepContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_l_sep}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_l_sep(CdmParser.Macro_l_sepContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_p_sep}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_p_sep(CdmParser.Macro_p_sepContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_p_sep}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_p_sep(CdmParser.Macro_p_sepContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_piece}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_piece(CdmParser.Macro_pieceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_piece}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_piece(CdmParser.Macro_pieceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_variable}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_variable(CdmParser.Macro_variableContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_variable}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_variable(CdmParser.Macro_variableContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_text}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_text(CdmParser.Macro_textContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_text}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_text(CdmParser.Macro_textContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_param_sign}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_param_sign(CdmParser.Macro_param_signContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_param_sign}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_param_sign(CdmParser.Macro_param_signContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CdmParser#macro_nonce}.
+	 * @param ctx the parse tree
+	 */
+	void enterMacro_nonce(CdmParser.Macro_nonceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#macro_nonce}.
+	 * @param ctx the parse tree
+	 */
+	void exitMacro_nonce(CdmParser.Macro_nonceContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CdmParser#code_block}.
 	 * @param ctx the parse tree
@@ -113,36 +265,6 @@ public interface CdmParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCode_block(CdmParser.Code_blockContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#line_mark}.
-	 * @param ctx the parse tree
-	 */
-	void enterLine_mark(CdmParser.Line_markContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#line_mark}.
-	 * @param ctx the parse tree
-	 */
-	void exitLine_mark(CdmParser.Line_markContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#line_number}.
-	 * @param ctx the parse tree
-	 */
-	void enterLine_number(CdmParser.Line_numberContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#line_number}.
-	 * @param ctx the parse tree
-	 */
-	void exitLine_number(CdmParser.Line_numberContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#filepath}.
-	 * @param ctx the parse tree
-	 */
-	void enterFilepath(CdmParser.FilepathContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#filepath}.
-	 * @param ctx the parse tree
-	 */
-	void exitFilepath(CdmParser.FilepathContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CdmParser#break_statement}.
 	 * @param ctx the parse tree
@@ -163,16 +285,6 @@ public interface CdmParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitContinue_statement(CdmParser.Continue_statementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#top_line}.
-	 * @param ctx the parse tree
-	 */
-	void enterTop_line(CdmParser.Top_lineContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#top_line}.
-	 * @param ctx the parse tree
-	 */
-	void exitTop_line(CdmParser.Top_lineContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code standaloneLabels}
 	 * labeled alternative in {@link CdmParser#line}.
@@ -288,26 +400,6 @@ public interface CdmParserListener extends ParseTreeListener {
 	 */
 	void exitElse_clause(CdmParser.Else_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link CdmParser#branch_mnemonic}.
-	 * @param ctx the parse tree
-	 */
-	void enterBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#branch_mnemonic}.
-	 * @param ctx the parse tree
-	 */
-	void exitBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#conjunction}.
-	 * @param ctx the parse tree
-	 */
-	void enterConjunction(CdmParser.ConjunctionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#conjunction}.
-	 * @param ctx the parse tree
-	 */
-	void exitConjunction(CdmParser.ConjunctionContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link CdmParser#while_loop}.
 	 * @param ctx the parse tree
 	 */
@@ -317,16 +409,6 @@ public interface CdmParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitWhile_loop(CdmParser.While_loopContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#while_condition}.
-	 * @param ctx the parse tree
-	 */
-	void enterWhile_condition(CdmParser.While_conditionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#while_condition}.
-	 * @param ctx the parse tree
-	 */
-	void exitWhile_condition(CdmParser.While_conditionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CdmParser#until_loop}.
 	 * @param ctx the parse tree
@@ -397,36 +479,6 @@ public interface CdmParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTerm(CdmParser.TermContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#byte_specifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterByte_specifier(CdmParser.Byte_specifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#byte_specifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitByte_specifier(CdmParser.Byte_specifierContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#label}.
-	 * @param ctx the parse tree
-	 */
-	void enterLabel(CdmParser.LabelContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#label}.
-	 * @param ctx the parse tree
-	 */
-	void exitLabel(CdmParser.LabelContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CdmParser#instruction}.
-	 * @param ctx the parse tree
-	 */
-	void enterInstruction(CdmParser.InstructionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CdmParser#instruction}.
-	 * @param ctx the parse tree
-	 */
-	void exitInstruction(CdmParser.InstructionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CdmParser#string}.
 	 * @param ctx the parse tree

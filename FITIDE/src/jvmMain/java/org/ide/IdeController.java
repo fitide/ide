@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
+import org.ide.PluginController.PluginController;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
 
@@ -19,6 +20,7 @@ public class IdeController {
     private final Logger logger = LogManager.getLogger(IdeController.class);
 
     private FileExplorerController fileExplorer;
+    private PluginController pluginController;
     private final EditorController editorController = new EditorController();
 
     private Path projectRoot;
@@ -27,6 +29,7 @@ public class IdeController {
         logger.info("Opening project: " + root);
         this.projectRoot = root;
         this.fileExplorer = new FileExplorerController(root.toString(), logger);
+        this.pluginController = new PluginController(root.toString());
     }
 
     public Directory getFileTree() {

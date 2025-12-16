@@ -1,14 +1,8 @@
 package org.cdm;
 
-import jdk.incubator.vector.VectorOperators;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.cdm.antlr.CdmLexer;
-import org.cdm.antlr.TestCdmParser;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+import org.cdm.antlr.*;
 import org.ide.PluginController.PluginInterface.*;
 
 import java.io.File;
@@ -17,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class CdmPluginTest implements Plugin {
+public class CdmPlugin implements Plugin {
     ExternalType registerType = null;
     ExternalType immediateType = null;
     ExternalType voidType = null;
@@ -25,7 +19,7 @@ public class CdmPluginTest implements Plugin {
     Map<String, ExternalFunc> externalFuncs = null;
     List<ExternalConstruction> standardConstructs = null;
 
-    public CdmPluginTest() {
+    public CdmPlugin() {
         immediateType = new ExternalType("immediate");
         registerType = new ExternalType("register");
         voidType = new ExternalType("void");
@@ -56,130 +50,13 @@ public class CdmPluginTest implements Plugin {
         CharStream charStream = CharStreams.fromString(fileContent);
         CdmLexer lexer = new CdmLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        TestCdmParser parser = new TestCdmParser(tokens);
+        CdmParser parser = new CdmParser(tokens);
 
         return parser.program();
     }
 
-    @Override
-    public Tag[] getTagsOfNode(ParseTree tree) {
-        if (tree instanceof TestCdmParser.InstructionWithArgContext) {
-            return new Tag[]{Tag.Func};
-        }
-
-        if (tree instanceof TestCdmParser.ArgumentContext) {
-            return new Tag[]{Tag.Var};
-        }
-
-        if (tree instanceof TerminalNode node) {
-            if (node.getSymbol().getType() == TestCdmParser.End) {
-                return new Tag[]{Tag.KeyWord};
-            }
-        }
-
-        return new Tag[0];
-    }
-
-    @Override
-    public String getNameOfNode(ParseTree tree) {
-        if (tree instanceof TestCdmParser.InstructionWithArgContext) {
-            return tree.getChild(0).getText();
-        }
-
-        if (tree instanceof TestCdmParser.ArgumentContext) {
-            return tree.getText();
-        }
-
-        if (tree instanceof TerminalNode node) {
-            if (node.getSymbol().getType() == TestCdmParser.End) {
-                return "end";
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement) {
-        return List.of();
-    }
-
-    @Override
-    public Position getBounds(ParseTree node) {
-        if (node instanceof ParserRuleContext ctx) {
-            return new Position(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
-        }
-
-        var sym = ((TerminalNode)node).getSymbol();
-        return new Position(sym.getLine(), sym.getCharPositionInLine(), sym.getLine(), sym.getCharPositionInLine() + sym.getText().length());
-    }
-
-    @Override
-    public Position getNamePositionOfModule(ParseTree node) {
-        if (node instanceof TestCdmParser.InstructionWithArgContext) {
-            return new Position(0, 0, 0, 3); //костыль под add!!
-        }
-
-        if (node instanceof TestCdmParser.ArgumentContext arg) {
-            var sym = arg.getStart();
-            var end = arg.getStop();
-            return new Position(sym.getLine(), sym.getCharPositionInLine(), end.getLine(), end.getCharPositionInLine());
-        }
-
-        if (node instanceof TerminalNode) {
-            if (((TerminalNode) node).getSymbol().getType() == TestCdmParser.End) {
-                var sym = ((TerminalNode) node).getSymbol();
-                return new Position(sym.getLine(), sym.getCharPositionInLine(), sym.getLine(), sym.getCharPositionInLine() + 3);
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public String getType(ParseTree tree) {
-        return "void";
-    }
-
-    @Override
-    public Position getTypePositionOfModule(ParseTree node) {
-        return null;
-    }
-
-    @Override
-    public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
-        return List.of();
-    }
-
-    @Override
-    public List<ParseTree> getArgsOfFunc(ParseTree func) {
-        return List.of(func.getChild(1).getChild(0), func.getChild(1).getChild(2));
-    }
-
-    @Override
-    public List<ParseTree> getConstructionArgs(ParseTree constr) {
-        return List.of();
-    }
-
-    @Override
-    public List<ParseTree> getBodeOfModule(ParseTree module) {
-        if (module instanceof TestCdmParser.ProgramContext prog) {
-            return List.of(module.getChild(0), module.getChild(2));
-        }
-
-        if (module instanceof TestCdmParser.InstructionWithArgContext) {
-            return List.of();
-        }
-
-
-        return List.of();
-    }
-
-    @Override
-    public List<ParseTree> getFuncsOfClass(ParseTree classNode) {
-        return List.of();
-    }
-
+    //в самом деле, у него есть стандартные файлы,
+    //но для них вроде как нет чего-либо типа #include
     @Override
     public List<ExternalFile> getStandartFiles() {
         return List.of();
@@ -195,6 +72,7 @@ public class CdmPluginTest implements Plugin {
         return externalVars;
     }
 
+    //cdm8 doesn't have any standard classes
     @Override
     public List<ExternalClass> getStandartClasses() {
         return List.of();
@@ -211,13 +89,169 @@ public class CdmPluginTest implements Plugin {
     }
 
     @Override
-    public Position getPositionOfModuleBody(ParseTree tree) {
-        return null;
+    public Tag[] getTagsOfNode(ParseTree tree) {
+        if (tree instanceof CdmParser.MacroSectionContext section) {
+            //TODO
+        } else if (tree instanceof CdmParser.AbsoluteSectionContext section) {
+            //TODO
+        } else if (tree instanceof CdmParser.RelocatableSectionContext section) {
+            //TODO
+        } else if (tree instanceof CdmParser.Code_blockContext code_block) {
+            //TODO
+        } else if (tree instanceof CdmParser.InstructionLineContext line) {
+            return new Tag[]{Tag.Func};
+        } else if (tree instanceof CdmParser.StandaloneLabelsContext line) {
+            //TODO
+        } else if (tree instanceof CdmParser.While_loopContext loop) {
+            //TODO
+        } else if (tree instanceof CdmParser.Until_loopContext loop) {
+            //TODO
+        } else if (tree instanceof CdmParser.MacroContext macro) {
+            //TODO
+        } else if (tree instanceof CdmParser.ConditionalContext cond) {
+            //TODO
+        }
+
+        //unreachable
+        return new Tag[0];
     }
 
     @Override
     public Position getPositionOfArgsOfFunc(ParseTree tree) {
-        return new Position(0, 0, 0, 4);
+        Position pos = new Position();
+        if (tree instanceof CdmParser.InstructionWithArgContext line) {
+            var start = line.arguments().getStart();
+            var stop = line.arguments().getStop();
+            pos.rowS = start.getLine();
+            pos.colS = start.getCharPositionInLine();
+            pos.rowE = stop.getLine();
+            pos.colE = stop.getCharPositionInLine() + stop.getText().length();
+            return pos;
+        }
+
+        return null;
+    }
+
+    @Override
+    public Position getPositionOfModuleBody(ParseTree tree) {
+        if (tree instanceof CdmParser.ConditionalContext) {
+            //надо вернуть cdm начало
+        }
+
+        return null;//для функций (кроме случая макросов) поля просто не будет
+    }
+
+    @Override
+    public List<ParseTree> getFuncsOfClass(ParseTree classNode) {
+        return List.of();
+    }
+
+    //нам нужно вернуть объекты, являющиеся *смысловыми* детьми ноды
+    @Override
+    public List<ParseTree> getChildsOfNode(ParseTree module) {
+        var res = new ArrayList<ParseTree>();
+        //TODO: необходимо добавить поддержку секций, сейчас просто их содержимое собирается
+        if (module instanceof CdmParser.ProgramContext program) {
+            for (var child : program.children) {
+                if (child instanceof CdmParser.MacroSectionContext) {
+                    continue;
+                }
+
+                for (int i = 0; i < child.getChildCount(); i++) {
+                    if (child instanceof CdmParser.AbsoluteSectionContext section) {
+                        if (section.code_block() != null) {
+                            for (int j = 0; j < section.code_block().getChildCount(); j++) {
+                                res.add(section.code_block().getChild(j));
+                            }
+                        }
+                    }
+                }
+            }
+//        } else if (module instanceof CdmParser.MacroSectionContext section) {
+//            //TODO
+//        } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
+//            res.add(section.code_block());
+//        } else if (module instanceof CdmParser.RelocatableSectionContext section) {
+//            res.add(section.code_block());
+        } else if (module instanceof CdmParser.Code_blockContext code_block) {
+            res.addAll(code_block.children);
+        } else if (module instanceof CdmParser.InstructionLineContext line) {
+            if (line.labels_declaration() != null) {
+                res.addAll(line.labels_declaration().children);
+            }
+
+            res.add(line.instructionWithArg());
+        } else if (module instanceof CdmParser.StandaloneLabelsContext line) {
+            //TODO
+        } else if (module instanceof CdmParser.While_loopContext loop) {
+            //TODO
+        } else if (module instanceof CdmParser.Until_loopContext loop) {
+            //TODO
+        } else if (module instanceof CdmParser.MacroContext macro) {
+            //TODO
+        } else if (module instanceof CdmParser.ConditionalContext cond) {
+            //TODO
+        }
+
+        return res;
+    }
+
+    @Override
+    public List<ParseTree> getConstructionArgs(ParseTree constr) {
+        return List.of(); //TODO: сделать
+    }
+
+    @Override
+    public List<ParseTree> getArgsOfFunc(ParseTree func) {
+        if (func instanceof CdmParser.InstructionWithArgContext) {
+            return List.of(func.getChild(1).getChild(0), func.getChild(1).getChild(2)); //только для add!!! костыль
+        }
+
+        return List.of();
+    }
+
+    @Override
+    public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
+        return List.of(); //пока без этого
+    }
+
+    @Override
+    public Position getTypePositionOfModule(ParseTree node) {
+        return null;
+    }
+
+    @Override
+    public String getType(ParseTree tree) {
+        if (tree instanceof CdmParser.InstructionWithArgContext) {
+            return "void";
+        } else if (tree instanceof CdmParser.LabelsContext) {
+            return "integer";
+        } else if (tree instanceof CdmParser.RegisterContext) {
+            return "register";
+        }
+
+        return null;
+    }
+
+    @Override
+    public Position getNamePositionOfModule(ParseTree node) {
+        return null;
+    }
+
+    @Override
+    public Position getBounds(ParseTree node) {
+        var ctx = (ParserRuleContext)node;
+        return new Position(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
+    }
+
+    @Override
+    public List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement) {
+        return List.of();
+    }
+
+    @Override
+    public String getNameOfNode(ParseTree node) {
+        return "";
     }
 
     private List<ExternalVar> initExternalVars() {
@@ -404,4 +438,3 @@ public class CdmPluginTest implements Plugin {
         return ret;
     }
 }
-
