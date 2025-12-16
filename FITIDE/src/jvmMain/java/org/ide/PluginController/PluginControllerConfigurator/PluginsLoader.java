@@ -14,21 +14,76 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class PluginsLoader {
 
-    public static Plugin loadPlugin(String name, Path pathToDirWithPlugin) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NotInstanceOfPluginException {
-        ClassLoader classLoader = Lang.class.getClassLoader();
-        Class<?> clazz = classLoader.loadClass(pathToDirWithPlugin.toString() + File.separator + name);
-        Object plobj = clazz.getDeclaredConstructor().newInstance();
-        if (plobj instanceof Plugin) {
-            return (Plugin) plobj;
-        } else {
-            throw new NotInstanceOfPluginException("File " + pathToDirWithPlugin + File.separator + name + " is not a Plugin implementaion");
+    public static Plugin loadPlugin(String name, Path pathToDirWithPlugin)
+            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
+            InstantiationException, IllegalAccessException, NotInstanceOfPluginException, IOException {
+        File pluginDir = pathToDirWithPlugin.toFile();
+        if (!pluginDir.exists() || !pluginDir.isDirectory()) {
+            throw new FileNotFoundException("Plugin directory not found: " + pathToDirWithPlugin);
         }
+
+        File[] jarFiles = pluginDir.listFiles((dir, fileName) -> fileName.endsWith(".jar"));
+        if (jarFiles == null || jarFiles.length == 0) {
+            throw new FileNotFoundException("No JAR file found in plugin directory: " + pathToDirWithPlugin);
+        }
+
+        File jarFile = jarFiles[0];
+
+        URL[] urls = { jarFile.toURI().toURL() };
+        URLClassLoader classLoader = new URLClassLoader(urls, Plugin.class.getClassLoader());
+
+        Plugin plugin = findPluginClass(jarFile, classLoader);
+
+        if (plugin == null) {
+            throw new NotInstanceOfPluginException(
+                    "No class implementing Plugin interface found in " + jarFile.getName()
+            );
+        }
+
+        return plugin;
+    }
+
+    private static Plugin findPluginClass(File jarFile, URLClassLoader classLoader)
+            throws IOException, ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, InstantiationException, IllegalAccessException {
+
+        try (JarFile jar = new JarFile(jarFile)) {
+            Enumeration<JarEntry> entries = jar.entries();
+
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                String entryName = entry.getName();
+
+                if (entryName.endsWith(".class") && !entryName.contains("$")) {
+                    String className = entryName
+                            .replace('/', '.')
+                            .replace(".class", "");
+
+                    try {
+                        Class<?> clazz = classLoader.loadClass(className);
+
+                        if (Plugin.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
+                            Object instance = clazz.getDeclaredConstructor().newInstance();
+                            return (Plugin) instance;
+                        }
+                    } catch (ClassNotFoundException | NoClassDefFoundError e) {
+                        continue;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public static List<Lang> loadLangsFromConfig(Path pathToConfig)
@@ -66,7 +121,7 @@ public class PluginsLoader {
 
     private static void setLang(List list, Path pathToConfig, String lang, JSONObject langObj)
             throws NotInstanceOfPluginException, ClassNotFoundException, InvocationTargetException,
-            NoSuchMethodException, InstantiationException, IllegalAccessException, ConfAlreadyExistException {
+            NoSuchMethodException, InstantiationException, IllegalAccessException, ConfAlreadyExistException, IOException {
 
         Lang langNode = setLangParams(pathToConfig, lang, langObj);
 
@@ -75,11 +130,12 @@ public class PluginsLoader {
 
     private static Lang setLangParams(Path pathToConfig, String lang, JSONObject langObj)
             throws NotInstanceOfPluginException, ClassNotFoundException, InvocationTargetException,
-            NoSuchMethodException, InstantiationException, IllegalAccessException, ConfAlreadyExistException {
+            NoSuchMethodException, InstantiationException, IllegalAccessException, ConfAlreadyExistException, IOException {
 
 
         String[] extensions = setExtensions(langObj);
-        Path pathToPluginDir = Paths.get(pathToConfig.getParent().toString() + File.separator + lang);
+        Path confDir = pathToConfig.getParent();
+        Path pathToPluginDir = confDir.resolve(lang);
 
         Lang langNode = new Lang(lang, pathToPluginDir, extensions);
 

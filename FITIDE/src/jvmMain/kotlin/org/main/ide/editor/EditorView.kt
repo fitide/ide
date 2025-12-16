@@ -73,8 +73,7 @@ fun EditorView(ide: IdeController) {
     val visualTransformation: VisualTransformation = remember(textValue.text, activeLineIndex) {
         createEditorVisualTransformation(
             ide = ide,
-            text = textValue.text,
-            activeLine = activeLineIndex
+            text = textValue.text
         ) { res ->
             currentMapping = res.offsetMapping
             firstLineSeparatorIndex = res.firstLineSeparatorIndex

@@ -20,7 +20,6 @@ internal data class HighlightResult(
 internal fun buildHighlightedWithLineNumbers(
     raw: String,
     tokens: List<CodeStrForColour>,
-    activeLine: Int?,
 ): HighlightResult {
 
     val lines = raw.split('\n')
@@ -77,14 +76,6 @@ internal fun buildHighlightedWithLineNumbers(
         }
 
         val textStart = pEnd
-
-        if (activeLine == i) {
-            builder.addStyle(
-                SpanStyle(background = activeBg),
-                pStart,
-                pStart + prefix.length + line.length
-            )
-        }
 
         builder.append(line)
 
@@ -153,15 +144,13 @@ internal fun buildHighlightedWithLineNumbers(
 internal fun createEditorVisualTransformation(
     ide: IdeController,
     text: String,
-    activeLine: Int,
     onResult: (HighlightResult) -> Unit
 ): VisualTransformation {
     return object : VisualTransformation {
         override fun filter(original: AnnotatedString): TransformedText {
             val res = buildHighlightedWithLineNumbers(
                 raw = original.text,
-                tokens = ide.getSyntaxHighlightingForCurrentFile(),
-                activeLine = activeLine
+                tokens = ide.getSyntaxHighlightingForCurrentFile()
             )
             onResult(res)
             return TransformedText(res.annotated, res.offsetMapping)

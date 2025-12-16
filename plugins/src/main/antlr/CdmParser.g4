@@ -16,7 +16,18 @@ import java.util.Base64;
     public int getCurrentOffset() { return currentOffset; }
 }
 
-program : NEWLINE* section* End ;
+// 1. ИСПРАВЛЕННОЕ ПРАВИЛО: Разрешаем код верхнего уровня (инструкции, макросы и т.д.)
+program
+    : NEWLINE* ( section
+      | macro
+      | conditional
+      | while_loop
+      | break_statement
+      | continue_statement
+      | line
+      | until_loop
+      )* End
+    ;
 
 section
     :  asect_header code_block #absoluteSection
@@ -40,6 +51,7 @@ macro_labels : macro_label* WS? ;
 macro_first_param : WS macro_param | ;
 
 macro_label :       (macro_piece | macro_variable+ macro_l_sep | macro_l_sep)* macro_variable* LABEL_END ;
+// ПЕРВОЕ ОПРЕДЕЛЕНИЕ: Полный параметр макроса
 macro_param :       (macro_piece | macro_variable+ macro_p_sep | macro_p_sep)* macro_variable* ;
 macro_instruction : (macro_piece | macro_variable+ OTHER | OTHER)+ macro_variable* | macro_variable+ ;
 macro_l_sep : OTHER | WS | COMMA ;
@@ -48,6 +60,9 @@ macro_p_sep : OTHER | WS ;
 macro_piece : macro_text | macro_param_sign | macro_nonce ;
 macro_variable : QUESTION_MARK macro_piece+ ;
 macro_text : Macro | WORD | DECIMAL_NUMBER | STRING | CHAR ;
+
+// ВТОРОЕ ОПРЕДЕЛЕНИЕ: Параметр подстановки $NUMBER.
+// Убедитесь, что оно называется macro_param_sign (или другим уникальным именем), чтобы избежать конфликта.
 macro_param_sign : DOLLAR_SIGN DECIMAL_NUMBER ;
 macro_nonce : APOSTROPHE;
 

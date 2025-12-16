@@ -35,13 +35,6 @@ public class IdeController {
     private Path projectRoot;
     private File config;
 
-    private Plugin languagePlugin;
-
-
-    public void setPluginController(PluginController pluginController) {
-        this.pluginController = pluginController;
-    }
-
     public void setLinkTreeController(LinkTreeController linkTreeController) {
         this.linkTreeController = linkTreeController;
         if (this.fileExplorer != null) {
@@ -49,11 +42,6 @@ public class IdeController {
             this.linkTreeController.setFilesAndDirectoriesData(rootCopy);
         }
     }
-
-    public void setLanguagePlugin(Plugin plugin) {
-        this.languagePlugin = plugin;
-    }
-
 
     public void openProject(Path root) throws Exception {
         logger.info("Opening project: " + root);
@@ -156,9 +144,52 @@ public class IdeController {
         List<String> list = fileExplorer.openFile(path);
         editorController.openFile(path.toString(), list);
 
-        analyzeAndUpdateLinkTree(path);
+        initializeFile(path);
 
         return String.join("\n", list);
+    }
+
+    private void initializeFile(Path path) {
+        if (pluginController == null || linkTreeController == null) {
+            System.out.println("[WARN] Cannot initialize file: controllers are null");
+            return;
+        }
+
+        try {
+            String ext = detectLang(path);
+            if (ext == null || ext.isEmpty()) {
+                System.out.println("[WARN] Cannot detect extension for file: " + path);
+                return;
+            }
+
+            Plugin currentPlugin = pluginController.getPluginByExtension(ext);
+            if (currentPlugin == null) {
+                System.out.println("[WARN] No plugin found for extension: " + ext);
+                return;
+            }
+
+            File file = path.toFile();
+            if (!file.exists()) {
+                System.out.println("[WARN] File does not exist: " + path);
+                return;
+            }
+
+            System.out.println("[DEBUG] Parsing file: " + path + " with extension: " + ext);
+
+            ParseTree tree = currentPlugin.getFileParseTree(file);
+
+            Path relativePath = projectRoot.relativize(path);
+            System.out.println("[DEBUG] Initializing file with relative path: " + relativePath);
+
+            List<Pair<Path, ParseTree>> files = List.of(new Pair<>(relativePath, tree));
+
+            linkTreeController.initFiles(currentPlugin, files);
+
+            System.out.println("[INFO] Successfully initialized file: " + relativePath);
+        } catch (Exception e) {
+            System.out.println("[ERROR] Failed to initialize file " + path);
+            e.printStackTrace();
+        }
     }
 
     public void updateContent(Path path, String newContent) {
@@ -240,17 +271,26 @@ public class IdeController {
 
     public List<CodeStrForColour> getSyntaxHighlightingForCurrentFile() {
         if (linkTreeController == null) {
+            System.out.println("[WARN] LinkTreeController is null");
             return Collections.emptyList();
         }
         String currentFile = editorController.getCurrentFile();
         if (currentFile == null) {
+            System.out.println("[WARN] Current file is null");
             return Collections.emptyList();
         }
-        Path path = Paths.get(currentFile);
+        Path absolutePath = Paths.get(currentFile);
+        Path relativePath = projectRoot.relativize(absolutePath);
+
+        System.out.println("[DEBUG] Getting syntax highlighting for: " + relativePath + " (absolute: " + absolutePath + ")");
+
         try {
-            return linkTreeController.getSyntaxHighlightning(path);
+            List<CodeStrForColour> result = linkTreeController.getSyntaxHighlightning(relativePath);
+            System.out.println("[DEBUG] Syntax highlighting tokens count: " + result.size());
+            return result;
         } catch (Exception e) {
-            logger.error("Failed to get syntax highlighting for " + path, e);
+            System.out.println("[ERROR] Failed to get syntax highlighting for " + relativePath);
+            e.printStackTrace();
             return Collections.emptyList();
         }
     }
@@ -263,32 +303,39 @@ public class IdeController {
         if (currentFile == null) {
             return Collections.emptyList();
         }
-        Path path = Paths.get(currentFile);
+        Path absolutePath = Paths.get(currentFile);
+        Path relativePath = projectRoot.relativize(absolutePath).normalize();
         try {
-            return new ArrayList<>(linkTreeController.getHintsForFile(path, prefix));
+            return new ArrayList<>(linkTreeController.getHintsForFile(relativePath, prefix));
         } catch (Exception e) {
-            logger.error("Failed to get hints for " + path, e);
+            logger.error("Failed to get hints for " + relativePath, e);
             return Collections.emptyList();
         }
     }
 
-
     private void analyzeAndUpdateLinkTree(Path path) {
-        if (pluginController == null || linkTreeController == null || languagePlugin == null) {
+        if (pluginController == null || linkTreeController == null) {
             return;
         }
 
         try {
-            String lang = detectLang(path);
-            if (lang == null || lang.isEmpty()) {
+            String ext = detectLang(path);
+            if (ext == null || ext.isEmpty()) {
+                return;
+            }
+
+            Plugin currentPlugin = pluginController.getPluginByExtension(ext);
+            if (currentPlugin == null) {
                 return;
             }
 
             File file = path.toFile();
-            ParseTree tree = pluginController.getTree(lang, file);
+            ParseTree tree = currentPlugin.getFileParseTree(file);
 
-            List<Pair<Path, ParseTree>> files = List.of(new Pair<>(path, tree));
-            linkTreeController.updateTree(languagePlugin, files);
+            Path relativePath = projectRoot.relativize(path);
+            List<Pair<Path, ParseTree>> files = List.of(new Pair<>(relativePath, tree));
+
+            linkTreeController.updateTree(currentPlugin, files);
         } catch (Exception e) {
             logger.error("Failed to analyze file " + path, e);
         }
