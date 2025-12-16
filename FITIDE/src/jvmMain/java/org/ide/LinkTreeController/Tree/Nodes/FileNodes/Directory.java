@@ -8,6 +8,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.FileNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -42,5 +43,13 @@ public class Directory extends FileNode {
         }
 
         throw new BadPathException("Bad Path");
+    }
+
+    @Override
+    public void updateFilePath(Directory newDir) {
+        this.pathToFile = Paths.get(newDir.pathToFile.toString(), this.name);
+        for (var child: childs.values()) {
+            child.updateFilePath((Directory) newDir.childs.get(this.name));
+        }
     }
 }

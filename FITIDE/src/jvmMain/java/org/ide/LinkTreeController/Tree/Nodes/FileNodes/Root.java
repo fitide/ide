@@ -223,6 +223,11 @@ public class Root extends ARoot {
         throw new BadPathException("Bad Path");
     }
 
+    @Override
+    public void updateFilePath(Directory newDir) {
+        return;
+    }
+
     private void getHintsFromMap(String prefix, Set<HintNode> listOfHints, Set<String> names, LinkTreeCodeTag codeType) {
         for (String name : names) {
             if (name.startsWith(prefix)) {
