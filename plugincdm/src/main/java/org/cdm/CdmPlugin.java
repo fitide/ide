@@ -37,12 +37,7 @@ public class CdmPlugin implements Plugin {
     public ParseTree getFileParseTree(File file) {
         String fileContent = null;
         try {
-            List<String> lines = Files.readAllLines(file.toPath());
-            StringBuilder sb = new StringBuilder();
-            for (String line : lines) {
-                sb.append(line);
-            }
-            fileContent = sb.toString();
+            fileContent = new String(Files.readAllBytes(file.toPath()));
         } catch (IOException e) {
             throw new RuntimeException(e); //TODO : сделать нормальную обработку ошибок
         }
@@ -98,7 +93,7 @@ public class CdmPlugin implements Plugin {
             //TODO
         } else if (tree instanceof CdmParser.Code_blockContext code_block) {
             //TODO
-        } else if (tree instanceof CdmParser.InstructionLineContext line) {
+        } else if (tree instanceof CdmParser.InstructionWithArgContext line) {
             return new Tag[]{Tag.Func};
         } else if (tree instanceof CdmParser.StandaloneLabelsContext line) {
             //TODO
@@ -110,6 +105,8 @@ public class CdmPlugin implements Plugin {
             //TODO
         } else if (tree instanceof CdmParser.ConditionalContext cond) {
             //TODO
+        } else if (tree instanceof CdmParser.ArgumentContext argument) {
+            return new Tag[]{Tag.Var};
         }
 
         //unreachable
@@ -120,13 +117,15 @@ public class CdmPlugin implements Plugin {
     public Position getPositionOfArgsOfFunc(ParseTree tree) {
         Position pos = new Position();
         if (tree instanceof CdmParser.InstructionWithArgContext line) {
-            var start = line.arguments().getStart();
-            var stop = line.arguments().getStop();
-            pos.rowS = start.getLine();
-            pos.colS = start.getCharPositionInLine();
-            pos.rowE = stop.getLine();
-            pos.colE = stop.getCharPositionInLine() + stop.getText().length();
-            return pos;
+            if (line.arguments() != null) {
+                var start = line.arguments().getStart();
+                var stop = line.arguments().getStop();
+                pos.rowS = start.getLine() - 1;
+                pos.colS = start.getCharPositionInLine();
+                pos.rowE = stop.getLine() - 1;
+                pos.colE = stop.getCharPositionInLine() + stop.getText().length();
+                return pos;
+            }
         }
 
         return null;
@@ -138,7 +137,7 @@ public class CdmPlugin implements Plugin {
             //надо вернуть cdm начало
         }
 
-        return null;//для функций (кроме случая макросов) поля просто не будет
+        return null;
     }
 
     @Override
@@ -146,7 +145,6 @@ public class CdmPlugin implements Plugin {
         return List.of();
     }
 
-    //нам нужно вернуть объекты, являющиеся *смысловыми* детьми ноды
     @Override
     public List<ParseTree> getChildsOfNode(ParseTree module) {
         var res = new ArrayList<ParseTree>();
@@ -157,11 +155,23 @@ public class CdmPlugin implements Plugin {
                     continue;
                 }
 
-                for (int i = 0; i < child.getChildCount(); i++) {
-                    if (child instanceof CdmParser.AbsoluteSectionContext section) {
-                        if (section.code_block() != null) {
-                            for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                                res.add(section.code_block().getChild(j));
+                if (child instanceof CdmParser.AbsoluteSectionContext section) {
+                    if (section.code_block() != null) {
+                        for (int j = 0; j < section.code_block().getChildCount(); j++) {
+                            if (section.code_block().getChild(j) instanceof CdmParser.InstructionLineContext instr) { //костыль!!!!
+                                res.add(instr.instructionWithArg());
+                            }
+
+                            if (section.code_block().getChild(j) instanceof CdmParser.ConditionalContext cond) { //костыль!!!!
+                                res.addAll(getChildsOfNode(cond));
+                            }
+
+                            if (section.code_block().getChild(j) instanceof CdmParser.While_loopContext cond) { //костыль!!!!
+                                res.addAll(getChildsOfNode(cond));
+                            }
+
+                            if (section.code_block().getChild(j) instanceof CdmParser.Until_loopContext cond) { //костыль!!!!
+                                res.addAll(getChildsOfNode(cond));
                             }
                         }
                     }
@@ -184,13 +194,64 @@ public class CdmPlugin implements Plugin {
         } else if (module instanceof CdmParser.StandaloneLabelsContext line) {
             //TODO
         } else if (module instanceof CdmParser.While_loopContext loop) {
-            //TODO
+            for (var child : loop.code_block()) {
+                for (var line : child.children) {
+                    if (line instanceof CdmParser.InstructionLineContext l) {
+                        res.add(l.instructionWithArg());
+                    } else {
+                        res.add(line);
+                    }
+                }
+            }
         } else if (module instanceof CdmParser.Until_loopContext loop) {
-            //TODO
+            for (var line : loop.code_block().children) {
+                if (line instanceof CdmParser.InstructionLineContext l) {
+                    res.add(l.instructionWithArg());
+                } else {
+                    res.add(line);
+                }
+            }
         } else if (module instanceof CdmParser.MacroContext macro) {
             //TODO
         } else if (module instanceof CdmParser.ConditionalContext cond) {
-            //TODO
+            var conditions = cond.conditions();
+            if (conditions.connective_condition() != null) {
+                for (var connect_cond : conditions.connective_condition()) {
+                    for (var line : connect_cond.condition().code_block().children) {
+                        if (line instanceof CdmParser.InstructionLineContext l) {
+                            res.add(l.instructionWithArg());
+                        } else {
+                            res.add(line);
+                        }
+                    }
+                }
+            };
+
+            for (var line : conditions.condition().code_block().children) {
+                if (line instanceof CdmParser.InstructionLineContext l) {
+                    res.add(l.instructionWithArg());
+                } else {
+                    res.add(line);
+                }
+            }
+
+            for (var line : cond.code_block().children) {
+                if (line instanceof CdmParser.InstructionLineContext l) {
+                    res.add(l.instructionWithArg());
+                } else {
+                    res.add(line);
+                }
+            }
+
+            if (cond.else_clause() != null) {
+                for (var line : cond.else_clause().code_block().children) {
+                    if (line instanceof CdmParser.InstructionLineContext l) {
+                        res.add(l.instructionWithArg());
+                    } else {
+                        res.add(line);
+                    }
+                }
+            }
         }
 
         return res;
@@ -203,8 +264,10 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getArgsOfFunc(ParseTree func) {
-        if (func instanceof CdmParser.InstructionWithArgContext) {
-            return List.of(func.getChild(1).getChild(0), func.getChild(1).getChild(2)); //только для add!!! костыль
+        if (func instanceof CdmParser.InstructionWithArgContext instr) {
+            if (instr.arguments() != null) {
+                return new ArrayList<ParseTree>(instr.arguments().argument());
+            }
         }
 
         return List.of();
@@ -212,7 +275,7 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
-        return List.of(); //пока без этого
+        return List.of();
     }
 
     @Override
@@ -235,13 +298,29 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public Position getNamePositionOfModule(ParseTree node) {
+        Position pos = new Position();
+        if (node instanceof CdmParser.InstructionWithArgContext instr) {
+            var name = instr.WORD();
+            pos.rowS = name.getSymbol().getLine() - 1;
+            pos.colS = name.getSymbol().getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + name.getText().length();
+            return pos;
+        } else if (node instanceof CdmParser.ArgumentContext arg) {
+            pos.rowS = arg.getStart().getLine() - 1;
+            pos.colS = arg.getStart().getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + arg.getText().length();
+            return pos;
+        }
+
         return null;
     }
 
     @Override
     public Position getBounds(ParseTree node) {
         var ctx = (ParserRuleContext)node;
-        return new Position(ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine(), ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
+        return new Position(ctx.getStart().getLine() - 1, ctx.getStart().getCharPositionInLine() - 1, ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
     }
 
     @Override

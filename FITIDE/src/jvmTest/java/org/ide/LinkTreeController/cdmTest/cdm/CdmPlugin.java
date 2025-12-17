@@ -125,7 +125,7 @@ public class CdmPlugin implements Plugin {
     //нам нужно вернуть объекты, являющиеся **смысловыми** детьми ноды
     //TODO: переименовать, название не очень
     @Override
-    public List<ParseTree> getBodeOfModule(ParseTree module) {
+    public List<ParseTree> getChildsOfNode(ParseTree module) {
         if (module instanceof CdmParser.Program_nomacrosContext) {
             return List.of(module.getChild(0));
         }

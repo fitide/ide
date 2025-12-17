@@ -252,11 +252,11 @@ public class Func extends AInternalCodeNode {
                 decs.put(this.name, this);
             }
             case Usage -> {
-                this.definition = setDefDec(defs);
-                this.declaration = setDefDec(decs);
-                if (this.definition == null && this.declaration == null) {
-                    codeType = CodeType.Error;
-                }
+                //this.definition = setDefDec(defs);
+                //this.declaration = setDefDec(decs);
+                //if (this.definition == null && this.declaration == null) {
+                //   codeType = CodeType.Error;
+                //}
             }
         }
     }
