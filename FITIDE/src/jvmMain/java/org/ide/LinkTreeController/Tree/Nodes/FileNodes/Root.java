@@ -214,12 +214,13 @@ public class Root extends ARoot {
         getHintsFromMap(prefix, listOfHints, externalVars.keySet(), LinkTreeCodeTag.Var);
 
         String nextNode = PathTools.getRootStr(PathTools.deleteRoot(pathToFile));
-
-        if (pathToFile.getNameCount() > 0 && this.childs.containsKey(nextNode)) {
+        if (pathToFile.getNameCount() > 1 && this.childs.containsKey(nextNode)) {
             childs.get(nextNode).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
             return;
-        } else if (nextNode.length() == 0) {
-            return;
+        } else if (pathToFile.getNameCount() == 1) {
+            if (this.childs.containsKey(nextNode)) {
+                childs.get(nextNode).getHints(pathToFile, prefix, listOfHints);
+            }
         }
 
         throw new BadPathException("Bad Path");
