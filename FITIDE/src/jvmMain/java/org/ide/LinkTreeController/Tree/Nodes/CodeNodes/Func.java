@@ -58,7 +58,7 @@ public class Func extends AInternalCodeNode {
     public void getCommonHints(String prefix, Set<HintNode> hints) {
         super.getCommonHints(prefix, hints);
 
-        if (name != null && name.startsWith(prefix)) hints.add(new HintNode(LinkTreeCodeTag.Func, name));
+        if (name != null && name.startsWith(prefix) && (codeType == CodeType.Declaration || codeType == CodeType.Definition)) hints.add(new HintNode(LinkTreeCodeTag.Func, name));
     }
 
 
