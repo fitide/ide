@@ -86,11 +86,11 @@ public class CdmPlugin implements Plugin {
     @Override
     public Tag[] getTagsOfNode(ParseTree tree) {
         if (tree instanceof CdmParser.MacroSectionContext section) {
-            //TODO
+            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.AbsoluteSectionContext section) {
-            //TODO
+            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.RelocatableSectionContext section) {
-            //TODO
+            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.Code_blockContext code_block) {
             //TODO
         } else if (tree instanceof CdmParser.InstructionWithArgContext line) {
@@ -102,12 +102,16 @@ public class CdmPlugin implements Plugin {
         } else if (tree instanceof CdmParser.Until_loopContext loop) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.MacroContext macro) {
-            //TODO
+            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.ConditionalContext cond) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.ArgumentContext argument) {
             return new Tag[]{Tag.Var};
         } else if (tree instanceof CdmParser.Branch_mnemonicContext mnemonic) {
+            return new Tag[]{Tag.Var};
+        } else if (tree instanceof CdmParser.NumberContext number) {
+            return new Tag[]{Tag.Var};
+        } else if (tree instanceof CdmParser.NameContext name) {
             return new Tag[]{Tag.Var};
         }
 
@@ -135,6 +139,34 @@ public class CdmPlugin implements Plugin {
             pos.rowE = arg.getLine() - 1;
             pos.colE = arg.getCharPositionInLine() + arg.getText().length();
             return pos;
+        } else if (tree instanceof CdmParser.Until_loopContext loop) {
+            var arg = loop.branch_mnemonic().getStart();
+            pos.rowS = arg.getLine() - 1;
+            pos.colS = arg.getCharPositionInLine();
+            pos.rowE = arg.getLine() - 1;
+            pos.colE = arg.getCharPositionInLine() + arg.getText().length();
+            return pos;
+        } else if (tree instanceof CdmParser.ConditionalContext cond) {
+            var arg = cond.conditions().condition().branch_mnemonic().getStart();
+            pos.rowS = arg.getLine() - 1;
+            pos.colS = arg.getCharPositionInLine();
+            pos.rowE = arg.getLine() - 1;
+            pos.colE = arg.getCharPositionInLine() + arg.getText().length();
+            return pos;
+        } else if (tree instanceof CdmParser.AbsoluteSectionContext asection) {
+            var arg = asection.asect_header().number().getStart();
+            pos.rowS = arg.getLine() - 1;
+            pos.colS = arg.getCharPositionInLine();
+            pos.rowE = arg.getLine() - 1;
+            pos.colE = arg.getCharPositionInLine() + arg.getText().length();
+            return pos;
+        } else if (tree instanceof CdmParser.RelocatableSectionContext rsection) {
+            var arg = rsection.rsect_header().name().getStart();
+            pos.rowS = arg.getLine() - 1;
+            pos.colS = arg.getCharPositionInLine();
+            pos.rowE = arg.getLine() - 1;
+            pos.colE = arg.getCharPositionInLine() + arg.getText().length();
+            return pos;
         }
 
         return null;
@@ -149,6 +181,34 @@ public class CdmPlugin implements Plugin {
             pos.rowE = loop.code_block().get(1).getStop().getLine() - 1;
             pos.colE = loop.code_block().get(1).getStop().getCharPositionInLine()
                     + loop.code_block().get(1).getStop().getText().length();
+            return pos;
+        } else if (tree instanceof CdmParser.ConditionalContext cond) {
+            pos.rowS = cond.code_block().getStart().getLine() - 1;
+            pos.colS = cond.code_block().getStart().getCharPositionInLine();
+            pos.rowE = cond.code_block().getStop().getLine() - 1;
+            pos.colE = cond.code_block().getStop().getCharPositionInLine()
+                    + cond.code_block().getStop().getText().length();
+            return pos;
+        } else if (tree instanceof CdmParser.Until_loopContext loop) {
+            pos.rowS = loop.code_block().getStart().getLine() - 1;
+            pos.colS = loop.code_block().getStart().getCharPositionInLine();
+            pos.rowE = loop.code_block().getStop().getLine() - 1;
+            pos.colE = loop.code_block().getStop().getCharPositionInLine()
+                    + loop.code_block().getStop().getText().length();
+            return pos;
+        } else if (tree instanceof CdmParser.AbsoluteSectionContext section) {
+            pos.rowS = section.code_block().getStart().getLine() - 1;
+            pos.colS = section.code_block().getStart().getCharPositionInLine();
+            pos.rowE = section.code_block().getStop().getLine() - 1;
+            pos.colE = section.code_block().getStop().getCharPositionInLine()
+                    + section.code_block().getStop().getText().length();
+            return pos;
+        } else if (tree instanceof CdmParser.RelocatableSectionContext section) {
+            pos.rowS = section.code_block().getStart().getLine() - 1;
+            pos.colS = section.code_block().getStart().getCharPositionInLine();
+            pos.rowE = section.code_block().getStop().getLine() - 1;
+            pos.colE = section.code_block().getStop().getCharPositionInLine()
+                    + section.code_block().getStop().getText().length();
             return pos;
         }
 
@@ -165,27 +225,36 @@ public class CdmPlugin implements Plugin {
         var res = new ArrayList<ParseTree>();
         //TODO: необходимо добавить поддержку секций, сейчас просто их содержимое собирается
         if (module instanceof CdmParser.ProgramContext program) {
-            for (var child : program.children) {
+            for (var child : program.section()) {
                 if (child instanceof CdmParser.MacroSectionContext) {
                     continue;
                 }
 
-                if (child instanceof CdmParser.AbsoluteSectionContext section) {
-                    if (section.code_block() != null) {
-                        for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                            res.addAll(getChildsOfNode(section.getChild(j)));
-                        }
-                    }
-                }
+                res.add(child);
+
             }
 //        } else if (module instanceof CdmParser.MacroSectionContext section) {
 //            //TODO
-//        } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
-//            res.add(section.code_block());
-//        } else if (module instanceof CdmParser.RelocatableSectionContext section) {
-//            res.add(section.code_block());
+        } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
+            if (section.code_block() != null) {
+                for (int j = 0; j < section.code_block().getChildCount(); j++) {
+                    res.addAll(getChildsOfNode(section.getChild(j)));
+                }
+            }
+        } else if (module instanceof CdmParser.RelocatableSectionContext section) {
+            if (section.code_block() != null) {
+                for (int j = 0; j < section.code_block().getChildCount(); j++) {
+                    res.addAll(getChildsOfNode(section.getChild(j)));
+                }
+            }
         } else if (module instanceof CdmParser.Code_blockContext code_block) {
-            res.addAll(code_block.children);
+            for (var child : code_block.children) {
+                if (child instanceof CdmParser.InstructionLineContext instr) {
+                    res.add(instr.instructionWithArg());
+                } else {
+                    res.add(child);
+                }
+            }
         } else if (module instanceof CdmParser.InstructionLineContext line) {
             if (line.labels_declaration() != null) {
                 res.addAll(line.labels_declaration().children);
@@ -262,6 +331,14 @@ public class CdmPlugin implements Plugin {
     public List<ParseTree> getConstructionArgs(ParseTree constr) {
         if (constr instanceof CdmParser.While_loopContext loop) {
             return List.of(loop.branch_mnemonic());
+        } else if (constr instanceof CdmParser.Until_loopContext loop) {
+            return List.of(loop.branch_mnemonic());
+        } else if (constr instanceof CdmParser.ConditionalContext cond) {
+            return List.of(cond.conditions().condition().branch_mnemonic());
+        } else if (constr instanceof CdmParser.AbsoluteSectionContext section) {
+            return List.of(section.asect_header().number());
+        } else if (constr instanceof CdmParser.RelocatableSectionContext section) {
+            return List.of(section.rsect_header().name());
         }
 
         return List.of();
@@ -282,6 +359,19 @@ public class CdmPlugin implements Plugin {
     public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
         if (node instanceof CdmParser.While_loopContext loop) {
             return List.of(loop.While(), loop.Stays(), loop.Wend());
+        } else if (node instanceof CdmParser.Until_loopContext loop) {
+            return List.of(loop.Do(), loop.Until());
+        } else if (node instanceof CdmParser.ConditionalContext cond) {
+            if (cond.else_clause() != null) {
+                return List.of(cond.If(), cond.conditions().condition().Is(),
+                        cond.else_clause().Else(), cond.Fi());
+            }
+
+            return List.of(cond.If(), cond.conditions().condition().Is(), cond.Fi());
+        } else if (node instanceof CdmParser.RelocatableSectionContext section) {
+            return List.of(section.rsect_header().Rsect());
+        } else if (node instanceof CdmParser.AbsoluteSectionContext section) {
+            return List.of(section.asect_header().Asect());
         }
 
         return List.of();
@@ -327,6 +417,41 @@ public class CdmPlugin implements Plugin {
             pos.rowE = pos.rowS;
             pos.colE = pos.colS + arg.getText().length();
             return pos;
+        } else if (node instanceof CdmParser.AbsoluteSectionContext section) {
+            var sym = section.asect_header().Asect().getSymbol();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
+        } else if (node instanceof CdmParser.RelocatableSectionContext section) {
+            var sym = section.rsect_header().Rsect().getSymbol();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
+        } else if (node instanceof CdmParser.NumberContext number) {
+            var sym = number.getStart();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
+        } else if (node instanceof CdmParser.NameContext name) {
+            var sym = name.getStart();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
+        } else if (node instanceof TerminalNode tnode) {
+            var sym = tnode.getSymbol();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
         }
 
         return null;
@@ -334,8 +459,19 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public Position getBounds(ParseTree node) {
-        var ctx = (ParserRuleContext)node;
-        return new Position(ctx.getStart().getLine() - 1, ctx.getStart().getCharPositionInLine() - 1, ctx.getStop().getLine(), ctx.getStop().getCharPositionInLine());
+        if (node instanceof ParserRuleContext ctx) {
+            return new Position(ctx.getStart().getLine() - 1,
+                    ctx.getStart().getCharPositionInLine(),
+                    ctx.getStop().getLine() - 1,
+                    ctx.getStop().getCharPositionInLine() + ctx.getStop().getText().length());
+        } else if (node instanceof TerminalNode tnode) {
+            return new Position(tnode.getSymbol().getLine() - 1,
+                                tnode.getSymbol().getCharPositionInLine(),
+                                tnode.getSymbol().getLine() - 1,
+                    tnode.getSymbol().getCharPositionInLine() + tnode.getSymbol().getText().length());
+        }
+
+        return null;
     }
 
     @Override
@@ -350,14 +486,7 @@ public class CdmPlugin implements Plugin {
         } else if (node instanceof CdmParser.Branch_mnemonicContext branch) {
             return branch.getText();
         }  else if (node instanceof TerminalNode tnode) {
-            if (tnode.getSymbol().getType() == CdmLexer.While) {
-                return tnode.getSymbol().getText();
-            } else if (tnode.getSymbol().getType() == CdmLexer.Wend) {
-                return tnode.getSymbol().getText();
-            } else if (tnode.getSymbol().getType() == CdmLexer.Stays) {
-                return tnode.getSymbol().getText();
-            }
-
+            return tnode.getSymbol().getText();
         }
 
         return "";
