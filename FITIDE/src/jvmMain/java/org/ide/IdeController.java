@@ -151,43 +151,31 @@ public class IdeController {
 
     private void initializeFile(Path path) {
         if (pluginController == null || linkTreeController == null) {
-            System.out.println("[WARN] Cannot initialize file: controllers are null");
             return;
         }
 
         try {
             String ext = detectLang(path);
-            if (ext == null || ext.isEmpty()) {
-                System.out.println("[WARN] Cannot detect extension for file: " + path);
+            if (ext.isEmpty()) {
                 return;
             }
 
             Plugin currentPlugin = pluginController.getPluginByExtension(ext);
             if (currentPlugin == null) {
-                System.out.println("[WARN] No plugin found for extension: " + ext);
                 return;
             }
 
             File file = path.toFile();
             if (!file.exists()) {
-                System.out.println("[WARN] File does not exist: " + path);
                 return;
             }
 
-            System.out.println("[DEBUG] Parsing file: " + path + " with extension: " + ext);
-
             ParseTree tree = currentPlugin.getFileParseTree(file);
-
             Path relativePath = projectRoot.relativize(path);
-            System.out.println("[DEBUG] Initializing file with relative path: " + relativePath);
-
             List<Pair<Path, ParseTree>> files = List.of(new Pair<>(relativePath, tree));
-
             linkTreeController.initFiles(currentPlugin, files);
 
-            System.out.println("[INFO] Successfully initialized file: " + relativePath);
         } catch (Exception e) {
-            System.out.println("[ERROR] Failed to initialize file " + path);
             e.printStackTrace();
         }
     }
@@ -271,25 +259,19 @@ public class IdeController {
 
     public List<CodeStrForColour> getSyntaxHighlightingForCurrentFile() {
         if (linkTreeController == null) {
-            System.out.println("[WARN] LinkTreeController is null");
             return Collections.emptyList();
         }
         String currentFile = editorController.getCurrentFile();
         if (currentFile == null) {
-            System.out.println("[WARN] Current file is null");
             return Collections.emptyList();
         }
         Path absolutePath = Paths.get(currentFile);
         Path relativePath = projectRoot.relativize(absolutePath);
 
-        System.out.println("[DEBUG] Getting syntax highlighting for: " + relativePath + " (absolute: " + absolutePath + ")");
-
         try {
             List<CodeStrForColour> result = linkTreeController.getSyntaxHighlightning(relativePath);
-            System.out.println("[DEBUG] Syntax highlighting tokens count: " + result.size());
             return result;
         } catch (Exception e) {
-            System.out.println("[ERROR] Failed to get syntax highlighting for " + relativePath);
             e.printStackTrace();
             return Collections.emptyList();
         }

@@ -77,7 +77,6 @@ private fun ThinDivider(
 }
 
 @Composable
-@Preview
 fun App(
     ideController: IdeController,
     fileExplorer: FileExplorer,

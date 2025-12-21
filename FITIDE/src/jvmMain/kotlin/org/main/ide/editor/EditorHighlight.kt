@@ -20,18 +20,28 @@ internal data class HighlightResult(
 internal fun buildHighlightedWithLineNumbers(
     raw: String,
     tokens: List<CodeStrForColour>,
+    folds: List<FoldRegion>
 ): HighlightResult {
 
     val lines = raw.split('\n')
+
+    val visualLineCount =
+        if (lines.isNotEmpty() && lines.last().isEmpty())
+            lines.size - 1
+        else
+            lines.size
+
     val count = lines.size
-    val maxDigits = maxOf(count.toString().length, 2)
+    val maxDigits = maxOf(visualLineCount.toString().length, 2)
 
     val builder = AnnotatedString.Builder()
 
     val origLineStart = IntArray(count)
-    val lineLen       = IntArray(count)
+    val lineLen = IntArray(count)
     val transfLineStart = IntArray(count)
-    val prefixLen       = IntArray(count)
+    val prefixLen = IntArray(count)
+
+    val visualLines = mutableListOf<Int>()
 
     var origIndex = 0
     for (i in 0 until count) {
@@ -42,18 +52,34 @@ internal fun buildHighlightedWithLineNumbers(
         if (i < count - 1) origIndex++
     }
 
-    fun tokensForLine(i: Int) =
-        tokens.filter { it.pos?.rowS == i }
+    fun foldStartingAt(line: Int) =
+        folds.firstOrNull { it.startLine == line }
 
-    val activeBg = UIColors.EditorBg.copy(alpha = 0.25f)
+    fun isLineHidden(line: Int) =
+        folds.any { it.collapsed && line > it.startLine && line <= it.endLine }
+
+    val FOLD_OPEN = '▾'
+    val FOLD_CLOSE = '▸'
+    val FOLD_EMPTY = ' '
 
     var tIndex = 0
     var firstLineSeparatorIndex = -1
 
     for (i in 0 until count) {
-        val line = lines[i]
+
+        if (isLineHidden(i)) continue
+        visualLines.add(i)
+
+        val fold = foldStartingAt(i)
+        val foldChar = when {
+            fold == null -> FOLD_EMPTY
+            fold.collapsed -> FOLD_CLOSE
+            else -> FOLD_OPEN
+        }
+
         val num = (i + 1).toString().padStart(maxDigits, ' ')
-        val prefix = " $num  "
+        val prefix = " $foldChar $num  "
+
         val pStart = tIndex
         builder.append(prefix)
         val pEnd = pStart + prefix.length
@@ -71,34 +97,51 @@ internal fun buildHighlightedWithLineNumbers(
             pEnd
         )
 
-        if (i == 0) {
-            firstLineSeparatorIndex = pStart + prefix.length - 1
+        if (visualLines.size == 1) {
+            firstLineSeparatorIndex = pEnd - 1
         }
 
         val textStart = pEnd
-
+        val line = lines[i]
         builder.append(line)
 
-        for (tok in tokensForLine(i)) {
-            val pos = tok.pos ?: continue
-            val tag = tok.tag ?: continue
-            val sc = pos.colS.coerceIn(0, line.length)
-            val ec = pos.colE.coerceIn(0, line.length)
-            if (sc < ec) {
-                builder.addStyle(
-                    SpanStyle(
-                        color = colorForTag(tag),
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.Monospace
-                    ),
-                    textStart + sc,
-                    textStart + ec
-                )
+        val collapsedHere = fold?.collapsed == true
+
+        if (collapsedHere) {
+            val dotsStart = builder.length
+            builder.append("  …")
+            builder.addStyle(
+                SpanStyle(
+                    color = UIColors.TextSecondary,
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace
+                ),
+                dotsStart,
+                builder.length
+            )
+        } else {
+            for (tok in tokens.filter { it.pos?.rowS == i }) {
+                val pos = tok.pos ?: continue
+                val tag = tok.tag ?: continue
+                val sc = pos.colS.coerceIn(0, line.length)
+                val ec = pos.colE.coerceIn(0, line.length)
+                if (sc < ec) {
+                    builder.addStyle(
+                        SpanStyle(
+                            color = colorForTag(tag),
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.Monospace
+                        ),
+                        textStart + sc,
+                        textStart + ec
+                    )
+                }
             }
         }
 
-        tIndex = textStart + line.length
-        if (i < count - 1) {
+        tIndex = builder.length
+        val nextOrigIndex = origLineStart[i] + lineLen[i]
+        if (i < count - 1 && nextOrigIndex < raw.length && raw[nextOrigIndex] == '\n') {
             builder.append('\n')
             tIndex++
         }
@@ -107,33 +150,50 @@ internal fun buildHighlightedWithLineNumbers(
     val mapping = object : OffsetMapping {
 
         override fun originalToTransformed(offset: Int): Int {
-            if (count == 0) return 0
+            if (visualLines.isEmpty()) return 0
+
             val safe = offset.coerceIn(0, raw.length)
 
-            var line = 0
-            while (line + 1 < count && origLineStart[line + 1] <= safe) line++
+            var origLine = 0
+            while (origLine + 1 < count && origLineStart[origLine + 1] <= safe) {
+                origLine++
+            }
 
+            val visualIndex =
+                visualLines.indexOfLast { it <= origLine }.coerceAtLeast(0)
+
+            val line = visualLines[visualIndex]
             val col = safe - origLineStart[line]
-            return transfLineStart[line] + prefixLen[line] + col.coerceIn(0, lineLen[line])
+
+            return transfLineStart[line] +
+                    prefixLen[line] +
+                    col.coerceIn(0, lineLen[line])
         }
 
         override fun transformedToOriginal(offset: Int): Int {
-            if (count == 0) return 0
+            if (visualLines.isEmpty()) return 0
+
             val safe = offset.coerceIn(0, builder.length)
 
-            var line = 0
-            while (line + 1 < count && transfLineStart[line + 1] <= safe) line++
+            var visualIndex = 0
+            while (
+                visualIndex + 1 < visualLines.size &&
+                transfLineStart[visualLines[visualIndex + 1]] <= safe
+            ) {
+                visualIndex++
+            }
 
+            val line = visualLines[visualIndex]
             val pStart = transfLineStart[line]
-            val pLen   = prefixLen[line]
+            val pLen = prefixLen[line]
             val cStart = pStart + pLen
-            val cEnd   = cStart + lineLen[line]
+            val cEnd = cStart + lineLen[line]
             val oStart = origLineStart[line]
 
             return when {
                 safe <= cStart -> oStart
-                safe <= cEnd   -> oStart + (safe - cStart)
-                else           -> oStart + lineLen[line]
+                safe <= cEnd -> oStart + (safe - cStart)
+                else -> oStart + lineLen[line]
             }
         }
     }
@@ -143,14 +203,15 @@ internal fun buildHighlightedWithLineNumbers(
 
 internal fun createEditorVisualTransformation(
     ide: IdeController,
-    text: String,
+    folds: List<FoldRegion>,
     onResult: (HighlightResult) -> Unit
 ): VisualTransformation {
     return object : VisualTransformation {
         override fun filter(original: AnnotatedString): TransformedText {
             val res = buildHighlightedWithLineNumbers(
                 raw = original.text,
-                tokens = ide.getSyntaxHighlightingForCurrentFile()
+                tokens = ide.getSyntaxHighlightingForCurrentFile(),
+                folds = folds
             )
             onResult(res)
             return TransformedText(res.annotated, res.offsetMapping)

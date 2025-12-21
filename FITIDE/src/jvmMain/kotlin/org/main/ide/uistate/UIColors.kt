@@ -15,4 +15,8 @@ object UIColors {
     val TextFieldContainer = Color(0xFF323438)
     val ButtonBg           = Color(0xFF3A3C40)
     val ButtonText         = Color(0xFFE6E6E6)
+    val HintBg             = Color(0xFF323438)
+    val HintBorder         = Color(0xFF45474B)
+    val HintSelectedBg     = Color(0xFF3F4248)
+
 }

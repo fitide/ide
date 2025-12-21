@@ -189,13 +189,11 @@ public class PluginController {
         for (Lang lang : langs.values()) {
             for (String ext : lang.filesExtensions) {
                 if (ext.equals(finalExtension)) {
-                    System.out.println("[DEBUG] Found plugin for extension " + finalExtension + ": " + lang.language);
                     return lang.getPlugin();
                 }
             }
         }
 
-        System.out.println("[DEBUG] No plugin found for extension: " + finalExtension);
         return null;
     }
 
