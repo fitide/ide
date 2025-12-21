@@ -1,10 +1,22 @@
 package org.main.ide.editor
 
-internal fun lineIndexForOffset(text: String, offset: Int): Int {
-    val safe = offset.coerceIn(0, text.length)
-    var line = 0
-    for (i in 0 until safe) {
-        if (text[i] == '\n') line++
+internal fun offsetFor(
+    row: Int,
+    col: Int,
+    text: String
+): Int {
+
+    if (row < 0 || col < 0) return 0
+
+    var currentRow = 0
+    var offset = 0
+
+    while (offset < text.length && currentRow < row) {
+        if (text[offset] == '\n') {
+            currentRow++
+        }
+        offset++
     }
-    return line
+
+    return (offset + col).coerceIn(0, text.length)
 }

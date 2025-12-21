@@ -215,6 +215,10 @@ public class Root extends ARoot {
 
         String nextNode = PathTools.getRootStr(PathTools.deleteRoot(pathToFile));
 
+        if (nextNode.isEmpty()) {
+            return;
+        }
+
         if (pathToFile.getNameCount() > 0 && this.childs.containsKey(nextNode)) {
             childs.get(nextNode).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
             return;

@@ -35,6 +35,18 @@ public class IdeController {
     private Path projectRoot;
     private File config;
 
+    private ParseTree currentParseTree = null;
+    private Plugin currentPlugin = null;
+
+    public ParseTree getCurrentParseTree() {
+        return currentParseTree;
+    }
+
+    public Plugin getCurrentPlugin() {
+        return currentPlugin;
+    }
+
+
     public void setLinkTreeController(LinkTreeController linkTreeController) {
         this.linkTreeController = linkTreeController;
         if (this.fileExplorer != null) {
@@ -164,6 +176,7 @@ public class IdeController {
             if (currentPlugin == null) {
                 return;
             }
+            this.currentPlugin = currentPlugin;
 
             File file = path.toFile();
             if (!file.exists()) {
@@ -171,6 +184,8 @@ public class IdeController {
             }
 
             ParseTree tree = currentPlugin.getFileParseTree(file);
+            this.currentParseTree = tree;
+
             Path relativePath = projectRoot.relativize(path);
             List<Pair<Path, ParseTree>> files = List.of(new Pair<>(relativePath, tree));
             linkTreeController.initFiles(currentPlugin, files);
@@ -179,6 +194,7 @@ public class IdeController {
             e.printStackTrace();
         }
     }
+
 
     public void updateContent(Path path, String newContent) {
         editorController.updateContent(path.toString(), newContent);
@@ -311,8 +327,12 @@ public class IdeController {
                 return;
             }
 
+            this.currentPlugin = currentPlugin;
+
             File file = path.toFile();
             ParseTree tree = currentPlugin.getFileParseTree(file);
+
+            this.currentParseTree = tree;
 
             Path relativePath = projectRoot.relativize(path);
             List<Pair<Path, ParseTree>> files = List.of(new Pair<>(relativePath, tree));
@@ -322,6 +342,7 @@ public class IdeController {
             logger.error("Failed to analyze file " + path, e);
         }
     }
+
 
     private String detectLang(Path path) {
         String fileName = path.getFileName().toString();
