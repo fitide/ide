@@ -122,10 +122,6 @@ public abstract class AInternalCodeNode {
     public abstract void getHint(String prefix, Set<HintNode> hints, Path pathToModule);
 
     public void getHighlightning(List<CodeStrForColour> list) {
-        for (KeyWord keyWord : keyWords) {
-            keyWord.getHighlightning(list);
-        }
-
         for (AInternalCodeNode node : childs.values()) {
             node.getHighlightning(list);
         }
