@@ -82,7 +82,9 @@ public abstract class AInternalCodeNode {
         this.setChilds(tree);
 
         this.id = UUID.randomUUID().toString();
-        this.pathToModule = Paths.get(path.toString(), id);
+        if (pathToModule != null) {
+            this.pathToModule = Paths.get(path.toString(), id);
+        }
     }
 
     protected void setKeyWords(ParseTree tree) {

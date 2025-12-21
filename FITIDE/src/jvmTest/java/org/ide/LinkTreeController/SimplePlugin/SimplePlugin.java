@@ -76,7 +76,7 @@ public class SimplePlugin implements Plugin {
     }
 
     @Override
-    public List<ParseTree> getBodeOfModule(ParseTree module) {
+    public List<ParseTree> getChildsOfNode(ParseTree module) {
         return ((SimpleParseTree) module).body;
     }
 

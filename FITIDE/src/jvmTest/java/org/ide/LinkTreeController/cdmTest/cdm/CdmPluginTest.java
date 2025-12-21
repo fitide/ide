@@ -160,7 +160,7 @@ public class CdmPluginTest implements Plugin {
     }
 
     @Override
-    public List<ParseTree> getBodeOfModule(ParseTree module) {
+    public List<ParseTree> getChildsOfNode(ParseTree module) {
         if (module instanceof TestCdmParser.ProgramContext prog) {
             return List.of(module.getChild(0), module.getChild(1));
         }

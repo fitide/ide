@@ -16,23 +16,13 @@ import java.util.Base64;
     public int getCurrentOffset() { return currentOffset; }
 }
 
-// 1. ИСПРАВЛЕННОЕ ПРАВИЛО: Разрешаем код верхнего уровня (инструкции, макросы и т.д.)
-program
-    : NEWLINE* ( section
-      | macro
-      | conditional
-      | while_loop
-      | break_statement
-      | continue_statement
-      | line
-      | until_loop
-      )* End
-    ;
+program : NEWLINE* (section NEWLINE*)* End ;
 
 section
     :  asect_header code_block #absoluteSection
     |  rsect_header code_block #relocatableSection
     | tplate_header code_block #templateSection
+    | macro  #macroSection
     ;
 
 asect_header  :  Asect number NEWLINE+ ;
@@ -51,7 +41,6 @@ macro_labels : macro_label* WS? ;
 macro_first_param : WS macro_param | ;
 
 macro_label :       (macro_piece | macro_variable+ macro_l_sep | macro_l_sep)* macro_variable* LABEL_END ;
-// ПЕРВОЕ ОПРЕДЕЛЕНИЕ: Полный параметр макроса
 macro_param :       (macro_piece | macro_variable+ macro_p_sep | macro_p_sep)* macro_variable* ;
 macro_instruction : (macro_piece | macro_variable+ OTHER | OTHER)+ macro_variable* | macro_variable+ ;
 macro_l_sep : OTHER | WS | COMMA ;
@@ -60,9 +49,6 @@ macro_p_sep : OTHER | WS ;
 macro_piece : macro_text | macro_param_sign | macro_nonce ;
 macro_variable : QUESTION_MARK macro_piece+ ;
 macro_text : Macro | WORD | DECIMAL_NUMBER | STRING | CHAR ;
-
-// ВТОРОЕ ОПРЕДЕЛЕНИЕ: Параметр подстановки $NUMBER.
-// Убедитесь, что оно называется macro_param_sign (или другим уникальным именем), чтобы избежать конфликта.
 macro_param_sign : DOLLAR_SIGN DECIMAL_NUMBER ;
 macro_nonce : APOSTROPHE;
 
@@ -75,6 +61,7 @@ code_block
     | conditional
     | while_loop
     | until_loop
+    | macro
     )*
     ;
 
@@ -92,16 +79,18 @@ labels_declaration: labels (COLON | ANGLE_BRACKET) ;
 labels: name (COMMA name)*;
 arguments : argument (COMMA argument)* ;
 
+branch_mnemonic : WORD ;
+
 conditional : If NEWLINE+ conditions code_block else_clause? Fi NEWLINE+ ;
 conditions : connective_condition* condition NEWLINE+ (Then NEWLINE+)? ;
 connective_condition : condition COMMA WORD NEWLINE+ ;
-condition : code_block Is WORD ;
+condition : code_block Is branch_mnemonic ;
 else_clause : Else NEWLINE+ code_block ;
 
 
-while_loop : While NEWLINE+ code_block Stays WORD NEWLINE+ code_block Wend NEWLINE+ ;
+while_loop : While NEWLINE+ code_block Stays branch_mnemonic NEWLINE+ code_block Wend NEWLINE+ ;
 
-until_loop : Do NEWLINE+ code_block Until WORD NEWLINE+ ;
+until_loop : Do NEWLINE+ code_block Until branch_mnemonic NEWLINE+ ;
 
 argument
     : character

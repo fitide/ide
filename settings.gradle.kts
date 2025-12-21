@@ -34,4 +34,4 @@ plugins {
 }
 
 include(":FITIDE")
-include("plugins")
+include("plugincdm")

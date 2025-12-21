@@ -11,5 +11,6 @@ public enum Tag {
     Declaration,
     Definition,
     Usage,
-    Error
+    Error,
+    Label
 }

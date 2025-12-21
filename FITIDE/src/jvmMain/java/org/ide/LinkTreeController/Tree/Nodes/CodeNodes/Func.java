@@ -255,7 +255,7 @@ public class Func extends AInternalCodeNode {
                 this.definition = setDefDec(defs);
                 this.declaration = setDefDec(decs);
                 if (this.definition == null && this.declaration == null) {
-                    codeType = CodeType.Error;
+                   codeType = CodeType.Error;
                 }
             }
         }

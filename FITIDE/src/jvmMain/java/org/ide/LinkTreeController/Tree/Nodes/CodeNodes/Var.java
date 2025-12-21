@@ -98,9 +98,9 @@ public class Var extends AInternalCodeNode {
             case Usage -> {
                 this.definition = validatePointer(defs.getOrDefault(this.name, null));
                 this.declaration = validatePointer(decs.getOrDefault(this.name, null));
-                if (definition == null && declaration == null) {
-                    codeType = CodeType.Error;
-                }
+                //if (definition == null && declaration == null) {
+                //    codeType = CodeType.Error;
+                //}
             }
         }
     }

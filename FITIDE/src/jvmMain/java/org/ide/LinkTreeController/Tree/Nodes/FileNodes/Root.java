@@ -218,9 +218,10 @@ public class Root extends ARoot {
         if (pathToFile.getNameCount() > 0 && this.childs.containsKey(nextNode)) {
             childs.get(nextNode).getHints(pathToFile.subpath(1, pathToFile.getNameCount()), prefix, listOfHints);
             return;
-        } else if (pathToFile.getNameCount() == 1 && childs.containsKey(pathToFile.toString())) {
-            childs.get(pathToFile.toString()).getHints(pathToFile,  prefix, listOfHints);
-            return;
+        } else if (pathToFile.getNameCount() == 1) {
+            if (this.childs.containsKey(nextNode)) {
+                childs.get(nextNode).getHints(pathToFile, prefix, listOfHints);
+            }
         }
 
         throw new BadPathException("Bad Path");

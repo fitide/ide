@@ -31,8 +31,10 @@ public class Construction extends AInternalCodeNode {
             AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, this.pathToModule));
             args.put(arg.id, arg);
         }
+
         this.bodyPosition = new LinkTreePosition(plugin.getPositionOfModuleBody(tree));
         this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree));
+
     }
 
     public Construction(String name, List<String> keyWords) {
@@ -49,6 +51,10 @@ public class Construction extends AInternalCodeNode {
             AInternalCodeNode arg = TreeBuilder.buildOneChild(plugin, tree, pathToFile, pathToModule);
             args.put(arg.id, arg);
         }
+
+        bodies = List.of(new Pair<>(childs, bodyPosition));
+
+
     }
 
 
@@ -80,6 +86,10 @@ public class Construction extends AInternalCodeNode {
             for (var state : body.a.values()) {
                 state.getHighlightning(list);
             }
+        }
+
+        for (var keyword : this.keyWords) {
+            keyword.getHighlightning(list);
         }
     }
 
