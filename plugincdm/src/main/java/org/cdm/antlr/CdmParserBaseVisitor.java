@@ -249,6 +249,13 @@ public class CdmParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitConditional(CdmParser.ConditionalContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

@@ -215,6 +215,12 @@ public interface CdmParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitArguments(CdmParser.ArgumentsContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CdmParser#branch_mnemonic}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CdmParser#conditional}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -79,16 +79,18 @@ labels_declaration: labels (COLON | ANGLE_BRACKET) ;
 labels: name (COMMA name)*;
 arguments : argument (COMMA argument)* ;
 
+branch_mnemonic : WORD ;
+
 conditional : If NEWLINE+ conditions code_block else_clause? Fi NEWLINE+ ;
 conditions : connective_condition* condition NEWLINE+ (Then NEWLINE+)? ;
 connective_condition : condition COMMA WORD NEWLINE+ ;
-condition : code_block Is WORD ;
+condition : code_block Is branch_mnemonic ;
 else_clause : Else NEWLINE+ code_block ;
 
 
-while_loop : While NEWLINE+ code_block Stays WORD NEWLINE+ code_block Wend NEWLINE+ ;
+while_loop : While NEWLINE+ code_block Stays branch_mnemonic NEWLINE+ code_block Wend NEWLINE+ ;
 
-until_loop : Do NEWLINE+ code_block Until WORD NEWLINE+ ;
+until_loop : Do NEWLINE+ code_block Until branch_mnemonic NEWLINE+ ;
 
 argument
     : character

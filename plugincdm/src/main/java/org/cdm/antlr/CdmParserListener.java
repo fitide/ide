@@ -350,6 +350,16 @@ public interface CdmParserListener extends ParseTreeListener {
 	 */
 	void exitArguments(CdmParser.ArgumentsContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CdmParser#branch_mnemonic}.
+	 * @param ctx the parse tree
+	 */
+	void enterBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CdmParser#branch_mnemonic}.
+	 * @param ctx the parse tree
+	 */
+	void exitBranch_mnemonic(CdmParser.Branch_mnemonicContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CdmParser#conditional}.
 	 * @param ctx the parse tree
 	 */

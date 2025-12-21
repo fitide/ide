@@ -98,14 +98,16 @@ public class CdmPlugin implements Plugin {
         } else if (tree instanceof CdmParser.StandaloneLabelsContext line) {
             //TODO
         } else if (tree instanceof CdmParser.While_loopContext loop) {
-            //TODO
+            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.Until_loopContext loop) {
-            //TODO
+            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.MacroContext macro) {
             //TODO
         } else if (tree instanceof CdmParser.ConditionalContext cond) {
-            //TODO
+            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.ArgumentContext argument) {
+            return new Tag[]{Tag.Var};
+        } else if (tree instanceof CdmParser.Branch_mnemonicContext mnemonic) {
             return new Tag[]{Tag.Var};
         }
 
@@ -126,6 +128,13 @@ public class CdmPlugin implements Plugin {
                 pos.colE = stop.getCharPositionInLine() + stop.getText().length();
                 return pos;
             }
+        } else if (tree instanceof CdmParser.While_loopContext loop) {
+            var arg = loop.branch_mnemonic().getStart();
+            pos.rowS = arg.getLine() - 1;
+            pos.colS = arg.getCharPositionInLine();
+            pos.rowE = arg.getLine() - 1;
+            pos.colE = arg.getCharPositionInLine() + arg.getText().length();
+            return pos;
         }
 
         return null;
@@ -133,8 +142,14 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public Position getPositionOfModuleBody(ParseTree tree) {
-        if (tree instanceof CdmParser.ConditionalContext) {
-            //надо вернуть cdm начало
+        Position pos = new Position();
+        if (tree instanceof CdmParser.While_loopContext loop) {
+            pos.rowS = loop.code_block().get(1).getStart().getLine() - 1;
+            pos.colS = loop.code_block().get(1).getStart().getCharPositionInLine();
+            pos.rowE = loop.code_block().get(1).getStop().getLine() - 1;
+            pos.colE = loop.code_block().get(1).getStop().getCharPositionInLine()
+                    + loop.code_block().get(1).getStop().getText().length();
+            return pos;
         }
 
         return null;
@@ -158,21 +173,7 @@ public class CdmPlugin implements Plugin {
                 if (child instanceof CdmParser.AbsoluteSectionContext section) {
                     if (section.code_block() != null) {
                         for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                            if (section.code_block().getChild(j) instanceof CdmParser.InstructionLineContext instr) { //костыль!!!!
-                                res.add(instr.instructionWithArg());
-                            }
-
-                            if (section.code_block().getChild(j) instanceof CdmParser.ConditionalContext cond) { //костыль!!!!
-                                res.addAll(getChildsOfNode(cond));
-                            }
-
-                            if (section.code_block().getChild(j) instanceof CdmParser.While_loopContext cond) { //костыль!!!!
-                                res.addAll(getChildsOfNode(cond));
-                            }
-
-                            if (section.code_block().getChild(j) instanceof CdmParser.Until_loopContext cond) { //костыль!!!!
-                                res.addAll(getChildsOfNode(cond));
-                            }
+                            res.addAll(getChildsOfNode(section.getChild(j)));
                         }
                     }
                 }
@@ -259,7 +260,11 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getConstructionArgs(ParseTree constr) {
-        return List.of(); //TODO: сделать
+        if (constr instanceof CdmParser.While_loopContext loop) {
+            return List.of(loop.branch_mnemonic());
+        }
+
+        return List.of();
     }
 
     @Override
@@ -275,6 +280,10 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
+        if (node instanceof CdmParser.While_loopContext loop) {
+            return List.of(loop.While(), loop.Stays(), loop.Wend());
+        }
+
         return List.of();
     }
 
@@ -312,6 +321,12 @@ public class CdmPlugin implements Plugin {
             pos.rowE = pos.rowS;
             pos.colE = pos.colS + arg.getText().length();
             return pos;
+        } else if (node instanceof CdmParser.Branch_mnemonicContext arg) {
+            pos.rowS = arg.getStart().getLine() - 1;
+            pos.colS = arg.getStart().getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + arg.getText().length();
+            return pos;
         }
 
         return null;
@@ -330,6 +345,21 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public String getNameOfNode(ParseTree node) {
+        if (node instanceof CdmParser.InstructionWithArgContext instr) {
+            return instr.WORD().getText();
+        } else if (node instanceof CdmParser.Branch_mnemonicContext branch) {
+            return branch.getText();
+        }  else if (node instanceof TerminalNode tnode) {
+            if (tnode.getSymbol().getType() == CdmLexer.While) {
+                return tnode.getSymbol().getText();
+            } else if (tnode.getSymbol().getType() == CdmLexer.Wend) {
+                return tnode.getSymbol().getText();
+            } else if (tnode.getSymbol().getType() == CdmLexer.Stays) {
+                return tnode.getSymbol().getText();
+            }
+
+        }
+
         return "";
     }
 
