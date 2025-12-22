@@ -19,9 +19,16 @@ import org.ide.editor.OpenedFileInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class IdeController {
 
@@ -260,13 +267,19 @@ public class IdeController {
         return editorController.openedFileInfoState();
     }
 
+    private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> pending;
+
     public void onTextChanged(TextFieldValue newValue) {
         editorController.onTextChanged(newValue);
 
         String currentFile = editorController.getCurrentFile();
-        if (currentFile != null) {
-            analyzeAndUpdateLinkTree(Paths.get(currentFile));
-        }
+        if (currentFile == null) return;
+
+        Path path = Paths.get(currentFile);
+
+        if (pending != null) pending.cancel(false);
+        pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
     }
 
     public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException {
@@ -322,25 +335,46 @@ public class IdeController {
                 return;
             }
 
-            Plugin currentPlugin = pluginController.getPluginByExtension(ext);
-            if (currentPlugin == null) {
+            Plugin plugin = pluginController.getPluginByExtension(ext);
+            if (plugin == null) {
+                return;
+            }
+            this.currentPlugin = plugin;
+
+            String content = editorController.getContent(path.toString());
+            if (content == null) {
                 return;
             }
 
-            this.currentPlugin = currentPlugin;
+            Path shadow = getShadowFilePath(path);
 
-            File file = path.toFile();
-            ParseTree tree = currentPlugin.getFileParseTree(file);
+            Files.createDirectories(shadow.getParent());
+            Files.writeString(
+                    shadow,
+                    content,
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE
+            );
 
+            ParseTree tree = plugin.getFileParseTree(shadow.toFile());
             this.currentParseTree = tree;
 
             Path relativePath = projectRoot.relativize(path);
             List<Pair<Path, ParseTree>> files = List.of(new Pair<>(relativePath, tree));
+            linkTreeController.updateTree(plugin, files);
 
-            linkTreeController.updateTree(currentPlugin, files);
         } catch (Exception e) {
             logger.error("Failed to analyze file " + path, e);
         }
+    }
+
+    private Path getShadowFilePath(Path originalPath) {
+        Path relative = projectRoot.relativize(originalPath);
+        return projectRoot
+                .resolve(".fitide-cache")
+                .resolve(relative);
     }
 
 

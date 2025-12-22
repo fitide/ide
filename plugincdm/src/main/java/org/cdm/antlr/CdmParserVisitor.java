@@ -75,90 +75,6 @@ public interface CdmParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMacro_header(CdmParser.Macro_headerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_body}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_body(CdmParser.Macro_bodyContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_line}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_line(CdmParser.Macro_lineContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_labels}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_labels(CdmParser.Macro_labelsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_first_param}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_first_param(CdmParser.Macro_first_paramContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_label}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_label(CdmParser.Macro_labelContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_param}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_param(CdmParser.Macro_paramContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_instruction}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_instruction(CdmParser.Macro_instructionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_l_sep}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_l_sep(CdmParser.Macro_l_sepContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_p_sep}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_p_sep(CdmParser.Macro_p_sepContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_piece}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_piece(CdmParser.Macro_pieceContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_variable}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_variable(CdmParser.Macro_variableContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_text}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_text(CdmParser.Macro_textContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_param_sign}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_param_sign(CdmParser.Macro_param_signContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CdmParser#macro_nonce}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMacro_nonce(CdmParser.Macro_nonceContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link CdmParser#code_block}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -203,11 +119,11 @@ public interface CdmParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLabels_declaration(CdmParser.Labels_declarationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link CdmParser#labels}.
+	 * Visit a parse tree produced by {@link CdmParser#label}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLabels(CdmParser.LabelsContext ctx);
+	T visitLabel(CdmParser.LabelContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CdmParser#arguments}.
 	 * @param ctx the parse tree

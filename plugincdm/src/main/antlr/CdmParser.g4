@@ -31,27 +31,8 @@ tplate_header : Tplate name   NEWLINE+ ;
 
 
 //macros
-macro : macro_header macro_body MACRO_FOOTER ;
+macro : macro_header code_block MACRO_FOOTER ;
 macro_header : WS? Macro WS? WORD WS? SLASH WS? DECIMAL_NUMBER WS? NEWLINE ;
-macro_body : ((WS? NEWLINE) | macro_line)*? ;
-
-macro_line :macro_labels (macro_instruction macro_first_param)? (COMMA macro_param)* NEWLINE;
-
-macro_labels : macro_label* WS? ;
-macro_first_param : WS macro_param | ;
-
-macro_label :       (macro_piece | macro_variable+ macro_l_sep | macro_l_sep)* macro_variable* LABEL_END ;
-macro_param :       (macro_piece | macro_variable+ macro_p_sep | macro_p_sep)* macro_variable* ;
-macro_instruction : (macro_piece | macro_variable+ OTHER | OTHER)+ macro_variable* | macro_variable+ ;
-macro_l_sep : OTHER | WS | COMMA ;
-macro_p_sep : OTHER | WS ;
-
-macro_piece : macro_text | macro_param_sign | macro_nonce ;
-macro_variable : QUESTION_MARK macro_piece+ ;
-macro_text : Macro | WORD | DECIMAL_NUMBER | STRING | CHAR ;
-macro_param_sign : DOLLAR_SIGN DECIMAL_NUMBER ;
-macro_nonce : APOSTROPHE;
-
 
 code_block
     :
@@ -75,8 +56,8 @@ line
 
 instructionWithArg: WORD arguments? ;
 
-labels_declaration: labels (COLON | ANGLE_BRACKET) ;
-labels: name (COMMA name)*;
+labels_declaration: label (COLON | ANGLE_BRACKET) ;
+label: name;
 arguments : argument (COMMA argument)* ;
 
 branch_mnemonic : WORD ;
@@ -93,11 +74,12 @@ while_loop : While NEWLINE+ code_block Stays branch_mnemonic NEWLINE+ code_block
 until_loop : Do NEWLINE+ code_block Until branch_mnemonic NEWLINE+ ;
 
 argument
-    : character
+    : '$'?
+    (character
     | string
     | register
     | addr_expr
-    | byte_expr
+    | byte_expr)
     ;
 
 byte_expr : name OPEN_PAREN addr_expr CLOSE_PAREN ;

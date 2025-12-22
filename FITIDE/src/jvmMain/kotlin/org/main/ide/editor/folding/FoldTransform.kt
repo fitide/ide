@@ -1,6 +1,7 @@
 package org.main.ide.editor.folding
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
@@ -12,55 +13,72 @@ class FoldingTransformation(
         private set
 
     override fun filter(text: AnnotatedString): TransformedText {
-        val originalLines = text.text.split('\n')
+        val originalText = text.text
+        val lineStarts = computeLineStarts(originalText)
+        val lineCount = lineStarts.size
 
-        val visibleLines = mutableListOf<String>()
-        val visibleToOriginal = mutableListOf<Int>()
+        val visibleLineIndices = mutableListOf<Int>()
+        for (i in 0 until lineCount) {
+            if (!isHidden(i)) visibleLineIndices.add(i)
+        }
+        lastVisibleToOriginal = visibleLineIndices.toIntArray()
 
-        var line = 0
-        while (line < originalLines.size) {
-            val fold = folds.firstOrNull { it.collapsed && it.startLine == line }
+        val transformedBuilder = AnnotatedString.Builder()
+        val mapping = FoldingOffsetMapping()
 
-            if (fold != null) {
-                val header = originalLines[line]
-                val footer = originalLines[fold.endLine]
-                visibleLines += "$header … $footer"
-                visibleToOriginal += line
-                line = fold.endLine + 1
-            } else {
-                visibleLines += originalLines[line]
-                visibleToOriginal += line
-                line++
+        for (lineIdx in visibleLineIndices) {
+            val start = lineStarts[lineIdx]
+            val end = if (lineIdx + 1 < lineCount) lineStarts[lineIdx + 1] else originalText.length
+
+            val currentTransformedStart = transformedBuilder.length
+
+            // ВАЖНО: subSequence сохраняет цвета из предыдущего шага (подсветки)
+            transformedBuilder.append(text.subSequence(start, end))
+
+            mapping.addRange(
+                originalStart = start,
+                transformedStart = currentTransformedStart,
+                length = end - start
+            )
+        }
+
+        return TransformedText(transformedBuilder.toAnnotatedString(), mapping)
+    }
+
+    private fun isHidden(line: Int): Boolean =
+        folds.any { it.collapsed && line in (it.startLine + 1 until it.endLine) }
+
+    private fun computeLineStarts(text: String): IntArray {
+        val starts = mutableListOf(0)
+        text.forEachIndexed { i, c -> if (c == '\n') starts.add(i + 1) }
+        return starts.toIntArray()
+    }
+}
+
+class FoldingOffsetMapping : OffsetMapping {
+    private val ranges = mutableListOf<MappingRange>()
+    private data class MappingRange(val origStart: Int, val transStart: Int, val length: Int)
+
+    fun addRange(originalStart: Int, transformedStart: Int, length: Int) {
+        ranges.add(MappingRange(originalStart, transformedStart, length))
+    }
+
+    override fun originalToTransformed(offset: Int): Int {
+        for (range in ranges) {
+            if (offset >= range.origStart && offset < range.origStart + range.length) {
+                return range.transStart + (offset - range.origStart)
             }
         }
+        return ranges.firstOrNull { it.origStart > offset }?.transStart
+            ?: ranges.lastOrNull()?.let { it.transStart + it.length } ?: 0
+    }
 
-        lastVisibleToOriginal = visibleToOriginal.toIntArray()
-        val transformedText = visibleLines.joinToString("\n")
-        val max = transformedText.length
-        val safeSpanStyles = text.spanStyles.mapNotNull { range ->
-            val s = range.start.coerceIn(0, max)
-            val e = range.end.coerceIn(0, max)
-            if (s >= e) null else AnnotatedString.Range(range.item, s, e)
+    override fun transformedToOriginal(offset: Int): Int {
+        for (range in ranges) {
+            if (offset >= range.transStart && offset < range.transStart + range.length) {
+                return range.origStart + (offset - range.transStart)
+            }
         }
-        val safeParagraphStyles = text.paragraphStyles.mapNotNull { range ->
-            val s = range.start.coerceIn(0, max)
-            val e = range.end.coerceIn(0, max)
-            if (s >= e) null else AnnotatedString.Range(range.item, s, e)
-        }
-
-        val transformedAnnotated = AnnotatedString(
-            text = transformedText,
-            spanStyles = safeSpanStyles,
-            paragraphStyles = safeParagraphStyles
-        )
-
-        return TransformedText(
-            transformedAnnotated,
-            FoldingOffsetMapping(
-                originalText = text.text,
-                transformedText = transformedText,
-                visibleToOriginal = lastVisibleToOriginal
-            )
-        )
+        return ranges.lastOrNull()?.let { it.origStart + it.length } ?: 0
     }
 }

@@ -18,7 +18,7 @@ Tplate : 'tplate' ;
 Until : 'until' ;
 Wend : 'wend' ;
 While : 'while' ;
-MACRO_FOOTER : [\t ]* 'mend' [\t ]* '\r'? '\n' ;
+MACRO_FOOTER : WS* 'mend' WS* NEWLINE ;
 
 DOT : '.' ;
 COMMA : ',' ;
