@@ -93,7 +93,7 @@ public class CdmPlugin implements Plugin {
         } else if (tree instanceof CdmParser.InstructionWithArgContext line) {
             return new Tag[]{Tag.Func};
         } else if (tree instanceof CdmParser.LabelContext line) {
-            return new Tag[]{Tag.Var};
+            return new Tag[]{Tag.Definition};
         } else if (tree instanceof CdmParser.While_loopContext loop) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.Until_loopContext loop) {
