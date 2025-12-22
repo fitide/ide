@@ -86,17 +86,14 @@ public class CdmPlugin implements Plugin {
     @Override
     public Tag[] getTagsOfNode(ParseTree tree) {
         if (tree instanceof CdmParser.MacroSectionContext section) {
-            return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.AbsoluteSectionContext section) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.RelocatableSectionContext section) {
             return new Tag[]{Tag.Construction};
-        } else if (tree instanceof CdmParser.Code_blockContext code_block) {
-            //TODO
         } else if (tree instanceof CdmParser.InstructionWithArgContext line) {
             return new Tag[]{Tag.Func};
-        } else if (tree instanceof CdmParser.StandaloneLabelsContext line) {
-            //TODO
+        } else if (tree instanceof CdmParser.LabelContext line) {
+            return new Tag[]{Tag.Var};
         } else if (tree instanceof CdmParser.While_loopContext loop) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.Until_loopContext loop) {
@@ -132,6 +129,8 @@ public class CdmPlugin implements Plugin {
                 pos.colE = stop.getCharPositionInLine() + stop.getText().length();
                 return pos;
             }
+        } else if (tree instanceof CdmParser.MacroContext macro) {
+
         } else if (tree instanceof CdmParser.While_loopContext loop) {
             var arg = loop.branch_mnemonic().getStart();
             pos.rowS = arg.getLine() - 1;
@@ -223,18 +222,10 @@ public class CdmPlugin implements Plugin {
     @Override
     public List<ParseTree> getChildsOfNode(ParseTree module) {
         var res = new ArrayList<ParseTree>();
-        //TODO: необходимо добавить поддержку секций, сейчас просто их содержимое собирается
         if (module instanceof CdmParser.ProgramContext program) {
-            for (var child : program.section()) {
-                if (child instanceof CdmParser.MacroSectionContext) {
-                    continue;
-                }
+            res.addAll(program.section());
+        } else if (module instanceof CdmParser.MacroSectionContext section) {
 
-                res.add(child);
-
-            }
-//        } else if (module instanceof CdmParser.MacroSectionContext section) {
-//            //TODO
         } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
             if (section.code_block() != null) {
                 for (int j = 0; j < section.code_block().getChildCount(); j++) {
@@ -249,20 +240,21 @@ public class CdmPlugin implements Plugin {
             }
         } else if (module instanceof CdmParser.Code_blockContext code_block) {
             for (var child : code_block.children) {
-                if (child instanceof CdmParser.InstructionLineContext instr) {
-                    res.add(instr.instructionWithArg());
-                } else {
-                    res.add(child);
+                if (child instanceof CdmParser.LineContext line) {
+                    res.addAll(getChildsOfNode(line));
+                    continue;
                 }
+
+                res.add(child);
             }
+        } else if (module instanceof CdmParser.StandaloneLabelsContext line) {
+            res.add(line.labels_declaration().label());
         } else if (module instanceof CdmParser.InstructionLineContext line) {
             if (line.labels_declaration() != null) {
-                res.addAll(line.labels_declaration().children);
+                res.add(line.labels_declaration().label());
             }
 
             res.add(line.instructionWithArg());
-        } else if (module instanceof CdmParser.StandaloneLabelsContext line) {
-            //TODO
         } else if (module instanceof CdmParser.While_loopContext loop) {
             for (var child : loop.code_block()) {
                 for (var line : child.children) {
@@ -282,7 +274,7 @@ public class CdmPlugin implements Plugin {
                 }
             }
         } else if (module instanceof CdmParser.MacroContext macro) {
-            //TODO
+            res.addAll(getChildsOfNode(macro.code_block()));
         } else if (module instanceof CdmParser.ConditionalContext cond) {
             var conditions = cond.conditions();
             if (conditions.connective_condition() != null) {
@@ -386,7 +378,7 @@ public class CdmPlugin implements Plugin {
     public String getType(ParseTree tree) {
         if (tree instanceof CdmParser.InstructionWithArgContext) {
             return "void";
-        } else if (tree instanceof CdmParser.LabelsContext) {
+        } else if (tree instanceof CdmParser.LabelContext) {
             return "integer";
         } else if (tree instanceof CdmParser.RegisterContext) {
             return "register";
@@ -440,6 +432,13 @@ public class CdmPlugin implements Plugin {
             return pos;
         } else if (node instanceof CdmParser.NameContext name) {
             var sym = name.getStart();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
+        } else if (node instanceof CdmParser.LabelContext label) {
+            var sym = label.name().getStart();
             pos.rowS = sym.getLine() - 1;
             pos.colS = sym.getCharPositionInLine();
             pos.rowE = pos.rowS;
@@ -656,6 +655,7 @@ public class CdmPlugin implements Plugin {
         funcs.put("crc", new ExternalFunc(voidType, "crc", Collections.emptyList()));
         funcs.put("halt", new ExternalFunc(voidType, "halt", Collections.emptyList()));
         funcs.put("wait", new ExternalFunc(voidType, "wait", Collections.emptyList()));
+        funcs.put("dc", new ExternalFunc(voidType, "dc", Collections.emptyList()));
 
         return funcs;
     }
