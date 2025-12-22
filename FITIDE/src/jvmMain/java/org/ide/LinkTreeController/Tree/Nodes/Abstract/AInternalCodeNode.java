@@ -224,4 +224,11 @@ public abstract class AInternalCodeNode {
             child.setTypes(types);
         }
     }
+
+    public void updateFilePath(Path newPath) {
+        this.pathToFile = newPath;
+        for (var child :childs.values()) {
+            child.updateFilePath(newPath);
+        }
+    }
 }

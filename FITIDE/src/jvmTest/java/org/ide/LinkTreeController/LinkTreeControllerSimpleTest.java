@@ -28,8 +28,7 @@ class LinkTreeControllerSimpleTest {
     static void setUp() {
         controller = new LinkTreeControllerImpl();
         try {
-            //TODO: надо класть в resources
-            FEController = new FileExplorerController("C:\\Users\\user\\IdeaProjects\\ide\\FITIDE\\src\\jvmTest\\java\\org\\ide\\LinkTreeController");
+            FEController = new FileExplorerController("src\\jvmTest\\resources");
         } catch (UnnableToCreateFileException e) {
             System.out.println(e.toString());
             throw new RuntimeException(e);
@@ -52,7 +51,7 @@ class LinkTreeControllerSimpleTest {
 
     @Test
     void testSyntax() {
-        var list = controller.getSyntaxHighlightning(Paths.get("LinkTreeController","test.txt"));
+        var list = controller.getSyntaxHighlightning(Paths.get("resources","test.txt"));
         for (var node : list) {
             System.out.println(node);
         }
