@@ -3,6 +3,8 @@ package org.main.ide.editor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -48,6 +50,7 @@ fun EditorView(ide: IdeController) {
     val textValue = opened.textFieldValue.value
     val vScroll = rememberScrollState()
     val hScroll = rememberScrollState()
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
     val fontSize = 14.sp
     val lineHeight = 18.sp
@@ -55,13 +58,16 @@ fun EditorView(ide: IdeController) {
 
     var folds by remember { mutableStateOf<List<FoldRegion>>(emptyList()) }
     var syntaxHighlight by remember { mutableStateOf<List<CodeStrForColour>>(emptyList()) }
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    var caretPx by remember { mutableStateOf(Offset.Zero) }
+
+    val density = LocalDensity.current
+    val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(textValue.text) {
         if (textValue.text.isEmpty()) return@LaunchedEffect
         delay(300)
-
         syntaxHighlight = ide.getSyntaxHighlightingForCurrentFile()
-
         val tree = ide.getCurrentParseTree()
         val plugin = ide.getCurrentPlugin()
         if (tree != null && plugin != null) {
@@ -100,12 +106,6 @@ fun EditorView(ide: IdeController) {
     var hintsVisible by remember { mutableStateOf(false) }
     var selectedHint by remember { mutableStateOf(0) }
 
-    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-    var caretPx by remember { mutableStateOf(Offset.Zero) }
-
-    val density = LocalDensity.current
-    val focusRequester = remember { FocusRequester() }
-
     LaunchedEffect(textValue.selection, textLayoutResult) {
         val layout = textLayoutResult ?: return@LaunchedEffect
         val transformed = visualTransformation.filter(AnnotatedString(textValue.text))
@@ -113,9 +113,15 @@ fun EditorView(ide: IdeController) {
         val offsetSafe = mapped.coerceIn(0, layout.layoutInput.text.length)
 
         val rect = layout.getCursorRect(offsetSafe)
-        val line = layout.getLineForOffset(offsetSafe)
+        caretPx = Offset(x = rect.left, y = rect.top)
 
-        caretPx = Offset(x = rect.left, y = layout.getLineBottom(line))
+        val extraPadding = with(density) { 24.dp.toPx() }
+        bringIntoViewRequester.bringIntoView(
+            rect.copy(
+                top = rect.top - extraPadding,
+                bottom = rect.bottom + extraPadding
+            )
+        )
     }
 
     Box(
@@ -162,8 +168,17 @@ fun EditorView(ide: IdeController) {
                     hintsVisible = false
                 }
             },
-            modifier = Modifier.fillMaxSize().focusRequester(focusRequester).verticalScroll(vScroll),
-            textStyle = TextStyle(color = UIColors.TextPrimary, fontSize = fontSize, lineHeight = lineHeight, fontFamily = FontFamily.Monospace),
+            modifier = Modifier
+                .fillMaxSize()
+                .focusRequester(focusRequester)
+                .verticalScroll(vScroll)
+                .bringIntoViewRequester(bringIntoViewRequester),
+            textStyle = TextStyle(
+                color = UIColors.TextPrimary,
+                fontSize = fontSize,
+                lineHeight = lineHeight,
+                fontFamily = FontFamily.Monospace
+            ),
             cursorBrush = SolidColor(UIColors.TextPrimary),
             visualTransformation = visualTransformation,
             onTextLayout = { textLayoutResult = it },
@@ -178,7 +193,12 @@ fun EditorView(ide: IdeController) {
                         lineHeight = lineHeight,
                         topPadding = editorPadding
                     )
-                    Box(modifier = Modifier.weight(1f).horizontalScroll(hScroll).padding(top = editorPadding, start = 8.dp, bottom = editorPadding)) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .horizontalScroll(hScroll)
+                            .padding(top = editorPadding, start = 8.dp, bottom = editorPadding)
+                    ) {
                         innerTextField()
                     }
                 }
@@ -187,7 +207,7 @@ fun EditorView(ide: IdeController) {
 
         if (hintsVisible && hints.isNotEmpty()) {
             val xDp = with(density) { (caretPx.x).toDp() + 8.dp }
-            val yDp = with(density) { (caretPx.y).toDp() + editorPadding }
+            val yDp = with(density) { (caretPx.y).toDp() + lineHeight.toDp() + editorPadding }
 
             HintPopup(
                 hints = hints,
