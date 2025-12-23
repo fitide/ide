@@ -474,6 +474,12 @@ public class CdmPlugin implements Plugin {
     @Override
     public Position getBounds(ParseTree node) {
         if (node instanceof ParserRuleContext ctx) {
+            var start = ctx.getStart();
+            var stop = ctx.getStop();
+            if (start == null || stop == null) {
+                return new Position(0, 0, 0, 0);
+            }
+
             return new Position(ctx.getStart().getLine() - 1,
                     ctx.getStart().getCharPositionInLine(),
                     ctx.getStop().getLine() - 1,
