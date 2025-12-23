@@ -388,7 +388,7 @@ public class IdeController {
     private Path getShadowFilePath(Path originalPath) {
         Path relative = projectRoot.relativize(originalPath);
         return projectRoot
-                .resolve(".ide/.fitide-cache")
+                .resolve(".ide/.cache")
                 .resolve(relative);
     }
 

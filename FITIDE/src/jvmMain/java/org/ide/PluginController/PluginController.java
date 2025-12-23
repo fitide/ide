@@ -27,7 +27,7 @@ public class PluginController {
             ParseException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException,
             InstantiationException, IllegalAccessException {
 
-        this.IDEConfigDir = new File(IDEDir + File.separator + "conf");
+        this.IDEConfigDir = new File(IDEDir + File.separator + ".ide" + File.separator + "conf");
         if (!IDEConfigDir.exists()) {
             if (!IDEConfigDir.mkdir()) throw new RuntimeException("Unable to create config");
         }
