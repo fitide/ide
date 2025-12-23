@@ -417,3 +417,9 @@ private fun LabeledField(
         content()
     }
 }
+
+fun getCompileStr(conf: Config): String {
+    val builder = StringBuilder()
+    builder.append(conf.pathToInterpreter).append(" ").append(conf.main).append(" ").append(conf.args)
+    return builder.toString()
+}

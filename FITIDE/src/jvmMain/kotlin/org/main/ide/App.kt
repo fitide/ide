@@ -22,6 +22,7 @@ import org.main.ide.buttonbar.ButtonBarHorizontal
 import org.main.ide.buttonbar.ButtonBarVertical
 import org.main.ide.config.Config
 import org.main.ide.config.ConfigView
+import org.main.ide.config.getCompileStr
 import org.main.ide.config.parseConfigsJson
 import org.main.ide.editor.EditorView
 import org.main.ide.fileexplorer.FileExplorer
@@ -83,6 +84,7 @@ fun App(
     uiState: UIState,
 ) {
     var isConfigOpen by remember { mutableStateOf(false) }
+    var isRun by remember { mutableStateOf(false) }
     var showNoProjectDialog by remember { mutableStateOf(false) }
     var configs by remember { mutableStateOf(listOf(Config())) }
     var selectedConfigIndex by remember { mutableStateOf(0) }
@@ -107,6 +109,11 @@ fun App(
         }
     }
 
+    LaunchedEffect(isRun) {
+        val compileString = getCompileStr(configs.get(selectedConfigIndex))
+        uiState.terminalController.sendCommand(compileString)
+    }
+
     MaterialTheme {
         Box(
             modifier = Modifier
@@ -128,6 +135,10 @@ fun App(
                             } else {
                                 isConfigOpen = true
                             }
+                        },
+                        onRunClick = {
+                          if (fileExplorer.currentProject != null && (configs.size > selectedConfigIndex))
+                              isRun = true
                         }
                     )
                 }

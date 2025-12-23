@@ -4,6 +4,7 @@ import com.jediterm.terminal.TtyConnector
 import com.jediterm.terminal.ui.JediTermWidget
 import com.pty4j.PtyProcess
 import com.pty4j.PtyProcessBuilder
+import org.main.ide.config.Config
 import java.nio.charset.StandardCharsets
 
 class TerminalController(workingDirectory: String) {
@@ -85,5 +86,10 @@ class TerminalController(workingDirectory: String) {
         }
 
         widget.start()
+    }
+
+    fun sendCommand(command: String) {
+        val res = "$command\n"
+        widget.ttyConnector?.write(res)
     }
 }
