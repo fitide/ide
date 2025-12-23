@@ -110,8 +110,11 @@ fun App(
     }
 
     LaunchedEffect(isRun) {
-        val compileString = getCompileStr(configs.get(selectedConfigIndex))
-        uiState.terminalController.sendCommand(compileString)
+        if (isRun) {
+            val compileString = getCompileStr(configs.get(selectedConfigIndex))
+            uiState.terminalController.sendCommand(compileString)
+            isRun = false
+        }
     }
 
     MaterialTheme {
