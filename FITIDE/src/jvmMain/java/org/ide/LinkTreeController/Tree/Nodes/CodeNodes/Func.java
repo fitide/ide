@@ -268,6 +268,9 @@ public class Func extends AInternalCodeNode {
             case Usage -> {
                 this.definition = setDefDec(defs);
                 this.declaration = setDefDec(decs);
+                for (var arg : args.values()) {
+                    arg.setDefinitionsAndDeclarations(defs, decs);
+                }
                 if (this.definition == null && this.declaration == null) {
                    codeType = CodeType.Error;
                 }

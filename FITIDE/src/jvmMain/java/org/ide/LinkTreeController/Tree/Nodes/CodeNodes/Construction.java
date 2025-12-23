@@ -243,7 +243,7 @@ public class Construction extends AInternalCodeNode {
             var tempDecs = new HashMap<>(decs);
 
             for (var node : body.a.values()) {
-                node.setDefinitionsAndDeclarations(defs, decs);
+                node.addDefinitionsAndDeclarations(defs, decs);
             }
 
             for (var node : body.a.values()) {
