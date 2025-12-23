@@ -226,38 +226,26 @@ public class CdmPlugin implements Plugin {
         if (module instanceof CdmParser.ProgramContext program) {
             res.addAll(program.section());
         } else if (module instanceof CdmParser.MacroSectionContext section) {
-dq            res.addAll(getChildsOfNode(section.macro().code_block()));
+            res.addAll(getChildsOfNode(section.macro().code_block()));
         } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
             if (section.code_block() != null) {
-                for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                    var child = section.code_block().getChild(j);
-                    if (child instanceof CdmParser.InstructionLineContext line) {
-                        res.addAll(getChildsOfNode(line));
-                    } else {
-                        res.add(section.code_block().getChild(j));
-                    }
-                }
+                res.addAll(getChildsOfNode(section.code_block()));
             }
         } else if (module instanceof CdmParser.RelocatableSectionContext section) {
             if (section.code_block() != null) {
-                for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                    var child = section.code_block().getChild(j);
-                    if (child instanceof CdmParser.InstructionLineContext line) {
-                        res.addAll(getChildsOfNode(line));
-                    } else {
-                        res.add(section.code_block().getChild(j));
-                    }
-                }
+                res.addAll(getChildsOfNode(section.code_block()));
             }
         } else if (module instanceof CdmParser.Code_blockContext code_block) {
             if (code_block.children != null) {
-                for (var child : code_block.children) {
-                    if (child instanceof CdmParser.LineContext line) {
+                for (int j = 0; j < code_block.getChildCount(); j++) {
+                    var child = code_block.getChild(j);
+                    if (child instanceof CdmParser.InstructionLineContext line) {
                         res.addAll(getChildsOfNode(line));
-                        continue;
+                    } else if (child instanceof CdmParser.StandaloneLabelsContext line) {
+                        res.add(line.labels_declaration().label());
+                    } else {
+                        res.add(code_block.getChild(j));
                     }
-
-                    res.add(child);
                 }
             }
         } else if (module instanceof CdmParser.StandaloneLabelsContext line) {
