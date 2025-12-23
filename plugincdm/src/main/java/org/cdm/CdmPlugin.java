@@ -511,6 +511,10 @@ public class CdmPlugin implements Plugin {
             return macro.macro().macro_header().WORD().getText();
         } else if (node instanceof CdmParser.MacroContext macro) {
             return macro.macro_header().WORD().getText();
+        } else if (node instanceof CdmParser.LabelContext label) {
+            return label.getText();
+        } else if (node instanceof CdmParser.ArgumentContext arg) {
+            return arg.getText();
         }
 
         return "";
