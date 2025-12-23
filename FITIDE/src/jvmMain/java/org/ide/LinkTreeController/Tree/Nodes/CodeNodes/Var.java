@@ -125,6 +125,7 @@ public class Var extends AInternalCodeNode {
 
     @Override
     public AInternalCodeNode findByPos(LinkTreePosition position) {
+        if (!contains(this.wholePos, position)) return null;
         return this;
     }
 }
