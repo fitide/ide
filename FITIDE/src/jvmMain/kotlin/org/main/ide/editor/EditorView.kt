@@ -191,7 +191,8 @@ fun EditorView(ide: IdeController) {
                             folds = folds.map { if (it.startLine == originalLine) it.copy(collapsed = !it.collapsed) else it }
                         },
                         lineHeight = lineHeight,
-                        topPadding = editorPadding
+                        topPadding = editorPadding,
+                        ide = ide
                     )
                     Box(
                         modifier = Modifier

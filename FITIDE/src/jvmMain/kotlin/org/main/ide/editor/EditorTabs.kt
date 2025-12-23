@@ -71,7 +71,6 @@ fun EditorTabs(
                     modifier = Modifier
                         .clickable {
                             ide.closeFile(path);
-                            openFiles = ide.openedFiles
                         }
                         .padding(start = 4.dp)
                 )
