@@ -91,5 +91,6 @@ class TerminalController(workingDirectory: String) {
     fun sendCommand(command: String) {
         val res = "$command\n"
         widget.ttyConnector?.write(res)
+        widget.ttyConnector?.write("\u000D")
     }
 }
