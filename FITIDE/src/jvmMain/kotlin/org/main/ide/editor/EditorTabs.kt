@@ -22,9 +22,9 @@ fun EditorTabs(
 ) {
     ide.openedFileInfoState().value
 
-    val openFiles: List<Path> = ide.openedFiles
+    var openFiles: List<Path> = ide.openedFiles
 
-    val currentFile: Path? = ide.openedFilePath
+    var currentFile: Path? = ide.openedFilePath
 
     Row(
         modifier = modifier
@@ -49,10 +49,7 @@ fun EditorTabs(
                             UIColors.Panel
                     )
                     .clickable {
-                        val value = ide.changeOpenedFile(path)
-                        if (value != null) {
-                            ide.onTextChanged(value)
-                        }
+                        ide.changeCurrentFile(path)
                     }
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -74,6 +71,7 @@ fun EditorTabs(
                     modifier = Modifier
                         .clickable {
                             ide.closeFile(path);
+                            openFiles = ide.openedFiles
                         }
                         .padding(start = 4.dp)
                 )

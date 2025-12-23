@@ -230,7 +230,7 @@ public class CdmPlugin implements Plugin {
         } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
             if (section.code_block() != null) {
                 for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                    res.addAll(getChildsOfNode(section.getChild(j)));
+                    res.addAll(getChildsOfNode(section.code_block().getChild(j)));
                 }
             }
         } else if (module instanceof CdmParser.RelocatableSectionContext section) {

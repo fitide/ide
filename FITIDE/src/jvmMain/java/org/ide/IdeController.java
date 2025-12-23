@@ -270,6 +270,16 @@ public class IdeController {
     private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> pending;
 
+    public void changeCurrentFile(Path path) {
+        if (path == null) return;
+        editorController.changeOpenedFile(path.toString());
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return;
+
+        if (pending != null) pending.cancel(false);
+        pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+    }
+
     public void onTextChanged(TextFieldValue newValue) {
         editorController.onTextChanged(newValue);
 
@@ -288,10 +298,6 @@ public class IdeController {
 
     public List<Path> getOpenedFiles() {
         return editorController.getOpenFiles();
-    }
-
-    public TextFieldValue changeOpenedFile(Path path) {
-        return editorController.changeOpenedFile(path.toString());
     }
 
     public void closeFile(Path path) {

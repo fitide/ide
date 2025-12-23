@@ -39,6 +39,10 @@ public class EditorController {
     }
 
     public void closeFile(String filename) {
+        if (currentFile == null) {
+            return;
+        }
+
         if (currentFile.equals(filename)) {
             if (files.size() != 0) {
                 currentFile = files.keySet().iterator().next();
