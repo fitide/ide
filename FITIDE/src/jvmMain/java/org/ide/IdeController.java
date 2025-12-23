@@ -10,6 +10,7 @@ import org.ide.FileExplorerController.Exceptions.UnnableToWriteInFileException;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.LinkTreeController.LinkTreeController;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
@@ -416,4 +417,28 @@ public class IdeController {
 
         return compileStringBuilder.toString();
     }
+
+    public GoToResult goToDefinition(int row, int col) {
+        if (linkTreeController == null || projectRoot == null) return null;
+
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return null;
+
+        Path absolutePath = Paths.get(currentFile);
+        Path relativePath = projectRoot.relativize(absolutePath).normalize();
+
+        AInternalCodeNode def = linkTreeController.goToDefinition(relativePath, row, col);
+        if (def == null || def.pathToFile == null) return null;
+
+        var pos = def.wholePos;
+        if (pos == null) return null;
+
+        Path defAbs = projectRoot.resolve(def.pathToFile).normalize();
+
+        int targetRow = pos.rowS;
+        int targetCol = pos.colS;
+
+        return new GoToResult(defAbs, targetRow, targetCol);
+    }
+
 }

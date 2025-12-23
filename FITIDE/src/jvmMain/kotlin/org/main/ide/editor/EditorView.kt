@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import org.ide.GoToResult
 import org.ide.IdeController
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode
@@ -63,6 +64,28 @@ fun EditorView(ide: IdeController) {
 
     val density = LocalDensity.current
     val focusRequester = remember { FocusRequester() }
+
+    var pendingGoTo by remember { mutableStateOf<GoToResult?>(null) }
+    var scrollToCaretAfterGoTo by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pendingGoTo) {
+        val req = pendingGoTo ?: return@LaunchedEffect
+        try {
+            ide.openFile(req.file)
+
+            val openedNow = ide.openedFileInfoState().value ?: return@LaunchedEffect
+            val curText = openedNow.textFieldValue.value.text
+
+            val off = rowColToOffset0(curText, req.row, req.col)
+            ide.onTextChanged(openedNow.textFieldValue.value.copy(selection = TextRange(off)))
+
+            focusRequester.requestFocus()
+            scrollToCaretAfterGoTo = true
+        } catch (_: Exception) {
+        } finally {
+            pendingGoTo = null
+        }
+    }
 
     LaunchedEffect(textValue.text) {
         if (textValue.text.isEmpty()) return@LaunchedEffect
@@ -124,6 +147,26 @@ fun EditorView(ide: IdeController) {
         )
     }
 
+    LaunchedEffect(scrollToCaretAfterGoTo, textLayoutResult, textValue.selection) {
+        if (!scrollToCaretAfterGoTo) return@LaunchedEffect
+        val layout = textLayoutResult ?: return@LaunchedEffect
+
+        val transformed = visualTransformation.filter(AnnotatedString(textValue.text))
+        val mapped = transformed.offsetMapping.originalToTransformed(textValue.selection.end)
+        val offsetSafe = mapped.coerceIn(0, layout.layoutInput.text.length)
+
+        val rect = layout.getCursorRect(offsetSafe)
+        val extraPadding = with(density) { 24.dp.toPx() }
+        bringIntoViewRequester.bringIntoView(
+            rect.copy(
+                top = rect.top - extraPadding,
+                bottom = rect.bottom + extraPadding
+            )
+        )
+
+        scrollToCaretAfterGoTo = false
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -131,6 +174,17 @@ fun EditorView(ide: IdeController) {
             .onPreviewKeyEvent { event ->
                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                 val mod = event.isCtrlPressed || event.isMetaPressed
+
+                if (event.key == Key.F12 || (mod && event.key == Key.B)) {
+                    val (row, col) = offsetToRowCol0(textValue.text, textValue.selection.end)
+                    val r = ide.goToDefinition(row, col)
+                    if (r != null) {
+                        pendingGoTo = r
+                        return@onPreviewKeyEvent true
+                    }
+                    return@onPreviewKeyEvent false
+                }
+
                 when {
                     mod && event.key == Key.S -> { ide.save(); true }
                     mod && event.key == Key.Z -> { ide.undo(); true }
@@ -145,7 +199,8 @@ fun EditorView(ide: IdeController) {
                                 text = applyHint(textValue.text, range, hint),
                                 selection = TextRange(range.start + hint.name.length)
                             ))
-                            hintsVisible = false; true
+                            hintsVisible = false
+                            true
                         }
                         Key.Escape -> { hintsVisible = false; true }
                         else -> false
@@ -188,7 +243,9 @@ fun EditorView(ide: IdeController) {
                         visibleToOriginal = folding.lastVisibleToOriginal,
                         folds = folds,
                         onToggleFold = { originalLine ->
-                            folds = folds.map { if (it.startLine == originalLine) it.copy(collapsed = !it.collapsed) else it }
+                            folds = folds.map {
+                                if (it.startLine == originalLine) it.copy(collapsed = !it.collapsed) else it
+                            }
                         },
                         lineHeight = lineHeight,
                         topPadding = editorPadding,
@@ -226,4 +283,33 @@ fun EditorView(ide: IdeController) {
             )
         }
     }
+}
+
+private fun offsetToRowCol0(text: String, offset: Int): Pair<Int, Int> {
+    val safe = offset.coerceIn(0, text.length)
+    var row = 0
+    var lineStart = 0
+    for (i in 0 until safe) {
+        if (text[i] == '\n') {
+            row++
+            lineStart = i + 1
+        }
+    }
+    val col = safe - lineStart
+    return row to col
+}
+
+private fun rowColToOffset0(text: String, row: Int, col: Int): Int {
+    val r = row.coerceAtLeast(0)
+    val c = col.coerceAtLeast(0)
+
+    var curRow = 0
+    var i = 0
+    while (curRow < r && i < text.length) {
+        if (text[i] == '\n') curRow++
+        i++
+    }
+    val lineStart = i
+    val lineEnd = text.indexOf('\n', startIndex = lineStart).let { if (it == -1) text.length else it }
+    return (lineStart + c).coerceIn(lineStart, lineEnd)
 }
