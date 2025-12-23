@@ -66,6 +66,10 @@ public class EditorController {
     public String saveFile(String fileName) {
         var file = files.get(fileName);
         file.save();
+        var openedFileInfo = openedFileInfoState.getValue();
+        var newOpenedFileInfo = new OpenedFileInfo(openedFileInfo.textFieldValue);
+        openedFileInfoState.setValue(newOpenedFileInfo);
+
         return file.getContent();
     }
 
@@ -111,6 +115,9 @@ public class EditorController {
 
     public void onTextChanged(TextFieldValue newValue) {
         if (currentFile != null) {
+            var openedFileInfo = openedFileInfoState.getValue();
+            var newOpenedFileInfo = new OpenedFileInfo(openedFileInfo.textFieldValue);
+            openedFileInfoState.setValue(newOpenedFileInfo);
             files.get(currentFile).onTextChanged(newValue);
         }
     }
