@@ -13,7 +13,8 @@ import ide.fitide.generated.resources.*
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ButtonBarHorizontal(
-    onConfigClick: () -> Unit = {}
+    onConfigClick: () -> Unit = {},
+    onRunClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -30,6 +31,8 @@ fun ButtonBarHorizontal(
             onClick = { onConfigClick() }
         )
         Spacer(Modifier.width(4.dp))
-        IconWithTooltip(Res.drawable.run, "Run")
+        IconWithTooltip(Res.drawable.run,
+            "Run",
+            onClick = {onRunClick()})
     }
 }
