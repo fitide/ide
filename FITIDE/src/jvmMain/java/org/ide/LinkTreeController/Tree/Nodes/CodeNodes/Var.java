@@ -85,7 +85,7 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+    public void addDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
         switch (codeType) {
             case Definition -> {
                 defs.put(this.name, this);
@@ -95,6 +95,13 @@ public class Var extends AInternalCodeNode {
                 defs.put(this.name, this);
                 decs.put(this.name, this);
             }
+            default -> {}
+        }
+    }
+
+    @Override
+    public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+        switch (codeType) {
             case Usage -> {
                 this.definition = validatePointer(defs.getOrDefault(this.name, null));
                 this.declaration = validatePointer(decs.getOrDefault(this.name, null));
@@ -102,6 +109,7 @@ public class Var extends AInternalCodeNode {
                 //    codeType = CodeType.Error;
                 //}
             }
+            default -> {}
         }
     }
 

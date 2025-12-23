@@ -38,6 +38,11 @@ public class ErrorNode extends AInternalCodeNode {
     }
 
     @Override
+    public void addDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+        return;
+    }
+
+    @Override
     public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
         return;
     }

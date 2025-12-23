@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -25,12 +26,17 @@ class LinkTreeControllerCdmTest {
     static LinkTreeController controller;
     static FileExplorerController FEController;
     static Plugin plugin;
+    static Path pathToFile;
+    static Path relativePathToFile;
 
     @BeforeAll
     static void setUp() {
         controller = new LinkTreeControllerImpl();
+        pathToFile = Paths.get("src", "jvmTest", "resources", "testCdm.asm");
+        relativePathToFile = Paths.get("resources", "testCdm.asm");
+        System.out.println(System.getProperty("user.dir"));
         try {
-            FEController = new FileExplorerController("C:\\Users\\user\\IdeaProjects\\ide\\FITIDE\\src\\jvmTest\\java\\org\\ide\\LinkTreeController\\cdmTest\\cdm\\testFiles");
+            FEController = new FileExplorerController("src\\jvmTest\\resources");
         } catch (UnnableToCreateFileException e) {
             System.out.println(e.toString());
             throw new RuntimeException(e);
@@ -42,23 +48,20 @@ class LinkTreeControllerCdmTest {
     @Test
     void simpleHighlightining() {
         controller.initFiles(plugin, List.of());
-        ParseTree tree = plugin.getFileParseTree(new File(
-                "C:\\Users\\user\\IdeaProjects\\ide\\FITIDE\\src\\jvmTest\\java\\org\\ide" +
-                        "\\LinkTreeController\\cdmTest\\cdm\\testFiles\\simple.asm"));
-        controller.updateTree(plugin, List.of(new Pair<>(Paths.get("testFiles", "simple.asm"), tree)));
-        var syn = controller.getSyntaxHighlightning(Paths.get("testFiles", "simple.asm"));
+        ParseTree tree = plugin.getFileParseTree(new File(pathToFile.toString()));
+
+        controller.updateTree(plugin, List.of(new Pair<>(relativePathToFile, tree)));
+        var syn = controller.getSyntaxHighlightning(relativePathToFile);
         Assert.assertEquals(syn.size(), 4);
     }
 
     @Test
     void simpleDec() {
         controller.initFiles(plugin, List.of());
-        ParseTree tree = plugin.getFileParseTree(new File(
-                "C:\\Users\\user\\IdeaProjects\\ide\\FITIDE\\src\\jvmTest\\java\\org\\ide" +
-                        "\\LinkTreeController\\cdmTest\\cdm\\testFiles\\simple.asm"));
-        controller.updateTree(plugin, List.of(new Pair<>(Paths.get("testFiles", "simple.asm"), tree)));
+        ParseTree tree = plugin.getFileParseTree(new File(pathToFile.toString()));
+        controller.updateTree(plugin, List.of(new Pair<>(relativePathToFile, tree)));
         var linkTree = controller.getTree();
-        var file = (CommonFile) linkTree.getFileNode(Paths.get("testFiles", "simple.asm"));
+        var file = (CommonFile) linkTree.getFileNode(relativePathToFile);
         for (var node : file.codeNodes.values()) {
             if (node instanceof Func) {
                 Assert.assertEquals(node.declaration, linkTree.getExternalFunctions().get("add"));

@@ -217,11 +217,20 @@ public abstract class AInternalCodeNode {
 
     protected abstract List<Path> getPaths(LinkTreePosition position);
 
+    public abstract void addDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs);
+
     public abstract void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs);
 
     public void setTypes(Set<String> types) {
         for (var child : childs.values()) {
             child.setTypes(types);
+        }
+    }
+
+    public void updateFilePath(Path newPath) {
+        this.pathToFile = newPath;
+        for (var child :childs.values()) {
+            child.updateFilePath(newPath);
         }
     }
 }

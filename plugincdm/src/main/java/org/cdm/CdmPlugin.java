@@ -86,6 +86,9 @@ public class CdmPlugin implements Plugin {
     @Override
     public Tag[] getTagsOfNode(ParseTree tree) {
         if (tree instanceof CdmParser.MacroSectionContext section) {
+            return new Tag[]{Tag.Func, Tag.Definition};
+        } else if (tree instanceof CdmParser.MacroContext) {
+            return new Tag[]{Tag.Func, Tag.Definition};
         } else if (tree instanceof CdmParser.AbsoluteSectionContext section) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.RelocatableSectionContext section) {
@@ -93,12 +96,10 @@ public class CdmPlugin implements Plugin {
         } else if (tree instanceof CdmParser.InstructionWithArgContext line) {
             return new Tag[]{Tag.Func};
         } else if (tree instanceof CdmParser.LabelContext line) {
-            return new Tag[]{Tag.Definition};
+            return new Tag[]{Tag.Var, Tag.Definition};
         } else if (tree instanceof CdmParser.While_loopContext loop) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.Until_loopContext loop) {
-            return new Tag[]{Tag.Construction};
-        } else if (tree instanceof CdmParser.MacroContext macro) {
             return new Tag[]{Tag.Construction};
         } else if (tree instanceof CdmParser.ConditionalContext cond) {
             return new Tag[]{Tag.Construction};
@@ -225,7 +226,7 @@ public class CdmPlugin implements Plugin {
         if (module instanceof CdmParser.ProgramContext program) {
             res.addAll(program.section());
         } else if (module instanceof CdmParser.MacroSectionContext section) {
-
+            res.addAll(getChildsOfNode(section.macro().code_block()));
         } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
             if (section.code_block() != null) {
                 for (int j = 0; j < section.code_block().getChildCount(); j++) {
@@ -444,6 +445,20 @@ public class CdmPlugin implements Plugin {
             pos.rowE = pos.rowS;
             pos.colE = pos.colS + sym.getText().length();
             return pos;
+        } else if (node instanceof CdmParser.MacroSectionContext macro) {
+            var sym = macro.macro().macro_header().WORD().getSymbol();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
+        } else if (node instanceof CdmParser.MacroContext macro) {
+            var sym = macro.macro_header().WORD().getSymbol();
+            pos.rowS = sym.getLine() - 1;
+            pos.colS = sym.getCharPositionInLine();
+            pos.rowE = pos.rowS;
+            pos.colE = pos.colS + sym.getText().length();
+            return pos;
         } else if (node instanceof TerminalNode tnode) {
             var sym = tnode.getSymbol();
             pos.rowS = sym.getLine() - 1;
@@ -459,6 +474,12 @@ public class CdmPlugin implements Plugin {
     @Override
     public Position getBounds(ParseTree node) {
         if (node instanceof ParserRuleContext ctx) {
+            var start = ctx.getStart();
+            var stop = ctx.getStop();
+            if (start == null || stop == null) {
+                return new Position(0, 0, 0, 0);
+            }
+
             return new Position(ctx.getStart().getLine() - 1,
                     ctx.getStart().getCharPositionInLine(),
                     ctx.getStop().getLine() - 1,
@@ -484,8 +505,12 @@ public class CdmPlugin implements Plugin {
             return instr.WORD().getText();
         } else if (node instanceof CdmParser.Branch_mnemonicContext branch) {
             return branch.getText();
-        }  else if (node instanceof TerminalNode tnode) {
+        } else if (node instanceof TerminalNode tnode) {
             return tnode.getSymbol().getText();
+        } else if (node instanceof CdmParser.MacroSectionContext macro) {
+            return macro.macro().macro_header().WORD().getText();
+        } else if (node instanceof CdmParser.MacroContext macro) {
+            return macro.macro_header().WORD().getText();
         }
 
         return "";
@@ -648,6 +673,10 @@ public class CdmPlugin implements Plugin {
                 new ExternalVar(immediateType, "const")
         )));
 
+        funcs.put("tst", new ExternalFunc(voidType, "tst", List.of(
+                new ExternalVar(registerType, "const")
+        )));
+
         funcs.put("rts", new ExternalFunc(voidType, "rts", Collections.emptyList()));
         funcs.put("osi", new ExternalFunc(voidType, "osi", Collections.emptyList()));
         funcs.put("osix", new ExternalFunc(voidType, "osix", Collections.emptyList()));
@@ -656,6 +685,7 @@ public class CdmPlugin implements Plugin {
         funcs.put("halt", new ExternalFunc(voidType, "halt", Collections.emptyList()));
         funcs.put("wait", new ExternalFunc(voidType, "wait", Collections.emptyList()));
         funcs.put("dc", new ExternalFunc(voidType, "dc", Collections.emptyList()));
+        funcs.put("ds", new ExternalFunc(voidType, "ds", Collections.emptyList()));
 
         return funcs;
     }

@@ -185,4 +185,9 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     public ARoot getTree() {
         return root;
     }
+
+    @Override
+    public void updateFilePath(Path pathToDirWithFileToChange, Path pathToDirToInsert, String fileName) {
+        root.updateFilePath(pathToDirWithFileToChange, pathToDirToInsert, fileName);
+    }
 }

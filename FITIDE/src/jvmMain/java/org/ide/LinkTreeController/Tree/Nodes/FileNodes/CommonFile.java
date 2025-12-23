@@ -223,6 +223,13 @@ public class CommonFile extends FileNode {
         codeNodes = TreeBuilder.build(plugin, tree, pathToFile);
     }
 
+    @Override
+    public void updateFilePath(Directory newDir) {
+        this.pathToFile = Paths.get(newDir.pathToFile.toString(), this.name);
+        for (var node : codeNodes.values()) {
+            node.updateFilePath(pathToFile);
+        }
+    }
 
 
     private Pair<List<AInternalCodeNode>, List<AInternalCodeNode>> getDecsAndDefs() {
@@ -290,6 +297,9 @@ public class CommonFile extends FileNode {
             decs.putAll(file.decInFile);
         }
 
+        for (var node : this.codeNodes.values()) {
+            node.addDefinitionsAndDeclarations(defs, decs);
+        }
         for (var node : this.codeNodes.values()) {
             node.setDefinitionsAndDeclarations(defs, decs);
         }

@@ -15,7 +15,6 @@ import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -217,4 +216,16 @@ public abstract class CommonFileNode {
 
         return null;
     }
+
+    public void updateFilePath(Path pathToDirWithFile, Path pathToNewDir, String fileName) {
+        CommonFileNode nextDir = getFileNode(pathToNewDir);
+        if (!(nextDir instanceof Directory)) throw new RuntimeException("path to dir leads to another file");
+        CommonFileNode curNode = getFileNode(pathToDirWithFile);
+        if (curNode instanceof CommonFile) throw new RuntimeException("copy file into file as directory");
+        nextDir.childs.put(fileName, curNode.childs.get(fileName));
+        curNode.childs.remove(fileName);
+        nextDir.childs.get(fileName).updateFilePath((Directory) nextDir);
+    }
+
+    public abstract void updateFilePath(Directory newDir);
 }
