@@ -97,6 +97,13 @@ public class IdeController {
         return fileExplorer.getTreeCopy();
     }
 
+    public Directory refreshFileTree() {
+        if (fileExplorer == null || projectRoot == null) return null;
+
+        fileExplorer.updateTree(projectRoot.toString());
+
+        return fileExplorer.getTreeCopy();
+    }
 
     public void createFile(Path dir, String name) throws Exception {
         fileExplorer.createFile(dir, name);
@@ -381,7 +388,7 @@ public class IdeController {
     private Path getShadowFilePath(Path originalPath) {
         Path relative = projectRoot.relativize(originalPath);
         return projectRoot
-                .resolve(".fitide-cache")
+                .resolve(".ide/.fitide-cache")
                 .resolve(relative);
     }
 

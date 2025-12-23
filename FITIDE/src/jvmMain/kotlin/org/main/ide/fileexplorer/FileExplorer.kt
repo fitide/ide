@@ -49,9 +49,8 @@ class FileExplorer(
     }
 
     fun refresh() {
-        fileTree = ideController.getFileTree()
+        fileTree = ideController.refreshFileTree()
     }
-
     fun createFile(dir: Path, name: String) {
         try {
             ideController.createFile(dir, name)

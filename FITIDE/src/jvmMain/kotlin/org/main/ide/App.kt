@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import kotlinx.coroutines.delay
 import org.ide.IdeController
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.main.ide.buttonbar.ButtonBarHorizontal
@@ -114,6 +115,8 @@ fun App(
         if (isRun) {
             val compileString = getCompileStr(configs.get(selectedConfigIndex))
             uiState.terminalController.sendCommand(compileString)
+            delay(1200)
+            fileExplorer.refresh()
             isRun = false
         }
     }
