@@ -5,6 +5,7 @@ import org.ide.IdeController
 import org.ide.FileExplorerController.Node.Directory
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import javax.swing.JFileChooser
 
 class FileExplorer(
@@ -32,7 +33,7 @@ class FileExplorer(
 
         if (chooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return
 
-        val dir = chooser.selectedFile.toPath()
+        val dir = Paths.get(chooser.selectedFile.toPath().toString())
         openProject(dir)
     }
 
@@ -48,7 +49,7 @@ class FileExplorer(
     }
 
     fun refresh() {
-        fileTree = ideController.refreshTree()
+        fileTree = ideController.getFileTree()
     }
 
     fun createFile(dir: Path, name: String) {

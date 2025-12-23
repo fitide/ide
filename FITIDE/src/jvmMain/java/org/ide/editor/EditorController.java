@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static org.ide.editor.TextFieldValueHelperKt.getMutableStateForOpenedFileInfo;
 import static org.ide.editor.TextFieldValueHelperKt.getMutableStateTextFieldValue;
@@ -85,6 +86,7 @@ public class EditorController {
         return paths;
     }
 
+    //нам это точно надо?
     public void updateContent(String filePath, String newContent) {
         files.get(filePath).setContent(newContent);
     }
@@ -130,6 +132,17 @@ public class EditorController {
         return openedFileInfoState;
     }
 
+    public void renameFile(String filename, String newName) {
+        if (this.files.containsKey(filename)) {
+            var file = this.files.get(filename);
+            this.files.remove(filename);
+            this.files.put(newName, file);
+
+            if (Objects.equals(currentFile, filename)) {
+                currentFile = newName;
+            }
+        }
+    }
     public Path getOpenedFilePath() {
         if (currentFile != null) {
             return Path.of(currentFile);

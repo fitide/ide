@@ -96,63 +96,48 @@ public class IdeController {
         return fileExplorer.getTreeCopy();
     }
 
-    public Directory refreshTree() {
-        if (fileExplorer == null) return null;
-        Directory updated = fileExplorer.updateTree(projectRoot.toString());
-        if (linkTreeController != null) {
-            linkTreeController.setFilesAndDirectoriesData(updated);
-        }
-        return updated;
-    }
 
     public void createFile(Path dir, String name) throws Exception {
         fileExplorer.createFile(dir, name);
-        refreshTree();
     }
 
     public void createDir(Path dir, String name) throws Exception {
         fileExplorer.createDir(dir, name);
-        refreshTree();
     }
 
     public void deleteFile(Path path) throws Exception {
         fileExplorer.deleteFile(path);
-        refreshTree();
     }
 
     public void deleteDir(Path path) throws Exception {
         fileExplorer.deleteDirectory(path);
-        refreshTree();
     }
 
     public void renameFile(Path path, String newName) throws Exception {
         fileExplorer.renameFile(path, newName);
-        refreshTree();
+        linkTreeController.updateFileName(projectRoot.relativize(path), newName);
+        var newPath = Paths.get(path.getParent().toString().toString(), newName);
+        editorController.renameFile(path.toString(), newPath.toString());
     }
 
     public void renameDir(Path path, String newName) throws Exception {
         fileExplorer.renameDirectory(path, newName);
-        refreshTree();
     }
 
     public void moveFile(Path from, Path toDir) throws Exception {
         fileExplorer.moveFile(from, toDir);
-        refreshTree();
     }
 
     public void moveDir(Path from, Path toDir) throws Exception {
         fileExplorer.moveDir(from, toDir);
-        refreshTree();
     }
 
     public void copyFile(Path from, Path toDir) throws Exception {
         fileExplorer.copyFile(from, toDir);
-        refreshTree();
     }
 
     public void copyDir(Path from, Path toDir) throws Exception {
         fileExplorer.copyDir(from, toDir);
-        refreshTree();
     }
 
 
