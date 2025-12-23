@@ -3,6 +3,7 @@ package org.ide.editor;
 import androidx.compose.runtime.MutableState;
 import androidx.compose.ui.text.input.TextFieldValue;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,23 @@ public class EditorController {
         );
     }
 
+    public TextFieldValue changeOpenedFile(String fileName) {
+        currentFile = fileName;
+        openedFileInfoState.setValue(
+                new OpenedFileInfo(files.get(currentFile).getTextField())
+        );
+        return files.get(currentFile).getTextField().getValue();
+    }
+
     public void closeFile(String filename) {
+        if (currentFile.equals(filename)) {
+            if (files.size() != 0) {
+                currentFile = files.keySet().iterator().next();
+            } else {
+                currentFile = null;
+            }
+        }
+
         files.remove(filename);
     }
 
@@ -43,11 +60,14 @@ public class EditorController {
         return files.get(filePath).getContent();
     }
 
-    public List<String> getOpenFiles() {
-        return new ArrayList<>(files.keySet());
+    public List<Path> getOpenFiles() {
+        var paths = new ArrayList<Path>();
+        for (var file : files.keySet()) {
+            paths.add(Path.of(file));
+        }
+        return paths;
     }
 
-    //нам это точно надо?
     public void updateContent(String filePath, String newContent) {
         files.get(filePath).setContent(newContent);
     }
@@ -90,4 +110,11 @@ public class EditorController {
         return openedFileInfoState;
     }
 
+    public Path getOpenedFilePath() {
+        if (currentFile != null) {
+            return Path.of(currentFile);
+        }
+
+        return null;
+    }
 }

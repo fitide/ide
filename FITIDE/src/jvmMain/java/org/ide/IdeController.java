@@ -282,6 +282,22 @@ public class IdeController {
         pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
     }
 
+    public Path getOpenedFilePath() {
+        return editorController.getOpenedFilePath();
+    }
+
+    public List<Path> getOpenedFiles() {
+        return editorController.getOpenFiles();
+    }
+
+    public TextFieldValue changeOpenedFile(Path path) {
+        return editorController.changeOpenedFile(path.toString());
+    }
+
+    public void closeFile(Path path) {
+        editorController.closeFile(path.toString());
+    }
+
     public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException {
         this.config = fileExplorer.applyConfig(config);
     }

@@ -22,11 +22,9 @@ fun EditorTabs(
 ) {
     ide.openedFileInfoState().value
 
-    // TODO: func getFileList
-    val openFiles: List<Path> = emptyList()
+    val openFiles: List<Path> = ide.openedFiles
 
-    // TODO: func getCurrentFile
-    val currentFile: Path? = null
+    val currentFile: Path? = ide.openedFilePath
 
     Row(
         modifier = modifier
@@ -51,7 +49,10 @@ fun EditorTabs(
                             UIColors.Panel
                     )
                     .clickable {
-                        // TODO: func selectFile - подгрузка из памяти уже распарсенного файла
+                        val value = ide.changeOpenedFile(path)
+                        if (value != null) {
+                            ide.onTextChanged(value)
+                        }
                     }
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -72,7 +73,7 @@ fun EditorTabs(
                     color = UIColors.TextSecondary,
                     modifier = Modifier
                         .clickable {
-                            // TODO: func closeFile(Path)
+                            ide.closeFile(path);
                         }
                         .padding(start = 4.dp)
                 )

@@ -24,6 +24,7 @@ import org.main.ide.config.Config
 import org.main.ide.config.ConfigView
 import org.main.ide.config.parseConfigsJson
 import org.main.ide.editor.EditorView
+import org.main.ide.editor.tabs.EditorTabs
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.fileexplorer.FileExplorerView
 import org.main.ide.terminal.Terminal
@@ -179,7 +180,22 @@ fun App(
                                     .fillMaxHeight(),
                                 bg = EditorBg
                             ) {
-                                EditorView(ideController)
+                                Column(Modifier.fillMaxSize()) {
+                                    EditorTabs(
+                                        ide = ideController,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    ThinDivider(vertical = false)
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxWidth()
+                                    ) {
+                                        EditorView(ideController)
+                                    }
+                                }
                             }
                         }
 
