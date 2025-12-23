@@ -304,4 +304,23 @@ public class Func extends AInternalCodeNode {
         }
     }
 
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        if (contains(namePosition, position)) return this;
+
+        for (var node : args.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        for (var node : childs.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        return null;
+    }
+
 }

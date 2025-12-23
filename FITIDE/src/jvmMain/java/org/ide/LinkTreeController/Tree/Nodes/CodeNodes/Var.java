@@ -122,4 +122,9 @@ public class Var extends AInternalCodeNode {
     public void setTypes(Set<String> types) {
         if (types.contains(retType)) isTypeDef = true;
     }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        return this;
+    }
 }

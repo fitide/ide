@@ -275,7 +275,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
 
         AInternalCodeNode bestChild = null;
         for (AInternalCodeNode ch : node.childs.values()) {
-            AInternalCodeNode cand = findNodeAtRec(ch, cursor, preferNamePosition);
+            AInternalCodeNode cand = ch.findByPos(cursor);
             if (cand == null) continue;
             if (bestChild == null || isNarrower(cand, bestChild)) bestChild = cand;
         }

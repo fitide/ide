@@ -67,4 +67,9 @@ public class ImportStatement extends AInternalCodeNode {
         return;
     }
 
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        return null;
+    }
+
 }

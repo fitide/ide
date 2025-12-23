@@ -266,4 +266,23 @@ public class Construction extends AInternalCodeNode {
             }
         }
     }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        if (contains(this.argsPosition, position)) {
+            for (var arg : args.values()) {
+                if (contains(arg.wholePos, position)) {
+                    return arg.findByPos(position);
+                }
+            }
+        }
+
+        for (var node : childs.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        return null;
+    }
 }
