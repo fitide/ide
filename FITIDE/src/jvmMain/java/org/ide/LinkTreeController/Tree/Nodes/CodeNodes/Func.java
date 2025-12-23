@@ -235,13 +235,28 @@ public class Func extends AInternalCodeNode {
     }
 
     @Override
-    public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+    public void addDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
         switch (codeType) {
             case Definition -> {
                 defs.put(this.name, this);
                 decs.put(this.name, this);
+            }
+            case Declaration -> {
+                decs.put(this.name, this);
+            }
+            default -> {}
+        }
+    }
+
+    @Override
+    public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+        var ddefs = new HashMap<>(defs);
+        var ddecs = new HashMap<>(decs);
+
+        switch (codeType) {
+            case Definition -> {
                 for (var arg : args.values()) {
-                    decs.put(arg.name, arg);
+                    arg.addDefinitionsAndDeclarations(defs, decs);
                 }
                 for (var node : this.childs.values()) {
                     node.setDefinitionsAndDeclarations(defs, decs);
@@ -249,7 +264,6 @@ public class Func extends AInternalCodeNode {
             }
             case Declaration -> {
                 this.definition = setDefDec(decs);
-                decs.put(this.name, this);
             }
             case Usage -> {
                 this.definition = setDefDec(defs);
@@ -258,7 +272,11 @@ public class Func extends AInternalCodeNode {
                    codeType = CodeType.Error;
                 }
             }
+            default -> {}
         }
+
+        defs = ddefs;
+        decs = ddecs;
     }
 
     private AInternalCodeNode setDefDec(Map<String, AInternalCodeNode> map) {

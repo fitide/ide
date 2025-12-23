@@ -224,18 +224,14 @@ public class Construction extends AInternalCodeNode {
     }
 
     @Override
+    public void addDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
+        return;
+    }
+
+    @Override
     public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
         for (var arg : this.args.values()) {
-            switch (arg.codeType) {
-                case Definition -> {
-                    defs.put(arg.name, arg);
-                    decs.put(arg.name, arg);
-                }
-                case Declaration -> {
-                    decs.put(arg.name, arg);
-                }
-                default -> {}
-            }
+            arg.addDefinitionsAndDeclarations(defs, decs);
         }
 
         for (var arg : args.values()) {
@@ -243,9 +239,19 @@ public class Construction extends AInternalCodeNode {
         }
 
         for (var body : bodies) {
+            Map<String, AInternalCodeNode> tempdefs = new HashMap<>(defs);
+            var tempDecs = new HashMap<>(decs);
+
             for (var node : body.a.values()) {
                 node.setDefinitionsAndDeclarations(defs, decs);
             }
+
+            for (var node : body.a.values()) {
+                node.setDefinitionsAndDeclarations(defs, decs);
+            }
+
+            defs = tempdefs;
+            decs = tempDecs;
         }
     }
 

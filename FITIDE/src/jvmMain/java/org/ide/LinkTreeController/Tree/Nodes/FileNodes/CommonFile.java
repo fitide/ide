@@ -298,6 +298,9 @@ public class CommonFile extends FileNode {
         }
 
         for (var node : this.codeNodes.values()) {
+            node.addDefinitionsAndDeclarations(defs, decs);
+        }
+        for (var node : this.codeNodes.values()) {
             node.setDefinitionsAndDeclarations(defs, decs);
         }
     }
