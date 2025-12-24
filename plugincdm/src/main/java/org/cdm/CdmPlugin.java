@@ -174,44 +174,47 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public Position getPositionOfModuleBody(ParseTree tree) {
-        Position pos = new Position();
-        if (tree instanceof CdmParser.While_loopContext loop) {
-            pos.rowS = loop.code_block().get(1).getStart().getLine() - 1;
-            pos.colS = loop.code_block().get(1).getStart().getCharPositionInLine();
-            pos.rowE = loop.code_block().get(1).getStop().getLine() - 1;
-            pos.colE = loop.code_block().get(1).getStop().getCharPositionInLine()
-                    + loop.code_block().get(1).getStop().getText().length();
-            return pos;
-        } else if (tree instanceof CdmParser.ConditionalContext cond) {
-            pos.rowS = cond.code_block().getStart().getLine() - 1;
-            pos.colS = cond.code_block().getStart().getCharPositionInLine();
-            pos.rowE = cond.code_block().getStop().getLine() - 1;
-            pos.colE = cond.code_block().getStop().getCharPositionInLine()
-                    + cond.code_block().getStop().getText().length();
-            return pos;
-        } else if (tree instanceof CdmParser.Until_loopContext loop) {
-            pos.rowS = loop.code_block().getStart().getLine() - 1;
-            pos.colS = loop.code_block().getStart().getCharPositionInLine();
-            pos.rowE = loop.code_block().getStop().getLine() - 1;
-            pos.colE = loop.code_block().getStop().getCharPositionInLine()
-                    + loop.code_block().getStop().getText().length();
-            return pos;
-        } else if (tree instanceof CdmParser.AbsoluteSectionContext section) {
-            pos.rowS = section.code_block().getStart().getLine() - 1;
-            pos.colS = section.code_block().getStart().getCharPositionInLine();
-            pos.rowE = section.code_block().getStop().getLine() - 1;
-            pos.colE = section.code_block().getStop().getCharPositionInLine()
-                    + section.code_block().getStop().getText().length();
-            return pos;
-        } else if (tree instanceof CdmParser.RelocatableSectionContext section) {
-            pos.rowS = section.code_block().getStart().getLine() - 1;
-            pos.colS = section.code_block().getStart().getCharPositionInLine();
-            pos.rowE = section.code_block().getStop().getLine() - 1;
-            pos.colE = section.code_block().getStop().getCharPositionInLine()
-                    + section.code_block().getStop().getText().length();
-            return pos;
+        try {
+            Position pos = new Position();
+            if (tree instanceof CdmParser.While_loopContext loop) {
+                pos.rowS = loop.code_block().get(1).getStart().getLine() - 1;
+                pos.colS = loop.code_block().get(1).getStart().getCharPositionInLine();
+                pos.rowE = loop.code_block().get(1).getStop().getLine() - 1;
+                pos.colE = loop.code_block().get(1).getStop().getCharPositionInLine()
+                        + loop.code_block().get(1).getStop().getText().length();
+                return pos;
+            } else if (tree instanceof CdmParser.ConditionalContext cond) {
+                pos.rowS = cond.code_block().getStart().getLine() - 1;
+                pos.colS = cond.code_block().getStart().getCharPositionInLine();
+                pos.rowE = cond.code_block().getStop().getLine() - 1;
+                pos.colE = cond.code_block().getStop().getCharPositionInLine()
+                        + cond.code_block().getStop().getText().length();
+                return pos;
+            } else if (tree instanceof CdmParser.Until_loopContext loop) {
+                pos.rowS = loop.code_block().getStart().getLine() - 1;
+                pos.colS = loop.code_block().getStart().getCharPositionInLine();
+                pos.rowE = loop.code_block().getStop().getLine() - 1;
+                pos.colE = loop.code_block().getStop().getCharPositionInLine()
+                        + loop.code_block().getStop().getText().length();
+                return pos;
+            } else if (tree instanceof CdmParser.AbsoluteSectionContext section) {
+                pos.rowS = section.code_block().getStart().getLine() - 1;
+                pos.colS = section.code_block().getStart().getCharPositionInLine();
+                pos.rowE = section.code_block().getStop().getLine() - 1;
+                pos.colE = section.code_block().getStop().getCharPositionInLine()
+                        + section.code_block().getStop().getText().length();
+                return pos;
+            } else if (tree instanceof CdmParser.RelocatableSectionContext section) {
+                pos.rowS = section.code_block().getStart().getLine() - 1;
+                pos.colS = section.code_block().getStart().getCharPositionInLine();
+                pos.rowE = section.code_block().getStop().getLine() - 1;
+                pos.colE = section.code_block().getStop().getCharPositionInLine()
+                        + section.code_block().getStop().getText().length();
+                return pos;
+            }
+        } catch (Exception e) {
+            return null;
         }
-
         return null;
     }
 
@@ -222,65 +225,44 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getChildsOfNode(ParseTree module) {
-        var res = new ArrayList<ParseTree>();
-        if (module instanceof CdmParser.ProgramContext program) {
-            res.addAll(program.section());
-        } else if (module instanceof CdmParser.MacroSectionContext section) {
-            res.addAll(getChildsOfNode(section.macro().code_block()));
-        } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
-            if (section.code_block() != null) {
-                for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                    res.addAll(getChildsOfNode(section.code_block().getChild(j)));
+        try {
+            var res = new ArrayList<ParseTree>();
+            if (module instanceof CdmParser.ProgramContext program) {
+                res.addAll(program.section());
+            } else if (module instanceof CdmParser.MacroSectionContext section) {
+                res.addAll(getChildsOfNode(section.macro().code_block()));
+            } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
+                if (section.code_block() != null) {
+                    res.addAll(getChildsOfNode(section.code_block()));
                 }
-            }
-        } else if (module instanceof CdmParser.RelocatableSectionContext section) {
-            if (section.code_block() != null) {
-                for (int j = 0; j < section.code_block().getChildCount(); j++) {
-                    res.addAll(getChildsOfNode(section.getChild(j)));
+            } else if (module instanceof CdmParser.RelocatableSectionContext section) {
+                if (section.code_block() != null) {
+                    res.addAll(getChildsOfNode(section.code_block()));
                 }
-            }
-        } else if (module instanceof CdmParser.Code_blockContext code_block) {
-            for (var child : code_block.children) {
-                if (child instanceof CdmParser.LineContext line) {
-                    res.addAll(getChildsOfNode(line));
-                    continue;
-                }
-
-                res.add(child);
-            }
-        } else if (module instanceof CdmParser.StandaloneLabelsContext line) {
-            res.add(line.labels_declaration().label());
-        } else if (module instanceof CdmParser.InstructionLineContext line) {
-            if (line.labels_declaration() != null) {
-                res.add(line.labels_declaration().label());
-            }
-
-            res.add(line.instructionWithArg());
-        } else if (module instanceof CdmParser.While_loopContext loop) {
-            for (var child : loop.code_block()) {
-                for (var line : child.children) {
-                    if (line instanceof CdmParser.InstructionLineContext l) {
-                        res.add(l.instructionWithArg());
-                    } else {
-                        res.add(line);
+            } else if (module instanceof CdmParser.Code_blockContext code_block) {
+                if (code_block.children != null) {
+                    for (int j = 0; j < code_block.getChildCount(); j++) {
+                        var child = code_block.getChild(j);
+                        if (child instanceof CdmParser.InstructionLineContext line) {
+                            res.addAll(getChildsOfNode(line));
+                        } else if (child instanceof CdmParser.StandaloneLabelsContext line) {
+                            res.add(line.labels_declaration().label());
+                        } else {
+                            res.add(code_block.getChild(j));
+                        }
                     }
                 }
-            }
-        } else if (module instanceof CdmParser.Until_loopContext loop) {
-            for (var line : loop.code_block().children) {
-                if (line instanceof CdmParser.InstructionLineContext l) {
-                    res.add(l.instructionWithArg());
-                } else {
-                    res.add(line);
+            } else if (module instanceof CdmParser.StandaloneLabelsContext line) {
+                res.add(line.labels_declaration().label());
+            } else if (module instanceof CdmParser.InstructionLineContext line) {
+                if (line.labels_declaration() != null) {
+                    res.add(line.labels_declaration().label());
                 }
-            }
-        } else if (module instanceof CdmParser.MacroContext macro) {
-            res.addAll(getChildsOfNode(macro.code_block()));
-        } else if (module instanceof CdmParser.ConditionalContext cond) {
-            var conditions = cond.conditions();
-            if (conditions.connective_condition() != null) {
-                for (var connect_cond : conditions.connective_condition()) {
-                    for (var line : connect_cond.condition().code_block().children) {
+
+                res.add(line.instructionWithArg());
+            } else if (module instanceof CdmParser.While_loopContext loop) {
+                for (var child : loop.code_block()) {
+                    for (var line : child.children) {
                         if (line instanceof CdmParser.InstructionLineContext l) {
                             res.add(l.instructionWithArg());
                         } else {
@@ -288,50 +270,79 @@ public class CdmPlugin implements Plugin {
                         }
                     }
                 }
-            };
-
-            for (var line : conditions.condition().code_block().children) {
-                if (line instanceof CdmParser.InstructionLineContext l) {
-                    res.add(l.instructionWithArg());
-                } else {
-                    res.add(line);
-                }
-            }
-
-            for (var line : cond.code_block().children) {
-                if (line instanceof CdmParser.InstructionLineContext l) {
-                    res.add(l.instructionWithArg());
-                } else {
-                    res.add(line);
-                }
-            }
-
-            if (cond.else_clause() != null) {
-                for (var line : cond.else_clause().code_block().children) {
+            } else if (module instanceof CdmParser.Until_loopContext loop) {
+                for (var line : loop.code_block().children) {
                     if (line instanceof CdmParser.InstructionLineContext l) {
                         res.add(l.instructionWithArg());
                     } else {
                         res.add(line);
                     }
                 }
-            }
-        }
+            } else if (module instanceof CdmParser.MacroContext macro) {
+                res.addAll(getChildsOfNode(macro.code_block()));
+            } else if (module instanceof CdmParser.ConditionalContext cond) {
+                var conditions = cond.conditions();
+                if (conditions.connective_condition() != null) {
+                    for (var connect_cond : conditions.connective_condition()) {
+                        for (var line : connect_cond.condition().code_block().children) {
+                            if (line instanceof CdmParser.InstructionLineContext l) {
+                                res.add(l.instructionWithArg());
+                            } else {
+                                res.add(line);
+                            }
+                        }
+                    }
+                }
+                ;
 
-        return res;
+                for (var line : conditions.condition().code_block().children) {
+                    if (line instanceof CdmParser.InstructionLineContext l) {
+                        res.add(l.instructionWithArg());
+                    } else {
+                        res.add(line);
+                    }
+                }
+
+                for (var line : cond.code_block().children) {
+                    if (line instanceof CdmParser.InstructionLineContext l) {
+                        res.add(l.instructionWithArg());
+                    } else {
+                        res.add(line);
+                    }
+                }
+
+                if (cond.else_clause() != null) {
+                    for (var line : cond.else_clause().code_block().children) {
+                        if (line instanceof CdmParser.InstructionLineContext l) {
+                            res.add(l.instructionWithArg());
+                        } else {
+                            res.add(line);
+                        }
+                    }
+                }
+            }
+            return res;
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     @Override
     public List<ParseTree> getConstructionArgs(ParseTree constr) {
-        if (constr instanceof CdmParser.While_loopContext loop) {
-            return List.of(loop.branch_mnemonic());
-        } else if (constr instanceof CdmParser.Until_loopContext loop) {
-            return List.of(loop.branch_mnemonic());
-        } else if (constr instanceof CdmParser.ConditionalContext cond) {
-            return List.of(cond.conditions().condition().branch_mnemonic());
-        } else if (constr instanceof CdmParser.AbsoluteSectionContext section) {
-            return List.of(section.asect_header().number());
-        } else if (constr instanceof CdmParser.RelocatableSectionContext section) {
-            return List.of(section.rsect_header().name());
+        try {
+            if (constr instanceof CdmParser.While_loopContext loop) {
+                return List.of(loop.branch_mnemonic());
+            } else if (constr instanceof CdmParser.Until_loopContext loop) {
+                return List.of(loop.branch_mnemonic());
+            } else if (constr instanceof CdmParser.ConditionalContext cond) {
+                return List.of(cond.conditions().condition().branch_mnemonic());
+            } else if (constr instanceof CdmParser.AbsoluteSectionContext section) {
+                return List.of(section.asect_header().number());
+            } else if (constr instanceof CdmParser.RelocatableSectionContext section) {
+                return List.of(section.rsect_header().name());
+            }
+        } catch (Exception e) {
+            return List.of();
         }
 
         return List.of();
@@ -350,21 +361,25 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
-        if (node instanceof CdmParser.While_loopContext loop) {
-            return List.of(loop.While(), loop.Stays(), loop.Wend());
-        } else if (node instanceof CdmParser.Until_loopContext loop) {
-            return List.of(loop.Do(), loop.Until());
-        } else if (node instanceof CdmParser.ConditionalContext cond) {
-            if (cond.else_clause() != null) {
-                return List.of(cond.If(), cond.conditions().condition().Is(),
-                        cond.else_clause().Else(), cond.Fi());
-            }
+        try {
+            if (node instanceof CdmParser.While_loopContext loop) {
+                return List.of(loop.While(), loop.Stays(), loop.Wend());
+            } else if (node instanceof CdmParser.Until_loopContext loop) {
+                return List.of(loop.Do(), loop.Until());
+            } else if (node instanceof CdmParser.ConditionalContext cond) {
+                if (cond.else_clause() != null) {
+                    return List.of(cond.If(), cond.conditions().condition().Is(),
+                            cond.else_clause().Else(), cond.Fi());
+                }
 
-            return List.of(cond.If(), cond.conditions().condition().Is(), cond.Fi());
-        } else if (node instanceof CdmParser.RelocatableSectionContext section) {
-            return List.of(section.rsect_header().Rsect());
-        } else if (node instanceof CdmParser.AbsoluteSectionContext section) {
-            return List.of(section.asect_header().Asect());
+                return List.of(cond.If(), cond.conditions().condition().Is(), cond.Fi());
+            } else if (node instanceof CdmParser.RelocatableSectionContext section) {
+                return List.of(section.rsect_header().Rsect());
+            } else if (node instanceof CdmParser.AbsoluteSectionContext section) {
+                return List.of(section.asect_header().Asect());
+            }
+        } catch (Exception e) {
+            return List.of();
         }
 
         return List.of();
@@ -511,6 +526,10 @@ public class CdmPlugin implements Plugin {
             return macro.macro().macro_header().WORD().getText();
         } else if (node instanceof CdmParser.MacroContext macro) {
             return macro.macro_header().WORD().getText();
+        } else if (node instanceof CdmParser.LabelContext label) {
+            return label.getText();
+        } else if (node instanceof CdmParser.ArgumentContext arg) {
+            return arg.getText();
         }
 
         return "";

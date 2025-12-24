@@ -89,7 +89,7 @@ fun EditorView(ide: IdeController) {
 
     LaunchedEffect(textValue.text) {
         if (textValue.text.isEmpty()) return@LaunchedEffect
-        delay(300)
+        delay(2000)
         syntaxHighlight = ide.getSyntaxHighlightingForCurrentFile()
         val tree = ide.getCurrentParseTree()
         val plugin = ide.getCurrentPlugin()

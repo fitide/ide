@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
@@ -58,7 +59,7 @@ fun LineNumberGutter(
                     Icon(
                         imageVector =
                             if (fold.collapsed)
-                                Icons.Default.KeyboardArrowRight
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight
                             else
                                 Icons.Default.KeyboardArrowDown,
                         contentDescription = "Toggle Fold",
