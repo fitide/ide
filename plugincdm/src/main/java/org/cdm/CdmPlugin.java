@@ -350,21 +350,25 @@ public class CdmPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getKeyWordsOfModule(ParseTree node) {
-        if (node instanceof CdmParser.While_loopContext loop) {
-            return List.of(loop.While(), loop.Stays(), loop.Wend());
-        } else if (node instanceof CdmParser.Until_loopContext loop) {
-            return List.of(loop.Do(), loop.Until());
-        } else if (node instanceof CdmParser.ConditionalContext cond) {
-            if (cond.else_clause() != null) {
-                return List.of(cond.If(), cond.conditions().condition().Is(),
-                        cond.else_clause().Else(), cond.Fi());
-            }
+        try {
+            if (node instanceof CdmParser.While_loopContext loop) {
+                return List.of(loop.While(), loop.Stays(), loop.Wend());
+            } else if (node instanceof CdmParser.Until_loopContext loop) {
+                return List.of(loop.Do(), loop.Until());
+            } else if (node instanceof CdmParser.ConditionalContext cond) {
+                if (cond.else_clause() != null) {
+                    return List.of(cond.If(), cond.conditions().condition().Is(),
+                            cond.else_clause().Else(), cond.Fi());
+                }
 
-            return List.of(cond.If(), cond.conditions().condition().Is(), cond.Fi());
-        } else if (node instanceof CdmParser.RelocatableSectionContext section) {
-            return List.of(section.rsect_header().Rsect());
-        } else if (node instanceof CdmParser.AbsoluteSectionContext section) {
-            return List.of(section.asect_header().Asect());
+                return List.of(cond.If(), cond.conditions().condition().Is(), cond.Fi());
+            } else if (node instanceof CdmParser.RelocatableSectionContext section) {
+                return List.of(section.rsect_header().Rsect());
+            } else if (node instanceof CdmParser.AbsoluteSectionContext section) {
+                return List.of(section.asect_header().Asect());
+            }
+        } catch (Exception e) {
+            return List.of();
         }
 
         return List.of();
