@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package user;
+
+import "Positions/positions.proto";
+
+option java_multiple_files = true;
+option java_package = "org.WebWorker.User";
+
+message User {
+    string host = 1;
+    string name = 2;
+}
+
+message UserCursor {
+    User user = 1;
+    positions.CursorPosition cursor_position = 2;
+}
+
+message UserCursorServer {
+    UserCursor user_cursor = 1;
+}
+
+message UsersClient {
+    repeated UserCursor user_cursors = 1;
+    repeated UserHighlighted user_highlighteds = 2;
+}
+
+message UserHighlighted {
+    User user = 1;
+    positions.HighlightedPosition highlighted_position = 2;
+}
+
+message UserHighlightedServer {
+    UserHighlighted user_cursor = 1;
+}
+
+

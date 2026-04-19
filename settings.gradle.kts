@@ -35,3 +35,4 @@ plugins {
 
 include(":FITIDE")
 include("plugincdm")
+include("webWorker")

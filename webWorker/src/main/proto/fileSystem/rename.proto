@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package fileSystemRename;
+
+import "constants/responsesCodes.proto";
+
+option java_multiple_files = true;
+option java_package = "org.WebWorker.FileSystem.Rename";
+
+message RenameFileServerRequest {
+    string relativeFilePath = 1;
+    string newName = 2;
+}
+
+message RenameFileServerResponse {
+    responsesCodes.RenameCode code = 1;
+}
+
+message RenameFileClientRequest {
+    string relativeFilePath = 1;
+    string newName = 2;
+}
+
+message RenameFileClientResponse {
+    responsesCodes.RenameCode code = 1;
+}
+
+
+
+message RenameDirectoryServerRequest {
+    string relativeFilePath = 1;
+    string newName = 2;
+}
+
+message RenameDirectoryServerResponse {
+    responsesCodes.RenameCode code = 1;
+}
+
+message RenameDirectoryClientRequest {
+    string relativeFilePath = 1;
+    string newName = 2;
+}
+
+message RenameDirectoryClientResponse {
+    responsesCodes.RenameCode code = 1;
+}
+

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package fileSystemDelete;
+
+import "constants/responsesCodes.proto";
+
+option java_multiple_files = true;
+option java_package = "org.WebWorker.FileSystem.Delete";
+
+message DeleteFileServerRequest {
+    string relativeFilePath = 1;
+}
+
+message DeleteFileServerResponse {
+    responsesCodes.DeleteFileCode code = 1;
+}
+
+message DeleteFileClientRequest {
+    string relativeFilePath = 1;
+}
+
+message DeleteFileClientResponse {
+    responsesCodes.DeleteFileCode code = 1;
+}
+
+
+message DeleteDirectoryServerRequest {
+    string relativeFilePath = 1;
+}
+
+message DeleteDirectoryServerResponse {
+    responsesCodes.DeleteFileCode code = 1;
+}
+
+message DeleteDirectoryClientRequest {
+    string relativeFilePath = 1;
+}
+
+message DeleteDirectoryClientResponse {
+    responsesCodes.DeleteFileCode code = 1;
+}

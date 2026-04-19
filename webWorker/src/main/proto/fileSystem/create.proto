@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package fileSystemCreate;
+
+import "constants/responsesCodes.proto";
+
+option java_multiple_files = true;
+option java_package = "org.WebWorker.FileSystem.Create";
+
+
+message CreateFileServerRequest {
+    string relativeFilePath = 1;
+}
+
+message CreateFileServerResponse {
+    responsesCodes.CreateFileCode code = 1;
+}
+
+message CreateFileClientRequest {
+    string relativeFilePath = 1;
+}
+
+message CreateFileClientResponse {
+    responsesCodes.CreateFileCode code = 1;
+}
+
+message CreateDirectoryServerRequest {
+    string relativeFilePath = 1;
+}
+
+message CreateDirectoryServerResponse {
+    responsesCodes.CreateFileCode code = 1;
+}
+
+message CreateDirectoryClientRequest {
+    string relativeFilePath = 1;
+}
+
+message CreateDirectoryClientResponse {
+    responsesCodes.CreateFileCode code = 1;
+}

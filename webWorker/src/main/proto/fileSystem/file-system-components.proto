@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package fileSystemComponents;
+
+option java_multiple_files = true;
+option java_package = "org.WebWorker.FileSystem.FileSystemComponents";
+
+message File {
+    string relativeFilePath = 1;
+    repeated string content = 2;
+}
+
+enum FileType {
+    REGULAR = 0;
+    DIRECTORY = 1;
+}
+
+message InboundFileSystemComponent {
+    FileType type = 1;
+    string relativePath = 2;
+}
+
+message Directory {
+    string relativeDirPath = 1;
+    repeated InboundFileSystemComponent inbounds = 2;
+}

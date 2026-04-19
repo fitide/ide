@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package responsesCodes;
+
+option java_multiple_files = true;
+option java_package = "org.WebWorker.ResponseCodes";
+
+enum UpdateProgrammersCode {
+    Update_Programmers_OK = 0;
+    Update_Programmers_FAILED = 1;
+}
+
+enum CreateFileCode {
+    Create_File_Code_OK = 0;
+    Create_File_Code_ALREADY_CREATED = 1;
+    Create_File_Code_WRONG_PATH = 2;
+    Create_File_Code_FAILED = 3;
+}
+
+enum DeleteFileCode {
+    Delete_File_Code_OK = 0;
+    Delete_File_Code_WRONG_PATH = 1;
+    Delete_File_Code_FAILED = 2;
+}
+
+enum CopyCode {
+    Copy_Code_OK = 0;
+    Copy_Code_ALREADY_EXIST = 1;
+    Copy_Code_WRONG_PATH = 2;
+    Copy_Code_WRONG_COPY_PATH = 3;
+    Copy_Code_FAILED = 4;
+}
+
+enum RenameCode {
+    Rename_Code_OK = 0;
+    Rename_Code_WRONG_PATH = 1;
+    Rename_Code_FAILED = 2;
+}
+
+enum MoveCode {
+    Move_Code_OK = 0;
+    Move_Code_ALREADY_EXIST = 1;
+    Move_Code_WRONG_PATH = 2;
+    Move_Code_WRONG_COPY_PATH = 3;
+    Move_Code_FAILED = 4;
+}
+
+enum InsertTextCode {
+    Insert_Text_Code_OK = 0;
+    Insert_Text_Code_FAILED = 1;
+}
+
+enum DeleteTextCode {
+    Delete_Text_Code_OK = 0;
+    Delete_Text_Code_FAILED = 1;
+}
+
+enum ChangeCode {
+    Change_Code_OK = 0;
+    Change_Code_FAILED = 1;
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package textInserting;
+
+import "constants/responsesCodes.proto";
+import "Positions/positions.proto";
+
+option java_multiple_files = true;
+option java_package = "org.WebWorker.Text.Inserting";
+
+message InsertTextServerRequest {
+    string filePath = 1;
+    positions.CursorPosition position = 2;
+    string text = 3;
+}
+
+message InsertTextServerResponse {
+    responsesCodes.InsertTextCode code = 1;
+}
+
+message InsertTextClientRequest {
+    string filePath = 1;
+    positions.CursorPosition position = 2;
+    string text = 3;
+}
+
