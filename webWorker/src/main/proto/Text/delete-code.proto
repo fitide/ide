@@ -8,19 +8,23 @@ import "Positions/positions.proto";
 option java_multiple_files = true;
 option java_package = "org.WebWorker.Text.Deleting";
 
-message InsertTextServerRequest {
+message DeleteTextServerRequest {
     string filePath = 1;
     positions.HighlightedPosition position = 2;
     string textToDelete = 3;
 }
 
-message InsertTextServerResponse {
+message DeleteTextServerResponse {
     responsesCodes.DeleteTextCode code = 1;
     string error = 2;
 }
 
-message InsertTextClientRequest {
+message DeleteTextClientRequest {
     string filePath = 1;
     positions.HighlightedPosition position = 2;
 }
 
+message DeleteTextClientResponse {
+    responsesCodes.CodeChangingCode code = 1;
+    string error = 2;
+}

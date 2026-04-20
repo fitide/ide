@@ -8,21 +8,25 @@ import "Positions/positions.proto";
 option java_multiple_files = true;
 option java_package = "org.WebWorker.Text.Changing";
 
-message InsertTextServerRequest {
+message ChangeTextServerRequest {
     string filePath = 1;
     positions.HighlightedPosition position = 2;
     string textToDelete = 3;
     string textToInsert = 4;
 }
 
-message InsertTextServerResponse {
+message ChangeTextServerResponse {
     responsesCodes.ChangeCode code = 1;
     string error = 2;
 }
 
-message InsertTextClientRequest {
+message ChangeTextClientRequest {
     string filePath = 1;
     positions.HighlightedPosition position = 2;
     string textToInsert = 4;
 }
 
+message ChangeTextClientResponse {
+    responsesCodes.CodeChangingCode code = 1;
+    string error = 2;
+}

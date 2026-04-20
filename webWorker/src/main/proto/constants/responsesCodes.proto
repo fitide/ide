@@ -64,3 +64,8 @@ enum ConnectionCode {
     Connection_Code_OK = 0;
     Connection_Code_FAILED = 1;
 }
+
+enum CodeChangingCode {
+    CODE_CHANGING_CODE_OK = 0;
+    CODE_CHANGING_CODE_FAILED = 1;
+}

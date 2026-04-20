@@ -7,7 +7,7 @@ import "constants/responsesCodes.proto";
 option java_multiple_files = true;
 option java_package = "org.WebWorker.Connection";
 
-message ConnectRequest {
+message ConnectionRequest {
     string host = 1;
     string name = 2;
 }

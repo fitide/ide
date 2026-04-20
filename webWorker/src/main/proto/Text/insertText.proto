@@ -25,3 +25,7 @@ message InsertTextClientRequest {
     string text = 3;
 }
 
+message InsertTextClientResponse {
+    responsesCodes.CodeChangingCode code = 1;
+    string error = 2;
+}
