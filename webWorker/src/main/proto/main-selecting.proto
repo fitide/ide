@@ -18,5 +18,6 @@ message UpdateProgrammersRequest {
 
 message UpdateProgrammersResponse {
     responsesCodes.UpdateProgrammersCode code = 1;
+    string error = 2;
 }
 

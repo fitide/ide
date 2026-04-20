@@ -3,39 +3,27 @@ syntax = "proto3";
 package fileSystemDelete;
 
 import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
 
 option java_multiple_files = true;
 option java_package = "org.WebWorker.FileSystem.Delete";
 
-message DeleteFileServerRequest {
+message DeleteServerRequest {
     string relativeFilePath = 1;
+    fileSystemComponents.FileType file_type = 2;
 }
 
-message DeleteFileServerResponse {
+message DeleteServerResponse {
     responsesCodes.DeleteFileCode code = 1;
+    string error = 2;
 }
 
-message DeleteFileClientRequest {
+message DeleteClientRequest {
     string relativeFilePath = 1;
+    fileSystemComponents.FileType file_type = 2;
 }
 
-message DeleteFileClientResponse {
+message DeleteClientResponse {
     responsesCodes.DeleteFileCode code = 1;
-}
-
-
-message DeleteDirectoryServerRequest {
-    string relativeFilePath = 1;
-}
-
-message DeleteDirectoryServerResponse {
-    responsesCodes.DeleteFileCode code = 1;
-}
-
-message DeleteDirectoryClientRequest {
-    string relativeFilePath = 1;
-}
-
-message DeleteDirectoryClientResponse {
-    responsesCodes.DeleteFileCode code = 1;
+    string error = 2;
 }

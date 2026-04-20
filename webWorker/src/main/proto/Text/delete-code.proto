@@ -16,6 +16,7 @@ message InsertTextServerRequest {
 
 message InsertTextServerResponse {
     responsesCodes.DeleteTextCode code = 1;
+    string error = 2;
 }
 
 message InsertTextClientRequest {

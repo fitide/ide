@@ -3,43 +3,30 @@ syntax = "proto3";
 package fileSystemCopy;
 
 import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
 
 option java_multiple_files = true;
 option java_package = "org.WebWorker.FileSystem.Copy";
 
 
-message CopyFileServerRequest {
-    string relativeFilePath = 1;
-    string pathToCopy = 2;
+message CopyServerRequest {
+    fileSystemComponents.FileType file_type = 1;
+    string relativeFilePath = 2;
+    string pathToCopy = 3;
 }
 
-message CopyFileServerResponse {
+message CopyServerResponse {
     responsesCodes.CopyCode code = 1;
+    string error = 2;
 }
 
-message CopyFileClientRequest {
-    string relativeFilePath = 1;
-    string pathToCopy = 2;
+message CopyClientRequest {
+    fileSystemComponents.FileType file_type = 1;
+    string relativeFilePath = 2;
+    string pathToCopy = 3;
 }
 
-message CopyFileClientResponse {
+message CopyClientResponse {
     responsesCodes.CopyCode code = 1;
-}
-
-message CopyDirectoryServerRequest {
-    string relativeFilePath = 1;
-    string pathToCopy = 2;
-}
-
-message CopyDirectoryServerResponse {
-    responsesCodes.CopyCode code = 1;
-}
-
-message CopyDirectoryClientRequest {
-    string relativeFilePath = 1;
-    string pathToCopy = 2;
-}
-
-message CopyDirectoryClientResponse {
-    responsesCodes.CopyCode code = 1;
+    string error = 2;
 }

@@ -3,39 +3,29 @@ syntax = "proto3";
 package fileSystemCreate;
 
 import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
 
 option java_multiple_files = true;
 option java_package = "org.WebWorker.FileSystem.Create";
 
 
-message CreateFileServerRequest {
+message CreateServerRequest {
     string relativeFilePath = 1;
+    fileSystemComponents.FileType file_type = 2;
 }
 
-message CreateFileServerResponse {
+message CreateServerResponse {
     responsesCodes.CreateFileCode code = 1;
+    string error = 2;
 }
 
-message CreateFileClientRequest {
+message CreateClientRequest {
     string relativeFilePath = 1;
+    fileSystemComponents.FileType file_type = 2;
 }
 
-message CreateFileClientResponse {
+message CreateClientResponse {
     responsesCodes.CreateFileCode code = 1;
+    string error = 2;
 }
 
-message CreateDirectoryServerRequest {
-    string relativeFilePath = 1;
-}
-
-message CreateDirectoryServerResponse {
-    responsesCodes.CreateFileCode code = 1;
-}
-
-message CreateDirectoryClientRequest {
-    string relativeFilePath = 1;
-}
-
-message CreateDirectoryClientResponse {
-    responsesCodes.CreateFileCode code = 1;
-}

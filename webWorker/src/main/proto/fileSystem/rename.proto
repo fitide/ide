@@ -3,45 +3,30 @@ syntax = "proto3";
 package fileSystemRename;
 
 import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
 
 option java_multiple_files = true;
 option java_package = "org.WebWorker.FileSystem.Rename";
 
-message RenameFileServerRequest {
+message RenameServerRequest {
     string relativeFilePath = 1;
     string newName = 2;
+    fileSystemComponents.FileType file_type = 3;
 }
 
-message RenameFileServerResponse {
+message RenameServerResponse {
     responsesCodes.RenameCode code = 1;
+    string error = 2;
 }
 
-message RenameFileClientRequest {
+message RenameClientRequest {
     string relativeFilePath = 1;
     string newName = 2;
+    fileSystemComponents.FileType file_type = 3;
 }
 
-message RenameFileClientResponse {
+message RenameClientResponse {
     responsesCodes.RenameCode code = 1;
-}
-
-
-
-message RenameDirectoryServerRequest {
-    string relativeFilePath = 1;
-    string newName = 2;
-}
-
-message RenameDirectoryServerResponse {
-    responsesCodes.RenameCode code = 1;
-}
-
-message RenameDirectoryClientRequest {
-    string relativeFilePath = 1;
-    string newName = 2;
-}
-
-message RenameDirectoryClientResponse {
-    responsesCodes.RenameCode code = 1;
+    string error = 2;
 }
 

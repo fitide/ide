@@ -3,43 +3,30 @@ syntax = "proto3";
 package fileSystemMove;
 
 import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
 
 option java_multiple_files = true;
 option java_package = "org.WebWorker.FileSystem.Move";
 
 
-message MoveFileServerRequest {
+message MoveServerRequest {
     string relativeFilePath = 1;
     string pathToMove = 2;
+    fileSystemComponents.FileType file_type = 3;
 }
 
-message MoveFileServerResponse {
+message MoveServerResponse {
     responsesCodes.MoveCode code = 1;
+    string error = 2;
 }
 
-message MoveFileClientRequest {
+message MoveClientRequest {
     string relativeFilePath = 1;
     string pathToMove = 2;
+    fileSystemComponents.FileType file_type = 3;
 }
 
-message MoveFileClientResponse {
+message MoveClientResponse {
     responsesCodes.MoveCode code = 1;
-}
-
-message MoveDirectoryServerRequest {
-    string relativeFilePath = 1;
-    string pathToMove = 2;
-}
-
-message MoveDirectoryServerResponse {
-    responsesCodes.MoveCode code = 1;
-}
-
-message MoveDirectoryClientRequest {
-    string relativeFilePath = 1;
-    string pathToMove = 2;
-}
-
-message MoveDirectoryClientResponse {
-    responsesCodes.MoveCode code = 1;
+    string error = 2;
 }
