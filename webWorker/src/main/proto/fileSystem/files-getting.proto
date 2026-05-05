@@ -5,7 +5,7 @@ package fileSystem;
 import "fileSystem/file-system-components.proto";
 
 option java_multiple_files = true;
-option java_package = "org.WebWorker.FileSystem.FilesGetting";
+option java_package = "org.ide.WebWorker.FileSystem.FilesGetting";
 
 message DirectoryRequest {
     string directoryRelativePath = 1;

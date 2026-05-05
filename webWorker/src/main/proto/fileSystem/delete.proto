@@ -6,7 +6,7 @@ import "constants/responsesCodes.proto";
 import "fileSystem/file-system-components.proto";
 
 option java_multiple_files = true;
-option java_package = "org.WebWorker.FileSystem.Delete";
+option java_package = "org.ide.WebWorker.FileSystem.Delete";
 
 message DeleteServerRequest {
     string relativeFilePath = 1;

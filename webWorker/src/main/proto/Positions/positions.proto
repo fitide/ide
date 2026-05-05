@@ -3,13 +3,12 @@ syntax = "proto3";
 package positions;
 
 option java_multiple_files = true;
-option java_package = "org.WebWorker.Positions";
+option java_package = "org.ide.WebWorker.Positions";
 
 
 message CursorPosition {
     uint32 lineNumer = 1;
     uint32 columnNumber = 2;
-    string file = 3;
 }
 
 message HighlightedPosition {
@@ -17,5 +16,4 @@ message HighlightedPosition {
     uint32 lineEnd = 2;
     uint32 columnStart = 3;
     uint32 columnEnd = 4;
-    string file = 5;
 }

@@ -5,7 +5,7 @@ package user;
 import "Positions/positions.proto";
 
 option java_multiple_files = true;
-option java_package = "org.WebWorker.User";
+option java_package = "org.ide.WebWorker.User";
 
 message User {
     string host = 1;
@@ -22,8 +22,9 @@ message UserCursorServer {
 }
 
 message UsersClient {
-    repeated UserCursor user_cursors = 1;
-    repeated UserHighlighted user_highlighteds = 2;
+    repeated UserFile user_files = 1;
+    repeated UserCursor user_cursors = 2;
+    repeated UserHighlighted user_highlighteds = 3;
 }
 
 message UserHighlighted {
@@ -35,4 +36,7 @@ message UserHighlightedServer {
     UserHighlighted user_cursor = 1;
 }
 
+message UserFile {
+    string file = 1;
+}
 

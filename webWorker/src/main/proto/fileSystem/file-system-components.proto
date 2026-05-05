@@ -3,7 +3,7 @@ syntax = "proto3";
 package fileSystemComponents;
 
 option java_multiple_files = true;
-option java_package = "org.WebWorker.FileSystem.FileSystemComponents";
+option java_package = "org.ide.WebWorker.FileSystem.FileSystemComponents";
 
 message File {
     string relativeFilePath = 1;

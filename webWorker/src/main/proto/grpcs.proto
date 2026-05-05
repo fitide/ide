@@ -15,7 +15,10 @@ import "Text/insertText.proto";
 import "Text/delete-code.proto";
 import "Text/change-code.proto";
 
-service Server {
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.Workers";
+
+service IDEWebWorker {
     rpc copy(fileSystemCopy.CopyServerRequest) returns (fileSystemCopy.CopyServerResponse) {};
     rpc create(fileSystemCreate.CreateServerRequest) returns (fileSystemCreate.CreateServerResponse) {};
     rpc delete(fileSystemDelete.DeleteServerRequest) returns (fileSystemDelete.DeleteServerResponse) {};
@@ -23,28 +26,17 @@ service Server {
     rpc rename(fileSystemRename.RenameServerRequest) returns (fileSystemRename.RenameServerResponse) {};
 
 
-    rpc getUserCursor(user.UserCursorServer) returns (google.protobuf.Empty) {};
-    rpc getUserHighlighted(user.UserHighlightedServer) returns (google.protobuf.Empty) {};
+    rpc setUserCursor(user.UserCursorServer) returns (google.protobuf.Empty) {};
+    rpc setUserHighlighted(user.UserHighlightedServer) returns (google.protobuf.Empty) {};
+    rpc setUserFilePosition(user.UserFile) returns (google.protobuf.Empty) {};
 
     rpc onConnection(Connection.ConnectionRequest) returns (Connection.ConnectionResponse) {};
-
-    rpc insertText(textInserting.InsertTextServerRequest) returns (textInserting.InsertTextServerResponse) {};
-    rpc deleteText(textDeleting.DeleteTextServerRequest) returns (textDeleting.DeleteTextServerResponse) {};
-    rpc changeText(textChanging.ChangeTextServerRequest) returns (textChanging.ChangeTextServerResponse) {};
-}
-
-service Client {
-    rpc copy(fileSystemCopy.CopyClientRequest) returns (fileSystemCopy.CopyClientResponse) {};
-    rpc create(fileSystemCreate.CreateClientRequest) returns (fileSystemCreate.CreateClientResponse) {};
-    rpc delete(fileSystemDelete.DeleteClientRequest) returns (fileSystemDelete.DeleteClientResponse) {};
-    rpc move(fileSystemMove.MoveClientRequest) returns (fileSystemMove.MoveClientResponse) {};
-    rpc rename(fileSystemRename.RenameClientRequest) returns (fileSystemRename.RenameClientResponse) {};
 
     rpc updatePositions(user.UsersClient) returns (google.protobuf.Empty) {};
 
     rpc updateUsers(mainSelecting.UpdateProgrammersRequest) returns (mainSelecting.UpdateProgrammersResponse) {};
 
-    rpc insertText(textInserting.InsertTextClientRequest) returns (textInserting.InsertTextClientResponse) {};
-    rpc deleteText(textDeleting.DeleteTextClientRequest) returns (textDeleting.DeleteTextClientResponse) {};
-    rpc changeText(textChanging.ChangeTextClientRequest) returns (textChanging.ChangeTextClientResponse) {};
+    rpc insertText(textInserting.InsertTextServerRequest) returns (textInserting.InsertTextServerResponse) {};
+    rpc deleteText(textDeleting.DeleteTextServerRequest) returns (textDeleting.DeleteTextServerResponse) {};
+    rpc changeText(textChanging.ChangeTextServerRequest) returns (textChanging.ChangeTextServerResponse) {};
 }

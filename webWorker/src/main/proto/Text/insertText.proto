@@ -6,7 +6,7 @@ import "constants/responsesCodes.proto";
 import "Positions/positions.proto";
 
 option java_multiple_files = true;
-option java_package = "org.WebWorker.Text.Inserting";
+option java_package = "org.ide.WebWorker.Text.Inserting";
 
 message InsertTextServerRequest {
     string filePath = 1;
