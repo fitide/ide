@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package user;
 
+
+import "google/protobuf/timestamp.proto";
 import "Positions/positions.proto";
 
 option java_multiple_files = true;
@@ -15,6 +17,7 @@ message User {
 message UserCursor {
     User user = 1;
     positions.CursorPosition cursor_position = 2;
+    google.protobuf.Timestamp time = 3;
 }
 
 message UserCursorServer {
@@ -30,6 +33,7 @@ message UsersClient {
 message UserHighlighted {
     User user = 1;
     positions.HighlightedPosition highlighted_position = 2;
+    google.protobuf.Timestamp time = 3;
 }
 
 message UserHighlightedServer {
@@ -37,6 +41,8 @@ message UserHighlightedServer {
 }
 
 message UserFile {
-    string file = 1;
+    User user = 1;
+    string file = 2;
+    google.protobuf.Timestamp time = 3;
 }
 

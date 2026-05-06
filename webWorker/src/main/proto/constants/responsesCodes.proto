@@ -63,6 +63,7 @@ enum ChangeCode {
 enum ConnectionCode {
     Connection_Code_OK = 0;
     Connection_Code_FAILED = 1;
+    Connection_Code_Request_To_Client = 2;
 }
 
 enum CodeChangingCode {

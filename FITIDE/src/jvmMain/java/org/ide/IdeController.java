@@ -14,6 +14,7 @@ import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
 import org.ide.PluginController.PluginInterface.Plugin;
+import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
 
@@ -30,7 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class IdeController {
+public class IdeController implements IdeControllerWebInt {
 
     private final Logger logger = LogManager.getLogger(IdeController.class);
 
@@ -257,6 +258,18 @@ public class IdeController {
 
     public boolean hasUnsavedChanges(Path path) {
         return editorController.hasUnsavedChanges(path.toString());
+    }
+
+    @Override
+    public List<org.ide.WebWorker.Tools.Pair<String, FileType>> getDirData(String relativePath) {
+        // TODO: implement
+        return List.of();
+    }
+
+    @Override
+    public List<String> getFileContent(String relativePath) {
+        // TODO: implement
+        return List.of();
     }
 
     public OpenedFileInfo getOpenedFileInfo() {

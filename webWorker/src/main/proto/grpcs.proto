@@ -10,6 +10,7 @@ import "fileSystem/create.proto";
 import "fileSystem/delete.proto";
 import "fileSystem/move.proto";
 import "fileSystem/rename.proto";
+import "fileSystem/files-getting.proto";
 
 import "Text/insertText.proto";
 import "Text/delete-code.proto";
@@ -39,4 +40,7 @@ service IDEWebWorker {
     rpc insertText(textInserting.InsertTextServerRequest) returns (textInserting.InsertTextServerResponse) {};
     rpc deleteText(textDeleting.DeleteTextServerRequest) returns (textDeleting.DeleteTextServerResponse) {};
     rpc changeText(textChanging.ChangeTextServerRequest) returns (textChanging.ChangeTextServerResponse) {};
+
+    rpc shareDir(fileSystem.DirectoryRequest) returns (fileSystem.DirectoryResponse);
+    rpc shareFile(fileSystem.FileRequest) returns (fileSystem.FileResponse);
 }

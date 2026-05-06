@@ -9,7 +9,8 @@ option java_package = "org.ide.WebWorker.MainSelecting";
 
 message Programmer {
     string host = 1;
-    uint32 clientNumber = 2;
+    string name = 2;
+    uint32 clientNumber = 3;
 }
 
 message UpdateProgrammersRequest {

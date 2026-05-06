@@ -15,4 +15,5 @@ message ConnectionRequest {
 message ConnectionResponse {
     responsesCodes.ConnectionCode code = 1;
     string error = 2;
+    string Directory = 3;
 }
