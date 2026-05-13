@@ -92,90 +92,94 @@ public class IDEWebWorkerServer extends IDEWebWorkerGrpc.IDEWebWorkerImplBase {
     }
 
     @Override
-    public void copy(CopyServerRequest request, StreamObserver<CopyServerResponse> responseObserver) throws Exception {
+    public void copy(CopyServerRequest request, StreamObserver<CopyServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.copy(request, responseObserver);});
     }
 
     @Override
-    public void create(CreateServerRequest request, StreamObserver<CreateServerResponse> responseObserver) throws Exception {
+    public void create(CreateServerRequest request, StreamObserver<CreateServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.create(request, responseObserver);});
     }
 
     @Override
-    public void delete(DeleteServerRequest request, StreamObserver<DeleteServerResponse> responseObserver) throws Exception {
+    public void delete(DeleteServerRequest request, StreamObserver<DeleteServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.delete(request, responseObserver);});
     }
 
     @Override
-    public void move(MoveServerRequest request, StreamObserver<MoveServerResponse> responseObserver) throws Exception {
+    public void move(MoveServerRequest request, StreamObserver<MoveServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.move(request, responseObserver);});
     }
 
     @Override
-    public void rename(RenameServerRequest request, StreamObserver<RenameServerResponse> responseObserver) throws Exception {
+    public void rename(RenameServerRequest request, StreamObserver<RenameServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.rename(request, responseObserver);});
     }
 
     @Override
-    public void setUserCursor(UserCursorServer request, StreamObserver<Empty> responseObserver) throws Exception {
+    public void setUserCursor(UserCursorServer request, StreamObserver<Empty> responseObserver) {
         withLock(roleLock, () -> {roleService.setUserCursor(request, responseObserver);});
     }
 
     @Override
-    public void setUserHighlighted(UserHighlightedServer request, StreamObserver<Empty> responseObserver) throws Exception {
+    public void setUserHighlighted(UserHighlightedServer request, StreamObserver<Empty> responseObserver) {
         withLock(roleLock, () -> {roleService.setUserHighlighted(request, responseObserver);});
     }
 
     @Override
-    public void setUserFilePosition(UserFile request, StreamObserver<Empty> responseObserver) throws Exception {
+    public void setUserFilePosition(UserFile request, StreamObserver<Empty> responseObserver) {
         withLock(roleLock, () -> {roleService.setUserFilePosition(request, responseObserver);});
     }
 
     @Override
-    public void onConnection(ConnectionRequest request, StreamObserver<ConnectionResponse> responseObserver) throws Exception {
+    public void onConnection(ConnectionRequest request, StreamObserver<ConnectionResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.onConnection(request, responseObserver);});
     }
 
     @Override
-    public void updatePositions(UsersClient request, StreamObserver<Empty> responseObserver) throws Exception {
+    public void updatePositions(UsersClient request, StreamObserver<Empty> responseObserver) {
         withLock(roleLock, () -> {roleService.updatePositions(request, responseObserver);});
     }
 
     @Override
-    public void updateUsers(UpdateProgrammersRequest request, StreamObserver<UpdateProgrammersResponse> responseObserver) throws Exception {
+    public void updateUsers(UpdateProgrammersRequest request, StreamObserver<UpdateProgrammersResponse> responseObserver) {
         this.lastTimeUpdated = LocalTime.now();
         withLock(roleLock, () -> {roleService.updateUsers(request, responseObserver);});
     }
 
     @Override
-    public void insertText(InsertTextServerRequest request, StreamObserver<InsertTextServerResponse> responseObserver) throws Exception {
+    public void insertText(InsertTextServerRequest request, StreamObserver<InsertTextServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.insertText(request, responseObserver);});
     }
 
     @Override
-    public void deleteText(DeleteTextServerRequest request, StreamObserver<DeleteTextServerResponse> responseObserver) throws Exception {
+    public void deleteText(DeleteTextServerRequest request, StreamObserver<DeleteTextServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.deleteText(request, responseObserver);});
     }
 
     @Override
-    public void changeText(ChangeTextServerRequest request, StreamObserver<ChangeTextServerResponse> responseObserver) throws Exception {
+    public void changeText(ChangeTextServerRequest request, StreamObserver<ChangeTextServerResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.changeText(request, responseObserver);});
     }
 
     @Override
-    public void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver) throws Exception {
+    public void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.shareDir(request, responseObserver);});
     }
 
     @Override
-    public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) throws Exception {
+    public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) {
         withLock(roleLock, () -> {roleService.shareFile(request, responseObserver);});
     }
 
-    private void withLock(ReadWriteLock lock, Action action) throws Exception {
-        lock.readLock().lock();
-        action.execute();
-        lock.readLock().unlock();
+    private void withLock(ReadWriteLock lock, Action action) {
+        try {
+            lock.readLock().lock();
+            action.execute();
+            lock.readLock().unlock();
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
     }
 
     public void becomeLeader() throws Exception {
