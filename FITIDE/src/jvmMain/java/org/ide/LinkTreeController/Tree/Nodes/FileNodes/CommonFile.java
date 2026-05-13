@@ -11,7 +11,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.ExternalFile;
 import org.ide.PluginController.PluginInterface.Plugin;

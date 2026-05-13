@@ -5,7 +5,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.KeyWord;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.PluginController.PluginInterface.Position;
 import org.ide.PluginController.PluginInterface.Tag;

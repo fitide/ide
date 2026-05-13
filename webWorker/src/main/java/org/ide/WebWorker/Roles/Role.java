@@ -53,9 +53,9 @@ public interface Role {
     boolean deleteText(DeleteTextServerRequest request, StreamObserver<DeleteTextServerResponse> responseObserver);
     boolean changeText(ChangeTextServerRequest request, StreamObserver<ChangeTextServerResponse> responseObserver);
 
-    void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver);
+    void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver) throws Exception;
 
-    void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver);
+    void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) throws Exception;
 
     User getNextLeader();
 

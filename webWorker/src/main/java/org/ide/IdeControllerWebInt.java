@@ -5,6 +5,7 @@ import org.ide.WebWorker.FileSystem.FileSystemComponents.File;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
 import org.ide.WebWorker.Tools.Pair;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,11 +54,13 @@ public interface IdeControllerWebInt {
 
     public boolean hasUnsavedChanges(Path path);
 
-    public List<Pair<String, FileType>> getDirData(String relativePath);
+    public List<Pair<String, FileType>> getDirData(String relativePath) throws Exception;
 
-    public List<String> getFileContent(String relativePath);
+    public List<String> getFileContent(String relativePath) throws FileNotFoundException, Exception;
 
     void setDir(Directory dir);
 
     void setFIle(File file);
+
+
 }

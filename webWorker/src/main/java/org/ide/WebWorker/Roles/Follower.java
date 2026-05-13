@@ -68,7 +68,7 @@ public class Follower implements Role {
         this.port = port;
         this.stub = IDEWebWorkerGrpc.newBlockingStub(ManagedChannelBuilder.forAddress(curMain, port).usePlaintext().build());
         rootDir = stub.onConnection(ConnectionRequest.newBuilder().setHost(host).setName(name).build()).getDirectory();
-
+        getDirectory(rootDir);
     }
 
     @Override
@@ -277,12 +277,12 @@ public class Follower implements Role {
     }
 
     @Override
-    public void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver) {
+    public void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver) throws Exception {
         getDirectory(rootDir);
     }
 
     @Override
-    public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) {
+    public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) throws Exception {
         getDirectory(rootDir);
     }
 
@@ -322,8 +322,8 @@ public class Follower implements Role {
     }
 
     private void getFile(String filePath) {
-        var file = stub.shareDir(DirectoryRequest.newBuilder().setDirectoryRelativePath(filePath).build());
-        // TODO: implement
+        var file = stub.shareFile(FileRequest.newBuilder().setFileRelativePath(filePath).build());
+        ideController.setFIle(file.getFile());
     }
 
     public String getCurMain() {

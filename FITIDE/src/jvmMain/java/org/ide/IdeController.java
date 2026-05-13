@@ -19,6 +19,7 @@ import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -261,15 +262,35 @@ public class IdeController implements IdeControllerWebInt {
     }
 
     @Override
-    public List<org.ide.WebWorker.Tools.Pair<String, FileType>> getDirData(String relativePath) {
-        // TODO: implement
-        return List.of();
+    public List<org.ide.WebWorker.Tools.Pair<String, FileType>> getDirData(String relativePath) throws Exception {
+        List<org.ide.WebWorker.Tools.Pair<String, FileType>> resList = new ArrayList<>();
+        var dir = fileExplorer.getTreeCopy().findDir(relativePath);
+        for (int i = 0; i < dir.getDirsCnt(); i++) {
+            var subDir = dir.getDir(i);
+            resList.add(new org.ide.WebWorker.Tools.Pair<>(Paths.get(relativePath, subDir.name).toString(), FileType.DIRECTORY));
+        }
+        for (int i = 0; i < dir.getFilesCnt(); i++) {
+            var subFile = dir.getFile(i);
+            resList.add(new org.ide.WebWorker.Tools.Pair<>(Paths.get(relativePath, subFile.name).toString(), FileType.REGULAR));
+        }
+
+        return resList;
     }
 
     @Override
-    public List<String> getFileContent(String relativePath) {
+    public List<String> getFileContent(String relativePath) throws Exception {
+        var fileText = openFile(Paths.get(relativePath));
+        return List.of(fileText.split("\n"));
+    }
+
+    @Override
+    public void setDir(org.ide.WebWorker.FileSystem.FileSystemComponents.Directory dir) {
         // TODO: implement
-        return List.of();
+    }
+
+    @Override
+    public void setFIle(org.ide.WebWorker.FileSystem.FileSystemComponents.File file) {
+        // TODO: implement
     }
 
     public OpenedFileInfo getOpenedFileInfo() {

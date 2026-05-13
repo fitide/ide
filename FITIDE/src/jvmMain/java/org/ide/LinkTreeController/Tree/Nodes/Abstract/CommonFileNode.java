@@ -11,7 +11,7 @@ import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;

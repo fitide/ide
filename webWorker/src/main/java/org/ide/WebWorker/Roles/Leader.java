@@ -213,7 +213,7 @@ public class Leader extends Follower{
     }
 
     @Override
-    public void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver) {
+    public void shareDir(DirectoryRequest request, StreamObserver<DirectoryResponse> responseObserver) throws Exception {
         var dir = ideController.getDirData(request.getDirectoryRelativePath());
 
         var directoryBuilder = Directory.newBuilder();
@@ -229,7 +229,7 @@ public class Leader extends Follower{
     }
 
     @Override
-    public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) {
+    public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) throws Exception {
         var file = ideController.getFileContent(request.getFileRelativePath());
 
         var fileBuilder = File.newBuilder().setRelativeFilePath(request.getFileRelativePath());
