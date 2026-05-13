@@ -34,4 +34,5 @@ plugins {
 }
 
 include(":FITIDE")
-include("plugincdm")
+include(":plugincdm")
+include(":idePluginInterface")
