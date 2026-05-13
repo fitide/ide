@@ -184,6 +184,16 @@ public class IDEWebWorkerServer extends IDEWebWorkerGrpc.IDEWebWorkerImplBase {
         roleLock.writeLock().unlock();
     }
 
+    public User setLeader() throws Exception {
+        if (getNextLeader().getName().equals(name)) {
+            becomeLeader();
+            return null;
+        }
+
+
+        return getNextLeader();
+    }
+
     public User getNextLeader() {
         return roleService.getNextLeader();
     }

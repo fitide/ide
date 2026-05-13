@@ -28,6 +28,8 @@ import org.ide.WebWorker.Text.Inserting.InsertTextServerRequest;
 import org.ide.WebWorker.Text.Inserting.InsertTextServerResponse;
 import org.ide.WebWorker.User.*;
 
+import java.time.LocalTime;
+
 public interface Role {
 
 
@@ -58,4 +60,6 @@ public interface Role {
     User getNextLeader();
 
     void updateLeader();
+
+    LocalTime getLastTimeUpdated();
 }

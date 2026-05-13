@@ -12,6 +12,7 @@ import org.ide.WebWorker.FileSystem.Create.CreateServerRequest;
 import org.ide.WebWorker.FileSystem.Create.CreateServerResponse;
 import org.ide.WebWorker.FileSystem.Delete.DeleteServerRequest;
 import org.ide.WebWorker.FileSystem.Delete.DeleteServerResponse;
+import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
 import org.ide.WebWorker.FileSystem.FilesGetting.DirectoryRequest;
 import org.ide.WebWorker.FileSystem.FilesGetting.DirectoryResponse;
 import org.ide.WebWorker.FileSystem.FilesGetting.FileRequest;
@@ -34,12 +35,15 @@ import org.ide.WebWorker.User.*;
 import org.ide.WebWorker.Workers.IDEWebWorkerGrpc;
 
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class Follower implements Role {
-    private final PositionsTable positionsTable;
+    protected final PositionsTable positionsTable;
     private String curMain;
     private final Object fileSystemLock = new Object();
     private final IdeControllerWebInt ideController;
@@ -50,6 +54,8 @@ public class Follower implements Role {
     private final String name;
     private final int port;
     private IDEWebWorkerGrpc.IDEWebWorkerBlockingStub stub;
+
+    private LocalTime lastTimeUpdated;
 
     private String rootDir;
 
@@ -228,6 +234,7 @@ public class Follower implements Role {
 
     @Override
     public void updatePositions(UsersClient request, StreamObserver<Empty> responseObserver) {
+        lastTimeUpdated = (Instant.ofEpochSecond(request.getTime().getSeconds())).atZone(ZoneId.systemDefault()).toLocalTime();
         for (var file : request.getUserFilesList()) {
             setUserFilePositionClient(file);
         }
@@ -298,9 +305,19 @@ public class Follower implements Role {
         this.stub = IDEWebWorkerGrpc.newBlockingStub(ManagedChannelBuilder.forAddress(newLeader.getHost(), port).usePlaintext().build());
     }
 
+    @Override
+    public LocalTime getLastTimeUpdated() {
+        return lastTimeUpdated;
+    }
+
     private void getDirectory(String directory) {
-        var dir = stub.shareDir(DirectoryRequest.newBuilder().setDirectoryRelativePath(directory).build());
-        // TODO: implement
+        var dir = stub.shareDir(DirectoryRequest.newBuilder().setDirectoryRelativePath(directory).build()).getDirectory();
+        ideController.setDir(dir);
+        for (var file : dir.getInboundsList()) {
+            if (file.getType() == FileType.REGULAR) {
+                getFile(file.getRelativePath());
+            }
+        }
 
     }
 

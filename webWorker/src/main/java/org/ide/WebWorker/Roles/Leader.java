@@ -1,6 +1,7 @@
 package org.ide.WebWorker.Roles;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.ide.IdeControllerWebInt;
@@ -27,6 +28,7 @@ import org.ide.WebWorker.FileSystem.Rename.RenameServerResponse;
 import org.ide.WebWorker.MainSelecting.Programmer;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersRequest;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersResponse;
+import org.ide.WebWorker.Positions.CursorPosition;
 import org.ide.WebWorker.ResponseCodes.*;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerRequest;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerResponse;
@@ -38,6 +40,8 @@ import org.ide.WebWorker.Tools.Pair;
 import org.ide.WebWorker.User.*;
 import org.ide.WebWorker.Workers.IDEWebWorkerGrpc;
 
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,6 +50,7 @@ public class Leader extends Follower{
     private int lastClientNumber = -1;
     private final int port;
     private final IdeControllerWebInt ideController;
+    private final Map<String, String> nameToHost = new HashMap<>();
 
     public Leader(String curMain, IdeControllerWebInt ideController, Map<User, Integer> programmers, int port, String host, String name) {
         super(curMain, ideController, host, port, name);
@@ -160,7 +165,28 @@ public class Leader extends Follower{
 
     @Override
     public void updatePositions(UsersClient request, StreamObserver<Empty> responseObserver) {
-        super.updatePositions(request, responseObserver);
+        var now = Instant.now();
+        Timestamp timestamp = Timestamp.newBuilder().setSeconds(now.getEpochSecond()).setNanos(now.getNano()).build();
+        var usersPositionsRequestBuilder = UsersClient.newBuilder().setTime(timestamp);
+        for (var name : positionsTable.usersPositions.keySet()) {
+            var userPosition = positionsTable.usersPositions.get(name);
+            if (userPosition.file == null) continue;
+            var user = User.newBuilder().setHost(this.nameToHost.get(name)).setName(name).build();
+            usersPositionsRequestBuilder.addUserFiles(UserFile.newBuilder().setFile(userPosition.file).setUser(user).setTime(timestamp).build());
+
+            if (userPosition.cursorPosition != null) {
+                usersPositionsRequestBuilder.addUserCursors(
+                        UserCursor.newBuilder().setUser(user).setTime(timestamp).setCursorPosition(userPosition.cursorPosition));
+            }
+            else if (userPosition.highlightedPosition != null) {
+                usersPositionsRequestBuilder.addUserHighlighteds(
+                        UserHighlighted.newBuilder().setHighlightedPosition(userPosition.highlightedPosition).setUser(user).setTime(timestamp));
+            }
+        }
+
+        for (var programmer : programmersStub.values()) {
+            programmer.updatePositions(usersPositionsRequestBuilder.build());
+        }
     }
 
     @Override

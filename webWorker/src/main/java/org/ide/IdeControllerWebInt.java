@@ -1,9 +1,10 @@
 package org.ide;
 
+import org.ide.WebWorker.FileSystem.FileSystemComponents.Directory;
+import org.ide.WebWorker.FileSystem.FileSystemComponents.File;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
 import org.ide.WebWorker.Tools.Pair;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -55,4 +56,8 @@ public interface IdeControllerWebInt {
     public List<Pair<String, FileType>> getDirData(String relativePath);
 
     public List<String> getFileContent(String relativePath);
+
+    void setDir(Directory dir);
+
+    void setFIle(File file);
 }
