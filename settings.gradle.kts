@@ -36,3 +36,4 @@ plugins {
 include(":FITIDE")
 include(":plugincdm")
 include(":idePluginInterface")
+include("smlplugin")
