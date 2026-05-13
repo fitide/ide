@@ -86,27 +86,27 @@ public class SimplePlugin implements Plugin {
     }
 
     @Override
-    public List<ExternalFile> getStandartFiles() {
+    public List<ExternalFile> getStandardFiles() {
         return List.of();
     }
 
     @Override
-    public List<ExternalFunc> getStandartFuncs() {
+    public List<ExternalFunc> getStandardFuncs() {
         return List.of();
     }
 
     @Override
-    public List<ExternalVar> getStandartVars() {
+    public List<ExternalVar> getStandardVars() {
         return List.of();
     }
 
     @Override
-    public List<ExternalClass> getStandartClasses() {
+    public List<ExternalClass> getStandardClasses() {
         return List.of();
     }
 
     @Override
-    public List<ExternalType> getStandartTypes() {
+    public List<ExternalType> getStandardTypes() {
         String []types = new String[] {"int", "double", "char"};
         List<ExternalType> list = new ArrayList<>();
         for (var type : types) {
@@ -118,7 +118,7 @@ public class SimplePlugin implements Plugin {
     }
 
     @Override
-    public List<ExternalConstruction> getStandartConstructionsLike() {
+    public List<ExternalConstruction> getStandardConstructionsLike() {
         return List.of();
     }
 

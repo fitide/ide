@@ -57,33 +57,33 @@ public class CdmPlugin implements Plugin {
 
     //cdm doesn't have standard files
     @Override
-    public List<ExternalFile> getStandartFiles() {
+    public List<ExternalFile> getStandardFiles() {
         return List.of();
     }
 
     @Override
-    public List<ExternalFunc> getStandartFuncs() {
+    public List<ExternalFunc> getStandardFuncs() {
         return new ArrayList<>(externalFuncs.values());
     }
 
     @Override
-    public List<ExternalVar> getStandartVars() {
+    public List<ExternalVar> getStandardVars() {
         return externalVars;
     }
 
     //cdm8 doesn't have any standard classes
     @Override
-    public List<ExternalClass> getStandartClasses() {
+    public List<ExternalClass> getStandardClasses() {
         return List.of();
     }
 
     @Override
-    public List<ExternalType> getStandartTypes() {
+    public List<ExternalType> getStandardTypes() {
         return List.of(registerType, immediateType, voidType);
     }
 
     @Override
-    public List<ExternalConstruction> getStandartConstructionsLike() {
+    public List<ExternalConstruction> getStandardConstructionsLike() {
         return standardConstructs;
     }
 

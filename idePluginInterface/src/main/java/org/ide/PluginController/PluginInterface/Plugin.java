@@ -39,18 +39,18 @@ public interface Plugin {
 
     List<ParseTree> getFuncsOfClass(ParseTree classNode);
 
-    List<ExternalFile> getStandartFiles();
+    List<ExternalFile> getStandardFiles();
 
-    List<ExternalFunc> getStandartFuncs();
+    List<ExternalFunc> getStandardFuncs();
 
-    List<ExternalVar> getStandartVars();
+    List<ExternalVar> getStandardVars();
 
-    List<ExternalClass> getStandartClasses();
+    List<ExternalClass> getStandardClasses();
 
-    List<ExternalType> getStandartTypes();
+    List<ExternalType> getStandardTypes();
 
     // for/while/if etc
-    List<ExternalConstruction> getStandartConstructionsLike();
+    List<ExternalConstruction> getStandardConstructionsLike();
 
 
 

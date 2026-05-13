@@ -114,7 +114,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     private void setConstrs(Plugin plugin) {
-        var constrsInfo = plugin.getStandartConstructionsLike();
+        var constrsInfo = plugin.getStandardConstructionsLike();
         Map<String, Construction> constMap = new HashMap<>();
         for (var constr : constrsInfo) {
             constMap.put(constr.name, new Construction(constr.name, constr.keyWords));
@@ -123,7 +123,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     private void setFuncs(Plugin plugin) {
-        var funcInfo = plugin.getStandartFuncs();
+        var funcInfo = plugin.getStandardFuncs();
         Map<String, Func> funcs = new HashMap<>();
         for (var externalFunc : funcInfo) {
             funcs.put(externalFunc.name, new Func(externalFunc.name, List.of(), externalFunc.args, externalFunc.type));
@@ -132,7 +132,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     private void setVars(Plugin plugin) {
-        var varInfo = plugin.getStandartVars();
+        var varInfo = plugin.getStandardVars();
         Map<String, Var> vars = new HashMap<>();
         for (var externalVar : varInfo) {
             vars.put(externalVar.Name, new Var(externalVar.Name, List.of(), externalVar.Type.name));
@@ -141,7 +141,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     private void setExternalFiles(Plugin plugin) {
-        var filesInfo = plugin.getStandartFiles();
+        var filesInfo = plugin.getStandardFiles();
         Map<String, CommonFile> files = new HashMap<>();
         for (var file : filesInfo) {
             files.put(file.name, new CommonFile(file));
@@ -150,7 +150,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
     }
 
     private void setStandartTypes(Plugin plugin) {
-        var extTypes = plugin.getStandartTypes();
+        var extTypes = plugin.getStandardTypes();
         var types = new HashSet<String>();
         for (var type : extTypes) {
             types.add(type.name);
