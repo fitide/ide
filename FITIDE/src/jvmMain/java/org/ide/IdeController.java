@@ -10,6 +10,7 @@ import org.ide.FileExplorerController.Exceptions.UnnableToWriteInFileException;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.LinkTreeController.LinkTreeController;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
@@ -96,63 +97,55 @@ public class IdeController {
         return fileExplorer.getTreeCopy();
     }
 
-    public Directory refreshTree() {
-        if (fileExplorer == null) return null;
-        Directory updated = fileExplorer.updateTree(projectRoot.toString());
-        if (linkTreeController != null) {
-            linkTreeController.setFilesAndDirectoriesData(updated);
-        }
-        return updated;
+    public Directory refreshFileTree() {
+        if (fileExplorer == null || projectRoot == null) return null;
+
+        fileExplorer.updateTree(projectRoot.toString());
+
+        return fileExplorer.getTreeCopy();
     }
 
     public void createFile(Path dir, String name) throws Exception {
         fileExplorer.createFile(dir, name);
-        refreshTree();
     }
 
     public void createDir(Path dir, String name) throws Exception {
         fileExplorer.createDir(dir, name);
-        refreshTree();
     }
 
     public void deleteFile(Path path) throws Exception {
         fileExplorer.deleteFile(path);
-        refreshTree();
     }
 
     public void deleteDir(Path path) throws Exception {
         fileExplorer.deleteDirectory(path);
-        refreshTree();
     }
 
     public void renameFile(Path path, String newName) throws Exception {
         fileExplorer.renameFile(path, newName);
-        refreshTree();
+        linkTreeController.updateFileName(projectRoot.relativize(path), newName);
+        var newPath = Paths.get(path.getParent().toString().toString(), newName);
+        editorController.renameFile(path.toString(), newPath.toString());
     }
 
     public void renameDir(Path path, String newName) throws Exception {
         fileExplorer.renameDirectory(path, newName);
-        refreshTree();
     }
 
     public void moveFile(Path from, Path toDir) throws Exception {
         fileExplorer.moveFile(from, toDir);
-        refreshTree();
     }
 
     public void moveDir(Path from, Path toDir) throws Exception {
         fileExplorer.moveDir(from, toDir);
-        refreshTree();
     }
 
     public void copyFile(Path from, Path toDir) throws Exception {
         fileExplorer.copyFile(from, toDir);
-        refreshTree();
     }
 
     public void copyDir(Path from, Path toDir) throws Exception {
         fileExplorer.copyDir(from, toDir);
-        refreshTree();
     }
 
 
@@ -270,6 +263,16 @@ public class IdeController {
     private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> pending;
 
+    public void changeCurrentFile(Path path) {
+        if (path == null) return;
+        editorController.changeOpenedFile(path.toString());
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return;
+
+        if (pending != null) pending.cancel(false);
+        pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+    }
+
     public void onTextChanged(TextFieldValue newValue) {
         editorController.onTextChanged(newValue);
 
@@ -280,6 +283,18 @@ public class IdeController {
 
         if (pending != null) pending.cancel(false);
         pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+    }
+
+    public Path getOpenedFilePath() {
+        return editorController.getOpenedFilePath();
+    }
+
+    public List<Path> getOpenedFiles() {
+        return editorController.getOpenFiles();
+    }
+
+    public void closeFile(Path path) {
+        editorController.closeFile(path.toString());
     }
 
     public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException {
@@ -373,7 +388,7 @@ public class IdeController {
     private Path getShadowFilePath(Path originalPath) {
         Path relative = projectRoot.relativize(originalPath);
         return projectRoot
-                .resolve(".fitide-cache")
+                .resolve(".ide/.cache")
                 .resolve(relative);
     }
 
@@ -409,4 +424,28 @@ public class IdeController {
 
         return compileStringBuilder.toString();
     }
+
+    public GoToResult goToDefinition(int row, int col) {
+        if (linkTreeController == null || projectRoot == null) return null;
+
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return null;
+
+        Path absolutePath = Paths.get(currentFile);
+        Path relativePath = projectRoot.relativize(absolutePath).normalize();
+
+        AInternalCodeNode def = linkTreeController.goToDefinition(relativePath, row, col);
+        if (def == null || def.pathToFile == null) return null;
+
+        var pos = def.wholePos;
+        if (pos == null) return null;
+
+        Path defAbs = projectRoot.resolve(def.pathToFile).normalize();
+
+        int targetRow = pos.rowS;
+        int targetCol = pos.colS;
+
+        return new GoToResult(defAbs, targetRow, targetCol);
+    }
+
 }

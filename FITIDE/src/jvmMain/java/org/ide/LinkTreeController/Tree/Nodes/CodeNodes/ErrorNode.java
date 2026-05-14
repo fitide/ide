@@ -46,4 +46,9 @@ public class ErrorNode extends AInternalCodeNode {
     public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
         return;
     }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        return null;
+    }
 }

@@ -233,4 +233,16 @@ public abstract class AInternalCodeNode {
             child.updateFilePath(newPath);
         }
     }
+
+    public abstract AInternalCodeNode findByPos(LinkTreePosition position);
+
+    protected boolean contains(LinkTreePosition range, LinkTreePosition cursor) {
+        int r = cursor.rowS;
+        int c = cursor.colS;
+
+        boolean afterStart = (r > range.rowS) || (r == range.rowS && c >= range.colS);
+        boolean beforeEnd  = (r < range.rowE) || (r == range.rowE && c <= range.colE);
+
+        return afterStart && beforeEnd;
+    }
 }

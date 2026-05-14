@@ -268,6 +268,9 @@ public class Func extends AInternalCodeNode {
             case Usage -> {
                 this.definition = setDefDec(defs);
                 this.declaration = setDefDec(decs);
+                for (var arg : args.values()) {
+                    arg.setDefinitionsAndDeclarations(defs, decs);
+                }
                 if (this.definition == null && this.declaration == null) {
                    codeType = CodeType.Error;
                 }
@@ -299,6 +302,25 @@ public class Func extends AInternalCodeNode {
         for (var arg : args.values()) {
             arg.setTypes(types);
         }
+    }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        if (contains(namePosition, position)) return this;
+
+        for (var node : args.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        for (var node : childs.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        return null;
     }
 
 }
