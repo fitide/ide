@@ -48,6 +48,7 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
             implementation("org.antlr:antlr4-runtime:4.13.2")
             implementation("com.googlecode.json-simple:json-simple:1.1.1")
+            implementation("com.google.protobuf:protobuf-java:3.25.1")
         }
         jvmTest.dependencies {
             implementation(project.dependencies.platform("org.junit:junit-bom:5.10.0"))

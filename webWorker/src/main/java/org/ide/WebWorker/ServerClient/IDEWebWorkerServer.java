@@ -22,6 +22,7 @@ import org.ide.WebWorker.FileSystem.Rename.RenameServerRequest;
 import org.ide.WebWorker.FileSystem.Rename.RenameServerResponse;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersRequest;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersResponse;
+import org.ide.WebWorker.Positions.PositionsTable;
 import org.ide.WebWorker.Roles.Follower;
 import org.ide.WebWorker.Roles.Leader;
 import org.ide.WebWorker.Roles.Role;
@@ -172,6 +173,15 @@ public class IDEWebWorkerServer extends IDEWebWorkerGrpc.IDEWebWorkerImplBase {
         withLock(roleLock, () -> {roleService.shareFile(request, responseObserver);});
     }
 
+    @Override
+    public void getPositions(Empty request, StreamObserver<UsersClient> responseObserver) {
+        withLock(roleLock, () -> {roleService.getPositions(request, responseObserver);});
+    }
+
+    public void applyPositions(UsersClient positions) {
+        roleService.updatePositions(positions, null);
+    }
+
     private void withLock(ReadWriteLock lock, Action action) {
         try {
             lock.readLock().lock();
@@ -180,6 +190,10 @@ public class IDEWebWorkerServer extends IDEWebWorkerGrpc.IDEWebWorkerImplBase {
         } catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    public void connect() {
+        roleService.connect();
     }
 
     public void becomeLeader() throws Exception {
@@ -200,5 +214,9 @@ public class IDEWebWorkerServer extends IDEWebWorkerGrpc.IDEWebWorkerImplBase {
 
     public User getNextLeader() {
         return roleService.getNextLeader();
+    }
+
+    public PositionsTable getPositionsTable() {
+        return roleService.getPositionsTable();
     }
 }

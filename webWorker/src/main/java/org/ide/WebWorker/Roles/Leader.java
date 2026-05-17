@@ -7,6 +7,7 @@ import io.grpc.stub.StreamObserver;
 import org.ide.IdeControllerWebInt;
 import org.ide.WebWorker.Connection.ConnectionRequest;
 import org.ide.WebWorker.Connection.ConnectionResponse;
+import org.ide.WebWorker.ResponseCodes.ConnectionCode;
 import org.ide.WebWorker.FileSystem.Copy.CopyServerRequest;
 import org.ide.WebWorker.FileSystem.Copy.CopyServerResponse;
 import org.ide.WebWorker.FileSystem.Create.CreateServerRequest;
@@ -15,7 +16,6 @@ import org.ide.WebWorker.FileSystem.Delete.DeleteServerRequest;
 import org.ide.WebWorker.FileSystem.Delete.DeleteServerResponse;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.Directory;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.File;
-import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.InboundFileSystemComponent;
 import org.ide.WebWorker.FileSystem.FilesGetting.DirectoryRequest;
 import org.ide.WebWorker.FileSystem.FilesGetting.DirectoryResponse;
@@ -28,7 +28,7 @@ import org.ide.WebWorker.FileSystem.Rename.RenameServerResponse;
 import org.ide.WebWorker.MainSelecting.Programmer;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersRequest;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersResponse;
-import org.ide.WebWorker.Positions.CursorPosition;
+import org.ide.WebWorker.Positions.PositionsTable;
 import org.ide.WebWorker.ResponseCodes.*;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerRequest;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerResponse;
@@ -36,7 +36,6 @@ import org.ide.WebWorker.Text.Deleting.DeleteTextServerRequest;
 import org.ide.WebWorker.Text.Deleting.DeleteTextServerResponse;
 import org.ide.WebWorker.Text.Inserting.InsertTextServerRequest;
 import org.ide.WebWorker.Text.Inserting.InsertTextServerResponse;
-import org.ide.WebWorker.Tools.Pair;
 import org.ide.WebWorker.User.*;
 import org.ide.WebWorker.Workers.IDEWebWorkerGrpc;
 
@@ -149,6 +148,13 @@ public class Leader extends Follower{
                 User.newBuilder().setHost(request.getHost()).setName(request.getName()).build(),
                 stub);
 
+        String rootDir = ideController.getProjectRoot().getFileName().toString();
+        responseObserver.onNext(ConnectionResponse.newBuilder()
+                .setCode(ConnectionCode.Connection_Code_OK)
+                .setDirectory(rootDir)
+                .build());
+        responseObserver.onCompleted();
+
         var requestToClientsBuilder = UpdateProgrammersRequest.newBuilder();
         for (var programmer : programmers.keySet()) {
             requestToClientsBuilder.addProgrammers(programmers.get(programmer),
@@ -156,9 +162,11 @@ public class Leader extends Follower{
         }
         var requestToClients = requestToClientsBuilder.build();
 
-        for (var programmer : programmersStub.values()) {
-            var response = programmer.updateUsers(requestToClients);
-        }
+        new Thread(() -> {
+            for (var p : programmersStub.values()) {
+                try { p.updateUsers(requestToClients); } catch (Exception ignored) {}
+            }
+        }).start();
 
         return true;
     }
@@ -217,6 +225,7 @@ public class Leader extends Follower{
         var dir = ideController.getDirData(request.getDirectoryRelativePath());
 
         var directoryBuilder = Directory.newBuilder();
+        directoryBuilder.setRelativeDirPath(request.getDirectoryRelativePath());
         int number = 0;
         for (var dirData : dir) {
             var compBuilder = InboundFileSystemComponent.newBuilder();
@@ -236,6 +245,36 @@ public class Leader extends Follower{
         fileBuilder.addAllContent(file);
 
         responseObserver.onNext(FileResponse.newBuilder().setFile(fileBuilder).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void connect() {
+        // лидер не коннектится ни к кому
+    }
+
+    @Override
+    public PositionsTable getPositionsTable() {
+        return positionsTable;
+    }
+
+    @Override
+    public void getPositions(Empty request, StreamObserver<UsersClient> responseObserver) {
+        var now = Instant.now();
+        Timestamp timestamp = Timestamp.newBuilder().setSeconds(now.getEpochSecond()).setNanos(now.getNano()).build();
+        var builder = UsersClient.newBuilder().setTime(timestamp);
+        for (var name : positionsTable.usersPositions.keySet()) {
+            var userPosition = positionsTable.usersPositions.get(name);
+            if (userPosition.file == null) continue;
+            var user = User.newBuilder().setHost(this.nameToHost.get(name)).setName(name).build();
+            builder.addUserFiles(UserFile.newBuilder().setFile(userPosition.file).setUser(user).setTime(timestamp).build());
+            if (userPosition.cursorPosition != null) {
+                builder.addUserCursors(UserCursor.newBuilder().setUser(user).setTime(timestamp).setCursorPosition(userPosition.cursorPosition));
+            } else if (userPosition.highlightedPosition != null) {
+                builder.addUserHighlighteds(UserHighlighted.newBuilder().setHighlightedPosition(userPosition.highlightedPosition).setUser(user).setTime(timestamp));
+            }
+        }
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 

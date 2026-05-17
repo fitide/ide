@@ -67,6 +67,9 @@ public class Follower implements Role {
         this.name = name;
         this.port = port;
         this.stub = IDEWebWorkerGrpc.newBlockingStub(ManagedChannelBuilder.forAddress(curMain, port).usePlaintext().build());
+    }
+
+    public void connect() {
         rootDir = stub.onConnection(ConnectionRequest.newBuilder().setHost(host).setName(name).build()).getDirectory();
         getDirectory(rootDir);
     }
@@ -287,6 +290,17 @@ public class Follower implements Role {
     }
 
     @Override
+    public PositionsTable getPositionsTable() {
+        return positionsTable;
+    }
+
+    @Override
+    public void getPositions(Empty request, StreamObserver<UsersClient> responseObserver) {
+        responseObserver.onNext(UsersClient.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public User getNextLeader() {
         User minUser = null;
         for (var programmer : programmers.keySet()) {
@@ -323,7 +337,7 @@ public class Follower implements Role {
 
     private void getFile(String filePath) {
         var file = stub.shareFile(FileRequest.newBuilder().setFileRelativePath(filePath).build());
-        ideController.setFIle(file.getFile());
+        ideController.setFile(file.getFile());
     }
 
     public String getCurMain() {

@@ -18,5 +18,6 @@ object UIColors {
     val HintBg             = Color(0xFF323438)
     val HintBorder         = Color(0xFF45474B)
     val HintSelectedBg     = Color(0xFF3F4248)
-
+    val AccentGreen = Color(0xFF4CAF85)
+    val AccentBlue  = Color(0xFF5B9CF6)
 }

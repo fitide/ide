@@ -28,13 +28,13 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:4.28.2")
 
     // Spring Boot
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-web:3.2.0")
 
     // Для аннотаций @Generated
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     // Для тестирования
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.2.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -84,4 +84,8 @@ tasks.jar {
 tasks.bootJar {
     archiveFileName.set("grpc-server.jar")
     mainClass.set("com.example.grpc.GrpcServerApplication")
+}
+
+tasks.processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

@@ -51,6 +51,12 @@ class FileExplorer(
         fileTree = ideController.refreshTree()
     }
 
+    fun syncFromController() {
+        val root = ideController.projectRoot ?: return
+        currentProject = root
+        fileTree = ideController.getFileTree()
+    }
+
     fun createFile(dir: Path, name: String) {
         try {
             ideController.createFile(dir, name)

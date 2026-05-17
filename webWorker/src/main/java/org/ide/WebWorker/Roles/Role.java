@@ -20,6 +20,7 @@ import org.ide.WebWorker.FileSystem.Rename.RenameServerRequest;
 import org.ide.WebWorker.FileSystem.Rename.RenameServerResponse;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersRequest;
 import org.ide.WebWorker.MainSelecting.UpdateProgrammersResponse;
+import org.ide.WebWorker.Positions.PositionsTable;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerRequest;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerResponse;
 import org.ide.WebWorker.Text.Deleting.DeleteTextServerRequest;
@@ -62,4 +63,10 @@ public interface Role {
     void updateLeader();
 
     LocalTime getLastTimeUpdated();
+
+    PositionsTable getPositionsTable();
+
+    void getPositions(Empty request, StreamObserver<UsersClient> responseObserver);
+
+    void connect();
 }

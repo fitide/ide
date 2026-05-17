@@ -43,4 +43,6 @@ service IDEWebWorker {
 
     rpc shareDir(fileSystem.DirectoryRequest) returns (fileSystem.DirectoryResponse);
     rpc shareFile(fileSystem.FileRequest) returns (fileSystem.FileResponse);
+
+    rpc getPositions(google.protobuf.Empty) returns (user.UsersClient);
 }

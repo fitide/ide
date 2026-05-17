@@ -6,20 +6,8 @@ import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
 import org.ide.WebWorker.Tools.Pair;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public interface IdeControllerWebInt {
 
@@ -54,13 +42,13 @@ public interface IdeControllerWebInt {
 
     public boolean hasUnsavedChanges(Path path);
 
+    public Path getProjectRoot();
+
     public List<Pair<String, FileType>> getDirData(String relativePath) throws Exception;
 
     public List<String> getFileContent(String relativePath) throws FileNotFoundException, Exception;
 
     void setDir(Directory dir);
 
-    void setFIle(File file);
-
-
+    void setFile(File file);
 }

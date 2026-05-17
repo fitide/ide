@@ -106,13 +106,13 @@ public class Directory extends Node {
     }
 
     public Directory findDir(Path relativePath) throws FileNotFoundException {
-        if ((relativePath.getRoot().toString()).equals(this.name) && relativePath.getNameCount() == 1) return this;
+        if (relativePath.getNameCount() == 1 && relativePath.getFileName().toString().equals(this.name)) return this;
         var newPath = PathTools.deleteRoot(relativePath);
         if (newPath.getNameCount() == 0) throw new FileNotFoundException();
 
         for (int i = 0; i < this.getDirsCnt(); i++) {
             var dir = getDir(i);
-            if (dir.name.equals(PathTools.getRootStr(newPath))) return dir.findDir(relativePath);
+            if (dir.name.equals(newPath.getName(0).toString())) return dir.findDir(newPath);
         }
 
         throw new FileNotFoundException();

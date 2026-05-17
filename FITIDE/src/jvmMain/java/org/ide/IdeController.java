@@ -15,11 +15,12 @@ import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
+import org.ide.WebWorker.WebController;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
 
+import javax.swing.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -40,6 +41,7 @@ public class IdeController implements IdeControllerWebInt {
     private final EditorController editorController = new EditorController();
     private PluginController pluginController;
     private LinkTreeController linkTreeController;
+    private WebController webController;
 
     private Path projectRoot;
     private File config;
@@ -55,6 +57,9 @@ public class IdeController implements IdeControllerWebInt {
         return currentPlugin;
     }
 
+    public void setWebController(WebController webController) {
+        this.webController = webController;
+    }
 
     public void setLinkTreeController(LinkTreeController linkTreeController) {
         this.linkTreeController = linkTreeController;
@@ -87,6 +92,10 @@ public class IdeController implements IdeControllerWebInt {
         } catch (Exception e) {
             logger.error("Failed to load plugins for project: " + projectRoot, e);
         }
+    }
+
+    public Path getProjectRoot() {
+        return projectRoot;
     }
 
     public File getConfig() {
@@ -279,18 +288,53 @@ public class IdeController implements IdeControllerWebInt {
 
     @Override
     public List<String> getFileContent(String relativePath) throws Exception {
-        var fileText = openFile(Paths.get(relativePath));
+        Path rel = Paths.get(relativePath);
+        // relativePath starts with the project dir name (e.g. "MyProject/src/Main.java")
+        // strip it and resolve against the absolute projectRoot
+        Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
+        Path absolutePath = projectRoot.resolve(stripped);
+        var fileText = openFile(absolutePath);
         return List.of(fileText.split("\n"));
     }
 
     @Override
     public void setDir(org.ide.WebWorker.FileSystem.FileSystemComponents.Directory dir) {
-        // TODO: implement
+        if (projectRoot == null) {
+            String name = Paths.get(dir.getRelativeDirPath()).getFileName().toString();
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.showOpenDialog(null);
+            Path targetDir = chooser.getSelectedFile().toPath();
+            projectRoot = targetDir.resolve(name);
+        }
+
+        for (var entry : dir.getInboundsList()) {
+            if (entry.getType() == FileType.DIRECTORY) {
+                Path rel = Paths.get(entry.getRelativePath());
+                Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : Paths.get("");
+                if (stripped.getNameCount() > 0) projectRoot.resolve(stripped).toFile().mkdirs();
+            }
+        }
+        try {
+            openProject(projectRoot);
+        } catch (Exception e) {
+            logger.error("setDir failed", e);
+        }
     }
 
     @Override
-    public void setFIle(org.ide.WebWorker.FileSystem.FileSystemComponents.File file) {
-        // TODO: implement
+    public void setFile(org.ide.WebWorker.FileSystem.FileSystemComponents.File file) {
+        if (projectRoot == null) return;
+        Path rel = Paths.get(file.getRelativeFilePath());
+        Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
+        Path path = projectRoot.resolve(stripped);
+        try {
+            path.getParent().toFile().mkdirs();
+            Files.writeString(path, String.join("\n", file.getContentList()));
+        } catch (IOException e) {
+            logger.error("setFile failed", e);
+        }
+        refreshTree();
     }
 
     public OpenedFileInfo getOpenedFileInfo() {
