@@ -19,6 +19,8 @@ import org.ide.WebWorker.WebController;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
 
+import static org.ide.editor.TextFieldValueHelperKt.getMutableStateForFileTree;
+
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +51,12 @@ public class IdeController implements IdeControllerWebInt {
     private ParseTree currentParseTree = null;
     private Plugin currentPlugin = null;
 
+    private final MutableState<Directory> fileTreeState = getMutableStateForFileTree(null);
+
+    public MutableState<Directory> fileTreeState() {
+        return fileTreeState;
+    }
+
     public ParseTree getCurrentParseTree() {
         return currentParseTree;
     }
@@ -77,15 +85,16 @@ public class IdeController implements IdeControllerWebInt {
 
         loadPluginsForProject();
 
+        Directory rootCopy = fileExplorer.getTreeCopy();
+        fileTreeState.setValue(rootCopy);
         if (linkTreeController != null) {
-            Directory rootCopy = fileExplorer.getTreeCopy();
             linkTreeController.setFilesAndDirectoriesData(rootCopy);
         }
     }
 
     private void loadPluginsForProject() {
         try {
-            Path confDir = projectRoot.resolve("conf");
+            Path confDir = projectRoot.resolve(".ide").resolve("conf");
             this.pluginController = new PluginController(projectRoot.toString());
 
             logger.info("Plugins loaded from: " + confDir);
@@ -113,6 +122,7 @@ public class IdeController implements IdeControllerWebInt {
         if (linkTreeController != null) {
             linkTreeController.setFilesAndDirectoriesData(updated);
         }
+        fileTreeState.setValue(updated);
         return updated;
     }
 
@@ -126,6 +136,24 @@ public class IdeController implements IdeControllerWebInt {
         refreshTree();
     }
 
+    public void createFileShared(Path dir, String name) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(dir).toString();
+            webController.create(rel, FileType.REGULAR, name);
+        } else {
+            createFile(dir, name);
+        }
+    }
+
+    public void createDirShared(Path dir, String name) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(dir).toString();
+            webController.create(rel, FileType.DIRECTORY, name);
+        } else {
+            createDir(dir, name);
+        }
+    }
+
     public void deleteFile(Path path) throws Exception {
         fileExplorer.deleteFile(path);
         refreshTree();
@@ -136,6 +164,24 @@ public class IdeController implements IdeControllerWebInt {
         refreshTree();
     }
 
+    public void deleteFileShared(Path path) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.delete(rel, FileType.REGULAR);
+        } else {
+            deleteFile(path);
+        }
+    }
+
+    public void deleteDirShared(Path path) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.delete(rel, FileType.DIRECTORY);
+        } else {
+            deleteDir(path);
+        }
+    }
+
     public void renameFile(Path path, String newName) throws Exception {
         fileExplorer.renameFile(path, newName);
         refreshTree();
@@ -144,6 +190,24 @@ public class IdeController implements IdeControllerWebInt {
     public void renameDir(Path path, String newName) throws Exception {
         fileExplorer.renameDirectory(path, newName);
         refreshTree();
+    }
+
+    public void renameFileShared(Path path, String newName) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.rename(rel, newName, FileType.REGULAR);
+        } else {
+            renameFile(path, newName);
+        }
+    }
+
+    public void renameDirShared(Path path, String newName) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.rename(rel, newName, FileType.DIRECTORY);
+        } else {
+            renameDir(path, newName);
+        }
     }
 
     public void moveFile(Path from, Path toDir) throws Exception {
@@ -289,8 +353,6 @@ public class IdeController implements IdeControllerWebInt {
     @Override
     public List<String> getFileContent(String relativePath) throws Exception {
         Path rel = Paths.get(relativePath);
-        // relativePath starts with the project dir name (e.g. "MyProject/src/Main.java")
-        // strip it and resolve against the absolute projectRoot
         Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
         Path absolutePath = projectRoot.resolve(stripped);
         var fileText = openFile(absolutePath);
@@ -301,10 +363,11 @@ public class IdeController implements IdeControllerWebInt {
     public void setDir(org.ide.WebWorker.FileSystem.FileSystemComponents.Directory dir) {
         if (projectRoot == null) {
             String name = Paths.get(dir.getRelativeDirPath()).getFileName().toString();
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.showOpenDialog(null);
-            Path targetDir = chooser.getSelectedFile().toPath();
+            Path targetDir = chooseTargetDirectory();
+            if (targetDir == null) {
+                logger.info("setDir cancelled: no target directory selected");
+                return;
+            }
             projectRoot = targetDir.resolve(name);
         }
 
@@ -315,11 +378,39 @@ public class IdeController implements IdeControllerWebInt {
                 if (stripped.getNameCount() > 0) projectRoot.resolve(stripped).toFile().mkdirs();
             }
         }
-        try {
-            openProject(projectRoot);
-        } catch (Exception e) {
-            logger.error("setDir failed", e);
+
+        if (fileExplorer == null) {
+            try {
+                openProject(projectRoot);
+            } catch (Exception e) {
+                logger.error("setDir failed", e);
+            }
         }
+    }
+
+    private Path chooseTargetDirectory() {
+        final Path[] result = new Path[1];
+        Runnable task = () -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                File selected = chooser.getSelectedFile();
+                if (selected != null) result[0] = selected.toPath();
+            }
+        };
+        try {
+            if (SwingUtilities.isEventDispatchThread()) {
+                task.run();
+            } else {
+                SwingUtilities.invokeAndWait(task);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Directory selection interrupted", e);
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            logger.error("Directory selection failed", e);
+        }
+        return result[0];
     }
 
     @Override
