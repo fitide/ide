@@ -204,15 +204,15 @@ public class WebController {
         client.setUserFilePosition(file);
     }
 
-    public void insertText(String filePath, String text, CursorPosition position) {
-        client.insertText(filePath, text, position);
+    public boolean insertText(String filePath, String text, CursorPosition position) {
+        return client.insertText(filePath, text, position);
     }
 
-    public void deleteText(String filePath, String textToDelete, HighlightedPosition position) {
-        client.deleteText(filePath, textToDelete, position);
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position) {
+        return client.deleteText(filePath, textToDelete, position);
     }
 
-    public void changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
-        changeText(filePath, textToDelete, newText, position);
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
+        return client.changeText(filePath, textToDelete, newText, position);
     }
 }

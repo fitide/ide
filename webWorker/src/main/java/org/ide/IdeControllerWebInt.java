@@ -3,6 +3,8 @@ package org.ide;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.Directory;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.File;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
+import org.ide.WebWorker.Positions.CursorPosition;
+import org.ide.WebWorker.Positions.HighlightedPosition;
 import org.ide.WebWorker.Tools.Pair;
 
 import java.io.FileNotFoundException;
@@ -51,4 +53,10 @@ public interface IdeControllerWebInt {
     void setDir(Directory dir);
 
     void setFile(File file);
+
+    public boolean insertText(String filePath, String text, CursorPosition position);
+
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position);
+
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position);
 }

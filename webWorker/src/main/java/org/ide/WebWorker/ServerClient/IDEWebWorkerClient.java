@@ -10,6 +10,9 @@ import org.ide.WebWorker.FileSystem.Move.MoveServerRequest;
 import org.ide.WebWorker.FileSystem.Rename.RenameServerRequest;
 import org.ide.WebWorker.Positions.CursorPosition;
 import org.ide.WebWorker.Positions.HighlightedPosition;
+import org.ide.WebWorker.ResponseCodes.ChangeCode;
+import org.ide.WebWorker.ResponseCodes.DeleteTextCode;
+import org.ide.WebWorker.ResponseCodes.InsertTextCode;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerRequest;
 import org.ide.WebWorker.Text.Deleting.DeleteTextServerRequest;
 import org.ide.WebWorker.Text.Inserting.InsertTextServerRequest;
@@ -57,17 +60,17 @@ public class IDEWebWorkerClient {
         stub.setUserFilePosition(file);
     }
 
-    public void insertText(String filePath, String text, CursorPosition position) {
-        stub.insertText(InsertTextServerRequest.newBuilder().setText(text).setFilePath(filePath).setPosition(position).build());
+    public boolean insertText(String filePath, String text, CursorPosition position) {
+        return stub.insertText(InsertTextServerRequest.newBuilder().setText(text).setFilePath(filePath).setPosition(position).build()).getCode() == InsertTextCode.Insert_Text_Code_OK;
     }
 
-    public void deleteText(String filePath, String textToDelete, HighlightedPosition position) {
-        stub.deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath).setPosition(position).build());
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position) {
+        return stub.deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath).setPosition(position).build()).getCode() == DeleteTextCode.Delete_Text_Code_OK;
     }
 
-    public void changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
-        stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath)
-                .setPosition(position).setTextToInsert(newText).build());
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
+        return stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath)
+                .setPosition(position).setTextToInsert(newText).build()).getCode() == ChangeCode.Change_Code_OK;
     }
 
     public UsersClient getPositions() {

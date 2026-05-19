@@ -2,6 +2,9 @@ package org.ide.editor;
 
 import androidx.compose.runtime.MutableState;
 import androidx.compose.ui.text.input.TextFieldValue;
+import org.ide.WebWorker.Positions.CursorPosition;
+import org.ide.WebWorker.Positions.HighlightedPosition;
+import org.ide.WebWorker.Tools.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +13,7 @@ import java.util.List;
 import static org.ide.editor.TextFieldValueHelperKt.getMutableStateForOpenedFileInfo;
 
 public class EditorController {
-    private final HashMap<String, EditorFile> files;
+    private final HashMap<String, EditorFileInt> files;
     private String currentFile = null;
     private final MutableState<OpenedFileInfo> openedFileInfoState = getMutableStateForOpenedFileInfo(null);
 
@@ -20,7 +23,7 @@ public class EditorController {
     }
 
     public void openFile(String fileName, List<String> fileContent) {
-        var editorFile = new EditorFile(fileContent);
+        var editorFile = new EditorFileWeb(fileContent);
         files.put(fileName, editorFile);
         currentFile = fileName;
 
@@ -90,4 +93,46 @@ public class EditorController {
         return openedFileInfoState;
     }
 
+    public OperationInfo getOperationType(TextFieldValue newValue) {
+        if (currentFile != null) {
+            return files.get(currentFile).getOperation(newValue);
+        }
+        return null;
+    }
+
+    public boolean insertText(String filePath, String text, CursorPosition position) {
+        try {
+            if (files.containsKey(filePath)) {
+                var file = files.get(filePath);
+                file.insertText(text, position);
+            }
+        } catch (ChangeTextUnnavailableException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position) {
+        try {
+            if (files.containsKey(filePath)) {
+                var file = files.get(filePath);
+                file.deleteText(textToDelete, position);
+            }
+        } catch (ChangeTextUnnavailableException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
+        try {
+            if (files.containsKey(filePath)) {
+                var file = files.get(filePath);
+                file.changeText(textToDelete, newText, position);
+            }
+        } catch (ChangeTextUnnavailableException e) {
+            return false;
+        }
+        return true;
+    }
 }

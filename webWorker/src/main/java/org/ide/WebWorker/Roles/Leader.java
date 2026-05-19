@@ -204,20 +204,44 @@ public class Leader extends Follower{
 
     @Override
     public boolean insertText(InsertTextServerRequest request, StreamObserver<InsertTextServerResponse> responseObserver) {
-        // TODO: implement
-        return true;
+        var res = ideController.insertText(request.getFilePath(), request.getText(), request.getPosition());
+
+        if (res) {
+            responseObserver.onNext(InsertTextServerResponse.newBuilder().setCode(InsertTextCode.Insert_Text_Code_OK).build());
+            for (var programmer : programmersStub.values()) {
+                programmer.insertText(request);
+            }
+        }
+
+        return res;
     }
 
     @Override
     public boolean deleteText(DeleteTextServerRequest request, StreamObserver<DeleteTextServerResponse> responseObserver) {
-        // TODO: implement
-        return true;
+        var res = ideController.deleteText(request.getFilePath(), request.getTextToDelete(), request.getPosition());
+
+        if (res) {
+            responseObserver.onNext(DeleteTextServerResponse.newBuilder().setCode(DeleteTextCode.Delete_Text_Code_OK).build());
+            for (var programmer : programmersStub.values()) {
+                programmer.deleteText(request);
+            }
+        }
+
+        return res;
     }
 
     @Override
     public boolean changeText(ChangeTextServerRequest request, StreamObserver<ChangeTextServerResponse> responseObserver) {
-        // TODO: implement
-        return true;
+        var res = ideController.changeText(request.getFilePath(), request.getTextToDelete(), request.getTextToInsert(), request.getPosition());
+
+        if (res) {
+            responseObserver.onNext(ChangeTextServerResponse.newBuilder().setCode(ChangeCode.Change_Code_OK).build());
+            for (var programmer : programmersStub.values()) {
+                programmer.changeText(request);
+            }
+        }
+
+        return res;
     }
 
     @Override

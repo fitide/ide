@@ -15,6 +15,8 @@ import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
 import org.ide.PluginController.PluginInterface.Plugin;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
+import org.ide.WebWorker.Positions.CursorPosition;
+import org.ide.WebWorker.Positions.HighlightedPosition;
 import org.ide.WebWorker.WebController;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
@@ -428,6 +430,21 @@ public class IdeController implements IdeControllerWebInt {
         refreshTree();
     }
 
+    @Override
+    public boolean insertText(String filePath, String text, CursorPosition position) {
+        return editorController.insertText(filePath, text, position);
+    }
+
+    @Override
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position) {
+        return editorController.deleteText(filePath, textToDelete, position);
+    }
+
+    @Override
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
+        return editorController.changeText(filePath, textToDelete, newText, position);
+    }
+
     public OpenedFileInfo getOpenedFileInfo() {
         return editorController.getOpenedFileInfo();
     }
@@ -440,15 +457,27 @@ public class IdeController implements IdeControllerWebInt {
     private ScheduledFuture<?> pending;
 
     public void onTextChanged(TextFieldValue newValue) {
-        editorController.onTextChanged(newValue);
+        if (webController == null) {
+            editorController.onTextChanged(newValue);
 
-        String currentFile = editorController.getCurrentFile();
-        if (currentFile == null) return;
+            String currentFile = editorController.getCurrentFile();
+            if (currentFile == null) return;
 
-        Path path = Paths.get(currentFile);
+            Path path = Paths.get(currentFile);
 
-        if (pending != null) pending.cancel(false);
-        pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+            if (pending != null) pending.cancel(false);
+            pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+        } else {
+            var operation = editorController.getOperationType(newValue);
+
+            switch (operation.operation) {
+                case Insert -> webController.insertText(editorController.getCurrentFile(), operation.text,
+                        CursorPosition.newBuilder().setLineNumer(operation.position.getLineStart()).setColumnNumber(operation.position.getColumnStart()).build());
+                case Delete -> webController.deleteText(editorController.getCurrentFile(), operation.text, operation.position);
+                case Changing -> webController.changeText(editorController.getCurrentFile(), operation.text,
+                        operation.newText, operation.position);
+            }
+        }
     }
 
     public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException {
@@ -545,7 +574,6 @@ public class IdeController implements IdeControllerWebInt {
                 .resolve(".fitide-cache")
                 .resolve(relative);
     }
-
 
     private String detectLang(Path path) {
         String fileName = path.getFileName().toString();

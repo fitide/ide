@@ -267,20 +267,17 @@ public class Follower implements Role {
 
     @Override
     public boolean insertText(InsertTextServerRequest request, StreamObserver<InsertTextServerResponse> responseObserver) {
-        //TODO: implement;
-        return false;
+        return ideController.insertText(request.getFilePath(), request.getText(), request.getPosition());
     }
 
     @Override
     public boolean deleteText(DeleteTextServerRequest request, StreamObserver<DeleteTextServerResponse> responseObserver) {
-        //TODO: implement;
-        return false;
+        return ideController.deleteText(request.getFilePath(), request.getTextToDelete(), request.getPosition());
     }
 
     @Override
     public boolean changeText(ChangeTextServerRequest request, StreamObserver<ChangeTextServerResponse> responseObserver) {
-        //TODO: implement;
-        return false;
+        return ideController.changeText(request.getFilePath(), request.getTextToDelete(), request.getTextToInsert(), request.getPosition());
     }
 
     @Override
