@@ -64,18 +64,6 @@ public class SMLBaseListener implements SMLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFunmatch(SMLParser.FunmatchContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFunmatch(SMLParser.FunmatchContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterPat(SMLParser.PatContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -155,6 +143,30 @@ public class SMLBaseListener implements SMLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSymbolicExp(SMLParser.SymbolicExpContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTupleExp(SMLParser.TupleExpContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTupleExp(SMLParser.TupleExpContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTuple(SMLParser.TupleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTuple(SMLParser.TupleContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

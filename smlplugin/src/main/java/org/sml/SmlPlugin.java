@@ -64,16 +64,18 @@ public class SmlPlugin implements Plugin {
         if (tree instanceof SMLParser.DecContext dec) {
             if (dec.funbind() != null) return new Tag[]{Tag.Func, Tag.Definition};
             if (dec.valbind() != null) return new Tag[]{Tag.Var,  Tag.Definition};
-        } else if (tree instanceof SMLParser.FunmatchContext) {
-            return new Tag[]{Tag.Func};
+        } else if (tree instanceof SMLParser.FunbindContext) {
+            //return new Tag[]{Tag.Func, Tag.Definition};
         } else if (tree instanceof SMLParser.ValbindContext) {
-            return new Tag[]{Tag.Var};
+            //return new Tag[]{Tag.Var, Tag.Definition};
         } else if (tree instanceof SMLParser.PatContext) {
-            return new Tag[]{Tag.Var};
+            //return new Tag[]{Tag.Var, Tag.Definition};
         } else if (tree instanceof SMLParser.FnExpContext) {
             return new Tag[]{Tag.Func};
         } else if (tree instanceof SMLParser.ApplicationExpContext) {
             return new Tag[]{Tag.Func};
+        } else if (tree instanceof SMLParser.TupleExpContext) {
+            return new Tag[]{Tag.Var};
         } else if (tree instanceof SMLParser.IdExpContext) {
             return new Tag[]{Tag.Var};
         } else if (tree instanceof SMLParser.IntExpContext) {
@@ -89,23 +91,27 @@ public class SmlPlugin implements Plugin {
     public String getNameOfNode(ParseTree node) {
         if (node instanceof SMLParser.DecContext dec) {
             if (dec.funbind() != null) {
-                return dec.funbind().funmatch(0).ID().getText();
+                return dec.funbind().ID().getText();
             }
             if (dec.valbind() != null) {
-                return dec.valbind().pat().ID().getText();
+                return patName(dec.valbind().pat());
             }
         }
 
-        if (node instanceof SMLParser.FunmatchContext fm) {
-            return fm.ID().getText();
+        if (node instanceof SMLParser.FunbindContext fb) {
+            return fb.ID().getText();
         }
 
         if (node instanceof SMLParser.ValbindContext vb) {
-            return vb.pat().ID().getText();
+            return patName(vb.pat());
         }
 
         if (node instanceof SMLParser.PatContext pat) {
-            return pat.ID().getText();
+            return patName(pat);
+        }
+
+        if (node instanceof SMLParser.TupleExpContext te) {
+            return te.getText();
         }
 
         if (node instanceof SMLParser.IdExpContext id) {
@@ -124,6 +130,13 @@ public class SmlPlugin implements Plugin {
             return tn.getSymbol().getText();
         }
         return "";
+    }
+
+    private String patName(SMLParser.PatContext pat) {
+        if (pat == null) return "";
+        if (pat.ID() != null) return pat.ID().getText();
+
+        return pat.getText();
     }
 
 
@@ -157,27 +170,28 @@ public class SmlPlugin implements Plugin {
 
     @Override
     public Position getNamePositionOfModule(ParseTree node) {
-        Position pos = new Position();
-
         if (node instanceof SMLParser.DecContext dec) {
             if (dec.funbind() != null) {
-                Token sym = dec.funbind().funmatch(0).ID().getSymbol();
+                Token sym = dec.funbind().ID().getSymbol();
                 return tokenPosition(sym);
             }
             if (dec.valbind() != null) {
-                Token sym = dec.valbind().pat().ID().getSymbol();
-                return tokenPosition(sym);
+                return patNamePosition(dec.valbind().pat());
             }
         }
-        if (node instanceof SMLParser.FunmatchContext fm) {
-            return tokenPosition(fm.ID().getSymbol());
+        if (node instanceof SMLParser.FunbindContext fb) {
+            return tokenPosition(fb.ID().getSymbol());
         }
 
         if (node instanceof SMLParser.ValbindContext vb) {
-            return tokenPosition(vb.pat().ID().getSymbol());
+            return patNamePosition(vb.pat());
         }
         if (node instanceof SMLParser.PatContext pat) {
-            return tokenPosition(pat.ID().getSymbol());
+            return patNamePosition(pat);
+        }
+        if (node instanceof SMLParser.TupleExpContext te) {
+            // Position of the entire tuple expression
+            return rulePosition(te.tuple());
         }
         if (node instanceof SMLParser.IdExpContext id) {
             return tokenPosition(id.ID().getSymbol());
@@ -194,10 +208,17 @@ public class SmlPlugin implements Plugin {
         return null;
     }
 
+    private Position patNamePosition(SMLParser.PatContext pat) {
+        if (pat == null) return null;
+        if (pat.ID() != null) return tokenPosition(pat.ID().getSymbol());
+
+        return rulePosition(pat);
+    }
+
     @Override
     public Position getPositionOfModuleBody(ParseTree tree) {
-        if (tree instanceof SMLParser.FunmatchContext fm) {
-            return rulePosition(fm.exp());
+        if (tree instanceof SMLParser.FunbindContext fb) {
+            return rulePosition(fb.exp());
         }
         if (tree instanceof SMLParser.ValbindContext vb) {
             return rulePosition(vb.exp());
@@ -209,13 +230,16 @@ public class SmlPlugin implements Plugin {
             if (dec.funbind() != null) return rulePosition(dec.funbind());
             if (dec.valbind() != null) return rulePosition(dec.valbind().exp());
         }
+        if (tree instanceof SMLParser.TupleExpContext te) {
+            return rulePosition(te.tuple());
+        }
         return null;
     }
 
     @Override
     public Position getPositionOfArgsOfFunc(ParseTree tree) {
-        if (tree instanceof SMLParser.FunmatchContext fm) {
-            List<SMLParser.PatContext> pats = fm.pat();
+        if (tree instanceof SMLParser.FunbindContext fb) {
+            List<SMLParser.PatContext> pats = fb.pat();
             if (pats == null || pats.isEmpty()) return null;
             Token start = pats.get(0).getStart();
             Token stop  = pats.get(pats.size() - 1).getStop();
@@ -232,12 +256,18 @@ public class SmlPlugin implements Plugin {
                     sym.getLine() - 1, sym.getCharPositionInLine() + sym.getText().length()
             );
         }
+        if (tree instanceof SMLParser.ApplicationExpContext app) {
+            return rulePosition((ParserRuleContext) app.exp(1));
+        }
+        if (tree instanceof SMLParser.TupleExpContext te) {
+            return rulePosition(te.tuple());
+        }
         return null;
     }
 
     @Override
     public String getType(ParseTree tree) {
-        if (tree instanceof SMLParser.IntExpContext)     return "int";
+        if (tree instanceof SMLParser.IntExpContext)      return "int";
         if (tree instanceof SMLParser.SymbolicExpContext) return "operator";
         return null;
     }
@@ -264,20 +294,16 @@ public class SmlPlugin implements Plugin {
 
         if (module instanceof SMLParser.ProgContext prog) {
             res.addAll(prog.dec());
-
         } else if (module instanceof SMLParser.DecContext dec) {
             if (dec.funbind() != null) {
-                res.addAll(dec.funbind().funmatch());
+                res.add(dec.funbind());
             } else if (dec.valbind() != null) {
                 res.add(dec.valbind());
             }
 
         } else if (module instanceof SMLParser.FunbindContext fb) {
-            res.addAll(fb.funmatch());
-
-        } else if (module instanceof SMLParser.FunmatchContext fm) {
-            res.addAll(fm.pat());
-            res.add(fm.exp());
+            res.addAll(fb.pat());
+            res.add(fb.exp());
 
         } else if (module instanceof SMLParser.ValbindContext vb) {
             res.add(vb.pat());
@@ -293,6 +319,13 @@ public class SmlPlugin implements Plugin {
             res.add(app.exp(0));
             res.add(app.exp(1));
 
+        } else if (module instanceof SMLParser.TupleExpContext te) {
+            SMLParser.TupleContext t = te.tuple();
+            res.addAll(t.exp());
+
+        } else if (module instanceof SMLParser.TupleContext t) {
+            res.addAll(t.exp());
+
         } else if (module instanceof SMLParser.ParensExpContext par) {
             res.add(par.exp());
         }
@@ -302,11 +335,19 @@ public class SmlPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getArgsOfFunc(ParseTree func) {
-        if (func instanceof SMLParser.FunmatchContext fm) {
-            return new ArrayList<>(fm.pat());
+        if (func instanceof SMLParser.FunbindContext fb) {
+            return new ArrayList<>(fb.pat());
         }
         if (func instanceof SMLParser.FnExpContext fn) {
             return new ArrayList<>(fn.match().pat());
+        }
+
+        if (func instanceof SMLParser.ApplicationExpContext app) {
+            return List.of(app.exp(0), app.exp(1));
+        }
+
+        if (func instanceof SMLParser.TupleExpContext te) {
+            return new ArrayList<>(te.tuple().exp());
         }
         return List.of();
     }
@@ -318,6 +359,9 @@ public class SmlPlugin implements Plugin {
         }
         if (constr instanceof SMLParser.FnExpContext fn) {
             return new ArrayList<>(fn.match().pat());
+        }
+        if (constr instanceof SMLParser.TupleExpContext te) {
+            return new ArrayList<>(te.tuple().exp());
         }
         return List.of();
     }
@@ -423,7 +467,6 @@ public class SmlPlugin implements Plugin {
         ret.add(new ExternalConstruction(List.of("val", "="),      "value binding"));
         ret.add(new ExternalConstruction(List.of("fun", "="),      "function definition"));
         ret.add(new ExternalConstruction(List.of("fn", "=>"),      "lambda (fn expression)"));
-        ret.add(new ExternalConstruction(List.of("fun", "and"),    "mutual recursion (fun ... and ...)"));
 
         return ret;
     }

@@ -47,16 +47,6 @@ public interface SMLListener extends ParseTreeListener {
 	 */
 	void exitFunbind(SMLParser.FunbindContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SMLParser#funmatch}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunmatch(SMLParser.FunmatchContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SMLParser#funmatch}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunmatch(SMLParser.FunmatchContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SMLParser#pat}.
 	 * @param ctx the parse tree
 	 */
@@ -138,6 +128,28 @@ public interface SMLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSymbolicExp(SMLParser.SymbolicExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code TupleExp}
+	 * labeled alternative in {@link SMLParser#exp}.
+	 * @param ctx the parse tree
+	 */
+	void enterTupleExp(SMLParser.TupleExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code TupleExp}
+	 * labeled alternative in {@link SMLParser#exp}.
+	 * @param ctx the parse tree
+	 */
+	void exitTupleExp(SMLParser.TupleExpContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SMLParser#tuple}.
+	 * @param ctx the parse tree
+	 */
+	void enterTuple(SMLParser.TupleContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SMLParser#tuple}.
+	 * @param ctx the parse tree
+	 */
+	void exitTuple(SMLParser.TupleContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SMLParser#match}.
 	 * @param ctx the parse tree

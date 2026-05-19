@@ -14,24 +14,27 @@ valbind
     ;
 
 funbind
-    : funmatch ('and' funmatch)*
-    ;
-
-funmatch
     : ID pat+ '=' exp
     ;
 
 pat
     : ID
+    | '(' pat (',' pat)+ ')'
+    | '(' pat ')'
     ;
 
 exp
-    : <assoc=left> exp exp   # ApplicationExp
+    : <assoc=left> exp exp           # ApplicationExp
     | 'fn' match                     # FnExp
-    | '(' exp ')'                         # ParensExp
-    | INT                                 # IntExp
-    | ID                                  # IdExp
-    | SYMBOLIC_ID                         # SymbolicExp
+    | tuple                          # TupleExp
+    | '(' exp ')'                    # ParensExp
+    | INT                            # IntExp
+    | ID                             # IdExp
+    | SYMBOLIC_ID                    # SymbolicExp
+    ;
+
+tuple
+    : '(' exp (',' exp)+ ')'
     ;
 
 match
