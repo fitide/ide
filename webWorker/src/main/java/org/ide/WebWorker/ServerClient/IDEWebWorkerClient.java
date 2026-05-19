@@ -2,39 +2,19 @@ package org.ide.WebWorker.ServerClient;
 
 import com.google.protobuf.Empty;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.stub.StreamObserver;
-import org.ide.WebWorker.Connection.ConnectionRequest;
-import org.ide.WebWorker.Connection.ConnectionResponse;
 import org.ide.WebWorker.FileSystem.Copy.CopyServerRequest;
-import org.ide.WebWorker.FileSystem.Copy.CopyServerResponse;
 import org.ide.WebWorker.FileSystem.Create.CreateServerRequest;
-import org.ide.WebWorker.FileSystem.Create.CreateServerResponse;
 import org.ide.WebWorker.FileSystem.Delete.DeleteServerRequest;
-import org.ide.WebWorker.FileSystem.Delete.DeleteServerResponse;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
-import org.ide.WebWorker.FileSystem.FilesGetting.DirectoryRequest;
-import org.ide.WebWorker.FileSystem.FilesGetting.DirectoryResponse;
-import org.ide.WebWorker.FileSystem.FilesGetting.FileRequest;
-import org.ide.WebWorker.FileSystem.FilesGetting.FileResponse;
 import org.ide.WebWorker.FileSystem.Move.MoveServerRequest;
-import org.ide.WebWorker.FileSystem.Move.MoveServerResponse;
 import org.ide.WebWorker.FileSystem.Rename.RenameServerRequest;
-import org.ide.WebWorker.FileSystem.Rename.RenameServerResponse;
-import org.ide.WebWorker.MainSelecting.UpdateProgrammersRequest;
-import org.ide.WebWorker.MainSelecting.UpdateProgrammersResponse;
 import org.ide.WebWorker.Positions.CursorPosition;
 import org.ide.WebWorker.Positions.HighlightedPosition;
-import org.ide.WebWorker.Positions.Positions;
 import org.ide.WebWorker.Text.Changing.ChangeTextServerRequest;
-import org.ide.WebWorker.Text.Changing.ChangeTextServerResponse;
 import org.ide.WebWorker.Text.Deleting.DeleteTextServerRequest;
-import org.ide.WebWorker.Text.Deleting.DeleteTextServerResponse;
 import org.ide.WebWorker.Text.Inserting.InsertTextServerRequest;
-import org.ide.WebWorker.Text.Inserting.InsertTextServerResponse;
 import org.ide.WebWorker.User.*;
 import org.ide.WebWorker.Workers.IDEWebWorkerGrpc;
-
-import java.time.LocalTime;
 
 public class IDEWebWorkerClient {
     private IDEWebWorkerGrpc.IDEWebWorkerBlockingStub stub;
@@ -88,5 +68,9 @@ public class IDEWebWorkerClient {
     public void changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
         stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath)
                 .setPosition(position).setTextToInsert(newText).build());
+    }
+
+    public UsersClient getPositions() {
+        return stub.getPositions(Empty.getDefaultInstance());
     }
 }

@@ -3,26 +3,18 @@ package org.ide.WebWorker;
 import io.grpc.ServerBuilder;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.ide.IdeControllerWebInt;
-import org.ide.WebWorker.FileSystem.Copy.CopyServerRequest;
-import org.ide.WebWorker.FileSystem.Create.CreateServerRequest;
-import org.ide.WebWorker.FileSystem.Delete.DeleteServerRequest;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
-import org.ide.WebWorker.FileSystem.Move.MoveServerRequest;
-import org.ide.WebWorker.FileSystem.Rename.RenameServerRequest;
 import org.ide.WebWorker.Positions.CursorPosition;
 import org.ide.WebWorker.Positions.HighlightedPosition;
-import org.ide.WebWorker.Roles.Leader;
+import org.ide.WebWorker.Positions.PositionsTable;
 import org.ide.WebWorker.Roles.ServersRoles;
 import org.ide.WebWorker.ServerClient.IDEWebWorkerClient;
 import org.ide.WebWorker.ServerClient.IDEWebWorkerServer;
-import org.ide.WebWorker.Text.Changing.ChangeTextServerRequest;
-import org.ide.WebWorker.Text.Deleting.DeleteTextServerRequest;
-import org.ide.WebWorker.Text.Inserting.InsertTextServerRequest;
 import org.ide.WebWorker.User.*;
 
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
-import java.util.concurrent.locks.ReadWriteLock;
 
 public class WebController {
     private final IdeControllerWebInt ideController;
@@ -75,10 +67,12 @@ public class WebController {
         this.name = name;
         this.host = host;
         curLeader = decodeCodeToConnect(identificationString);
+        curRole = ServersRoles.Follower;
         this.server = new IDEWebWorkerServer(ServersRoles.Follower, ideController, curLeader, port, host, name);
         ServerBuilder.forPort(port).addService(server).build().start();
         this.client = new IDEWebWorkerClient();
         client.updateServer(curLeader, port);
+        server.connect();
         initDemons();
     }
 
@@ -88,13 +82,15 @@ public class WebController {
                 var updaterDemon = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            while (true) {
+                        while (true) {
+                            try {
                                 Thread.sleep(10000);
                                 server.updatePositions(null, null);
+                            } catch (InterruptedException e) {
+                                return;
+                            } catch (Exception ignored) {
+                                // клиент временно недоступен — продолжаем
                             }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
                         }
                     }
                 });
@@ -109,10 +105,17 @@ public class WebController {
                         try {
                             int cntskipped = 0;
                             while (true) {
-                                Thread.sleep(10000);
+                                Thread.sleep(500);
+
+                                try {
+                                    var positions = client.getPositions();
+                                    server.applyPositions(positions);
+                                } catch (Exception e) {
+                                    // соединение потеряно, ждём следующей итерации
+                                }
+
                                 if (server.getLastTimeUpdated() == lastTimeUpdated) {
                                     cntskipped++;
-
                                     if (cntskipped >= skippingUpdationsLimit) {
 
                                     }
@@ -121,19 +124,29 @@ public class WebController {
                                 }
                                 lastTimeUpdated = server.getLastTimeUpdated();
                             }
-
-
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                     }
                 });
+                updaterChecker.setDaemon(true);
+                updaterChecker.start();
             }
 
         }
 
     }
 
+    public PositionsTable getPositionsTable() {
+        return server.getPositionsTable();
+    }
+
+    public static String getLocalIp() throws Exception {
+        try (var socket = new java.net.DatagramSocket()) {
+            socket.connect(InetAddress.getByName("8.8.8.8"), 80);
+            return socket.getLocalAddress().getHostAddress();
+        }
+    }
 
     public String getCodeToConnect() {
         return Base64.encodeBase64String(host.getBytes(StandardCharsets.UTF_8));

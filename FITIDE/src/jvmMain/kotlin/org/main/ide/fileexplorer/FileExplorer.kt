@@ -14,8 +14,8 @@ class FileExplorer(
     var currentProject: Path? by mutableStateOf(null)
         private set
 
-    var fileTree: Directory? by mutableStateOf(null)
-        private set
+    val fileTree: Directory?
+        get() = ideController.fileTreeState().value
 
     var selected by mutableStateOf(setOf<String>())
     var lastClicked: String? by mutableStateOf(null)
@@ -39,7 +39,6 @@ class FileExplorer(
     fun openProject(dir: Path) {
         currentProject = dir
         ideController.openProject(dir)
-        fileTree = ideController.getFileTree()
 
         selected = emptySet()
         lastClicked = null
@@ -48,12 +47,17 @@ class FileExplorer(
     }
 
     fun refresh() {
-        fileTree = ideController.refreshTree()
+        ideController.refreshTree()
+    }
+
+    fun syncFromController() {
+        val root = ideController.projectRoot ?: return
+        currentProject = root
     }
 
     fun createFile(dir: Path, name: String) {
         try {
-            ideController.createFile(dir, name)
+            ideController.createFileShared(dir, name)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -62,7 +66,7 @@ class FileExplorer(
 
     fun createDirectory(dir: Path, name: String) {
         try {
-            ideController.createDir(dir, name)
+            ideController.createDirShared(dir, name)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -71,8 +75,8 @@ class FileExplorer(
 
     fun delete(path: Path, isDirectory: Boolean) {
         try {
-            if (isDirectory) ideController.deleteDir(path)
-            else ideController.deleteFile(path)
+            if (isDirectory) ideController.deleteDirShared(path)
+            else ideController.deleteFileShared(path)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -98,9 +102,9 @@ class FileExplorer(
 
         try {
             if (isDirectory) {
-                ideController.renameDir(path, newName)
+                ideController.renameDirShared(path, newName)
             } else {
-                ideController.renameFile(path, newName)
+                ideController.renameFileShared(path, newName)
             }
         } catch (e: Exception) {
             e.printStackTrace()

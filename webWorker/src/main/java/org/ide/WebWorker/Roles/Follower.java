@@ -34,6 +34,7 @@ import org.ide.WebWorker.Text.Inserting.InsertTextServerResponse;
 import org.ide.WebWorker.User.*;
 import org.ide.WebWorker.Workers.IDEWebWorkerGrpc;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalTime;
@@ -67,6 +68,9 @@ public class Follower implements Role {
         this.name = name;
         this.port = port;
         this.stub = IDEWebWorkerGrpc.newBlockingStub(ManagedChannelBuilder.forAddress(curMain, port).usePlaintext().build());
+    }
+
+    public void connect() {
         rootDir = stub.onConnection(ConnectionRequest.newBuilder().setHost(host).setName(name).build()).getDirectory();
         getDirectory(rootDir);
     }
@@ -101,9 +105,10 @@ public class Follower implements Role {
         synchronized (fileSystemLock) {
             var fileType = request.getFileType();
             try {
+                Path base = ideController.getProjectRoot().resolve(request.getRelativeFilePath());
                 switch (fileType) {
-                    case REGULAR -> ideController.createFile(Paths.get(request.getRelativeFilePath()), request.getName());
-                    case DIRECTORY -> ideController.createDir(Paths.get(request.getRelativeFilePath()), request.getName());
+                    case REGULAR   -> ideController.createFile(base, request.getName());
+                    case DIRECTORY -> ideController.createDir(base, request.getName());
                     default -> {
                         responseObserver.onNext(CreateServerResponse.newBuilder().setCode(CreateFileCode.UNRECOGNIZED).build());
                         return false;
@@ -126,9 +131,10 @@ public class Follower implements Role {
         synchronized (fileSystemLock) {
             var fileType = request.getFileType();
             try {
+                Path base = ideController.getProjectRoot().resolve(request.getRelativeFilePath());
                 switch (fileType) {
-                    case REGULAR -> ideController.deleteFile(Paths.get(request.getRelativeFilePath()));
-                    case DIRECTORY -> ideController.deleteDir(Paths.get(request.getRelativeFilePath()));
+                    case REGULAR -> ideController.deleteFile(base);
+                    case DIRECTORY -> ideController.deleteDir(base);
                     default -> {
                         responseObserver.onNext(DeleteServerResponse.newBuilder().setCode(DeleteFileCode.UNRECOGNIZED).build());
                         return false;
@@ -176,9 +182,10 @@ public class Follower implements Role {
         synchronized (fileSystemLock) {
             var fileType = request.getFileType();
             try {
+                Path base = ideController.getProjectRoot().resolve(request.getRelativeFilePath());
                 switch (fileType) {
-                    case REGULAR -> ideController.renameFile(Paths.get(request.getRelativeFilePath()), request.getNewName());
-                    case DIRECTORY -> ideController.createDir(Paths.get(request.getRelativeFilePath()), request.getNewName());
+                    case REGULAR   -> ideController.renameFile(base, request.getNewName());
+                    case DIRECTORY -> ideController.renameDir(base, request.getNewName());
                     default -> {
                         responseObserver.onNext(RenameServerResponse.newBuilder().setCode(RenameCode.UNRECOGNIZED).build());
                         return false;
@@ -287,6 +294,17 @@ public class Follower implements Role {
     }
 
     @Override
+    public PositionsTable getPositionsTable() {
+        return positionsTable;
+    }
+
+    @Override
+    public void getPositions(Empty request, StreamObserver<UsersClient> responseObserver) {
+        responseObserver.onNext(UsersClient.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public User getNextLeader() {
         User minUser = null;
         for (var programmer : programmers.keySet()) {
@@ -316,6 +334,8 @@ public class Follower implements Role {
         for (var file : dir.getInboundsList()) {
             if (file.getType() == FileType.REGULAR) {
                 getFile(file.getRelativePath());
+            } else if (file.getType() == FileType.DIRECTORY) {
+                getDirectory(file.getRelativePath());
             }
         }
 
@@ -323,7 +343,7 @@ public class Follower implements Role {
 
     private void getFile(String filePath) {
         var file = stub.shareFile(FileRequest.newBuilder().setFileRelativePath(filePath).build());
-        ideController.setFIle(file.getFile());
+        ideController.setFile(file.getFile());
     }
 
     public String getCurMain() {

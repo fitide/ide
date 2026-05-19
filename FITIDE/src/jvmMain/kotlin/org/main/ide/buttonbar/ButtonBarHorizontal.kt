@@ -9,12 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ide.fitide.generated.resources.*
+import org.main.ide.uistate.UIColors.AccentGreen
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ButtonBarHorizontal(
     onConfigClick: () -> Unit = {},
-    onRunClick: () -> Unit = {}
+    onRunClick: () -> Unit = {},
+    onServerClick: () -> Unit = {},
+    isConnected: Boolean = false
 ) {
     Row(
         modifier = Modifier
@@ -30,9 +33,20 @@ fun ButtonBarHorizontal(
             "Config",
             onClick = { onConfigClick() }
         )
+
         Spacer(Modifier.width(4.dp))
+
         IconWithTooltip(Res.drawable.run,
             "Run",
             onClick = {onRunClick()})
+
+        Spacer(Modifier.width(4.dp))
+
+        IconWithTooltip(
+            Res.drawable.servers,
+            "CodeWithMe",
+            tint = if (isConnected) AccentGreen else Color(0xFFE6E6E6),
+            onClick = { onServerClick() }
+        )
     }
 }
