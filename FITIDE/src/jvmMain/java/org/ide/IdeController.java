@@ -20,6 +20,7 @@ import org.ide.WebWorker.Positions.HighlightedPosition;
 import org.ide.WebWorker.WebController;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
+import org.ide.editor.TextOperation;
 
 import static org.ide.editor.TextFieldValueHelperKt.getMutableStateForFileTree;
 
@@ -237,6 +238,9 @@ public class IdeController implements IdeControllerWebInt {
         if (fileExplorer == null)
             throw new IllegalStateException("Project not opened");
 
+        if (webController != null) {
+            webController.updateFile(path.toString());
+        }
         List<String> list = fileExplorer.openFile(path);
         editorController.openFile(path.toString(), list);
 
@@ -469,6 +473,10 @@ public class IdeController implements IdeControllerWebInt {
             pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
         } else {
             var operation = editorController.getOperationType(newValue);
+            if (operation.operation == TextOperation.Insert && operation.text.equals("")) {
+                editorController.onTextChanged(newValue);
+                return;
+            }
 
             switch (operation.operation) {
                 case Insert -> webController.insertText(editorController.getCurrentFile(), operation.text,

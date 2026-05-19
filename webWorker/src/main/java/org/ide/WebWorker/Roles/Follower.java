@@ -343,6 +343,12 @@ public class Follower implements Role {
         ideController.setFile(file.getFile());
     }
 
+
+    @Override
+    public void updateFile(String filePath) {
+        getFile(filePath);
+    }
+
     public String getCurMain() {
         return curMain;
     }

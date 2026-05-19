@@ -60,17 +60,31 @@ public class IDEWebWorkerClient {
         stub.setUserFilePosition(file);
     }
 
-    public boolean insertText(String filePath, String text, CursorPosition position) {
-        return stub.insertText(InsertTextServerRequest.newBuilder().setText(text).setFilePath(filePath).setPosition(position).build()).getCode() == InsertTextCode.Insert_Text_Code_OK;
+    public void insertText(String filePath, String text, CursorPosition position) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                 stub.insertText(InsertTextServerRequest.newBuilder().setText(text).setFilePath(filePath).setPosition(position).build());
+            }
+        }).start();
     }
 
-    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position) {
-        return stub.deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath).setPosition(position).build()).getCode() == DeleteTextCode.Delete_Text_Code_OK;
+    public void deleteText(String filePath, String textToDelete, HighlightedPosition position) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                stub.deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath).setPosition(position).build());
+            }
+        }).start();
     }
 
-    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
-        return stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath)
-                .setPosition(position).setTextToInsert(newText).build()).getCode() == ChangeCode.Change_Code_OK;
+    public void changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete).setTextToInsert(newText).setFilePath(filePath).setPosition(position).build());
+            }
+        }).start();
     }
 
     public UsersClient getPositions() {

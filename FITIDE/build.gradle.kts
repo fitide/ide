@@ -46,6 +46,7 @@ kotlin {
             implementation("org.jetbrains:annotations:24.1.0")
             implementation("org.jetbrains.compose.ui:ui-graphics")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
             implementation("org.antlr:antlr4-runtime:4.13.2")
             implementation("com.googlecode.json-simple:json-simple:1.1.1")
             implementation("com.google.protobuf:protobuf-java:3.25.1")

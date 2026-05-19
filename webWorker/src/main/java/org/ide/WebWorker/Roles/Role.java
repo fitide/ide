@@ -69,4 +69,6 @@ public interface Role {
     void getPositions(Empty request, StreamObserver<UsersClient> responseObserver);
 
     void connect();
+
+    void updateFile(String filePath);
 }

@@ -2,9 +2,9 @@ package org.ide.editor;
 
 import androidx.compose.runtime.MutableState;
 import androidx.compose.ui.text.input.TextFieldValue;
+import kotlinx.coroutines.CoroutineScope;
 import org.ide.WebWorker.Positions.CursorPosition;
 import org.ide.WebWorker.Positions.HighlightedPosition;
-import org.ide.WebWorker.Tools.Pair;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static org.ide.editor.TextFieldValueHelperKt.getMutableStateTextFieldValue;
 import static org.ide.editor.TextFieldValueHelperKt.getTextFieldValue;
 
 public class EditorFileWeb implements EditorFileInt {
@@ -21,7 +22,7 @@ public class EditorFileWeb implements EditorFileInt {
     private MutableState<TextFieldValue> mutableStateValue;
     private boolean saved;
     private int currentVersion;
-    private Map<Integer, Lock> fileStringslocks;
+    private final Map<Integer, Lock> fileStringslocks = new HashMap<>();
     private List<String> fileStrings = new LinkedList<>();
     private final ReadWriteLock fileLock = new ReentrantReadWriteLock();
     private final Object stateChangerObject = new Object();
@@ -30,6 +31,7 @@ public class EditorFileWeb implements EditorFileInt {
 
     private int currentWorking = 0;
     private int cntChanged = 0;
+
 
     public EditorFileWeb(List<String> contentLines) {
         saved = true;
@@ -73,7 +75,7 @@ public class EditorFileWeb implements EditorFileInt {
                 this.fileStringslocks.put(it, new ReentrantLock());
             }
 
-            this.fileStrings.addLast(str + "\n");
+            this.fileStrings.addLast(str);
             it++;
         }
     }
@@ -139,7 +141,15 @@ public class EditorFileWeb implements EditorFileInt {
 
     @Override
     public void onTextChanged(TextFieldValue newValue) {
-        setContent(newValue.getText());
+        if (currentVersion < versionsList.size() - 1) {
+            versionsList = new ArrayList<>(versionsList.subList(0, currentVersion + 1));
+        }
+
+        versionsList.add(newValue);
+        currentVersion = versionsList.size() - 1;
+
+        saved = false;
+        this.mutableStateValue.setValue(newValue);;
     }
 
     @Override
@@ -220,8 +230,9 @@ public class EditorFileWeb implements EditorFileInt {
             checkForChanging(changesList, position);
 
             var strBefore = fileStrings.get(position.getLineStart());
-            fileStrings.set(position.getLineStart(), strBefore.substring(0, position.getLineStart() + 1) +
-                    strBefore.substring(position.getLineEnd()));
+            var newStr = strBefore.substring(0, position.getColumnStart()) +
+                    strBefore.substring(position.getColumnEnd() + 1);
+            fileStrings.set(position.getLineStart(), newStr);
 
             unlockStringLockers(position.getLineStart(), position.getLineStart() + 1);
             return;
@@ -271,7 +282,7 @@ public class EditorFileWeb implements EditorFileInt {
 
     private void checkForChanging(List<String> textToCompare, HighlightedPosition position) throws ChangeTextUnnavailableException {
         if (textToCompare.size() == 1) {
-            var curStr = fileStrings.getFirst();
+            var curStr = fileStrings.get(position.getLineStart());
             if (!curStr.substring(position.getColumnStart(), position.getColumnEnd() + 1).equals(textToCompare.getFirst())) {
                 throw new ChangeTextUnnavailableException("Deleting on changed text");
             }
@@ -296,9 +307,9 @@ public class EditorFileWeb implements EditorFileInt {
 
     private void addToStr(String text, int strIndex, int start) {
         var strBefore = fileStrings.get(strIndex);
-        String builder = strBefore.substring(0, start + 1) + text +
-                strBefore.substring(start);
-        fileStrings.set(strIndex, builder);
+        StringBuilder builder = new StringBuilder().append(strBefore.substring(0, start)).append(text).append(
+                strBefore.substring(start));
+        fileStrings.set(strIndex, builder.toString());
     }
 
     @Override
@@ -313,16 +324,16 @@ public class EditorFileWeb implements EditorFileInt {
         int start = 0;
         int end1 = curText.length() - 1;
         int end2 = newText.length() - 1;
-        while(curText.charAt(start) != newText.charAt(start) && start < end1 && start < end2) start++;
+        while(curText.charAt(start) == newText.charAt(start) && start < end1 && start < end2) start++;
 
-        while(curText.charAt(end1) != newText.charAt(end2) && end1 > start && end2 > start) {
+        while(curText.charAt(end1) == newText.charAt(end2) && end1 > start && end2 > start) {
             end1--;
             end2--;
         }
 
-        var difLen = end1 - start - 1;
-        var startPos = getPosition(curText, start + 1);
-        var endPos = getPosition(curText, end1);
+        var difLen = end1 - start;
+        var startPos = getPosition(curText, start);
+        var endPos = getPosition(curText, end1 - 1);
         var positions = HighlightedPosition.newBuilder()
                 .setColumnStart(startPos.getColumnNumber()).setLineStart(startPos.getLineNumer())
                 .setColumnEnd(endPos.getColumnNumber()).setLineEnd(endPos.getLineNumer()).build();
@@ -333,14 +344,15 @@ public class EditorFileWeb implements EditorFileInt {
     }
 
     private CursorPosition getPosition(String value, int it) {
-        int col = 0;
+        int col = -1;
         int line = 0;
         int curIt = 0;
         while(curIt != it) {
             if (value.charAt(curIt) == '\n') {
-                col = 0;
+                col = -1;
                 line += 1;
             }
+            col++;
             curIt++;
         }
         return CursorPosition.newBuilder().setColumnNumber(col).setLineNumer(line).build();
@@ -351,9 +363,20 @@ public class EditorFileWeb implements EditorFileInt {
         for (var str : fileStrings) {
             builder.append(str).append("\n");
         }
-        this.mutableStateValue.setValue(getTextFieldValue(builder.toString()));
-        versionsList.add(this.mutableStateValue.getValue());
-        currentVersion += 1;
+
+        if (mutableStateValue != null) {
+            UIUpdater.INSTANCE.runOnMain(() -> {
+                System.out.println("runOnMain action: thread=" + Thread.currentThread().getName());
+                mutableStateValue.setValue(getTextFieldValue(builder.toString()));
+                return null;
+            });
+        }
+        else {
+            mutableStateValue = getMutableStateTextFieldValue(builder.toString());
+        }
+
+        versionsList.add(mutableStateValue.getValue());
+        currentVersion = versionsList.size() - 1;
     }
 
     private void workerStart() {
@@ -361,14 +384,13 @@ public class EditorFileWeb implements EditorFileInt {
             while (true) {
                 if (cntChanged + currentWorking + 1 < changingLimitCnt) {
                     currentWorking += 1;
+                    cntChanged += 1;
                     break;
                 } else {
-                    synchronized (workersObject) {
-                        try {
-                            workersObject.wait();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
+                    try {
+                        stateChangerObject.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -378,7 +400,7 @@ public class EditorFileWeb implements EditorFileInt {
     private void workerEnd() {
         synchronized (stateChangerObject) {
             currentWorking -= 1;
-            stateChangerObject.notify();
+            stateChangerObject.notifyAll();
         }
     }
 
@@ -411,7 +433,7 @@ public class EditorFileWeb implements EditorFileInt {
         for (start = start / lockersSeparatorStringsCount * lockersSeparatorStringsCount;
              start < end; start += lockersSeparatorStringsCount) {
 
-            this.fileStringslocks.get(start).lock();
+            this.fileStringslocks.get(start).unlock();
         }
     }
 }

@@ -219,4 +219,10 @@ public class IDEWebWorkerServer extends IDEWebWorkerGrpc.IDEWebWorkerImplBase {
     public PositionsTable getPositionsTable() {
         return roleService.getPositionsTable();
     }
+
+    public void updateFile(String filePath) {
+        if (role == ServersRoles.Follower) {
+            roleService.updateFile(filePath);
+        }
+    }
 }
