@@ -238,8 +238,9 @@ public class IdeController implements IdeControllerWebInt {
         if (fileExplorer == null)
             throw new IllegalStateException("Project not opened");
 
+        var rp = projectRoot.relativize(path);
         if (webController != null) {
-            webController.updateFile(path.toString());
+            webController.updateFile(rp.toString());
         }
         List<String> list = fileExplorer.openFile(path);
         editorController.openFile(path.toString(), list);

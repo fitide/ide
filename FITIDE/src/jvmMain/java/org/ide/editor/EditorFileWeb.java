@@ -12,8 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.ide.editor.TextFieldValueHelperKt.getMutableStateTextFieldValue;
-import static org.ide.editor.TextFieldValueHelperKt.getTextFieldValue;
+import static org.ide.editor.TextFieldValueHelperKt.*;
 
 public class EditorFileWeb implements EditorFileInt {
     private final static int lockersSeparatorStringsCount = 100;
@@ -32,6 +31,7 @@ public class EditorFileWeb implements EditorFileInt {
     private int currentWorking = 0;
     private int cntChanged = 0;
 
+    private int changeCurPos = 0;
 
     public EditorFileWeb(List<String> contentLines) {
         saved = true;
@@ -307,7 +307,7 @@ public class EditorFileWeb implements EditorFileInt {
 
     private void addToStr(String text, int strIndex, int start) {
         var strBefore = fileStrings.get(strIndex);
-        StringBuilder builder = new StringBuilder().append(strBefore.substring(0, start)).append(text).append(
+        StringBuilder builder = new StringBuilder().append(strBefore, 0, start).append(text).append(
                 strBefore.substring(start));
         fileStrings.set(strIndex, builder.toString());
     }
@@ -367,7 +367,7 @@ public class EditorFileWeb implements EditorFileInt {
         if (mutableStateValue != null) {
             UIUpdater.INSTANCE.runOnMain(() -> {
                 System.out.println("runOnMain action: thread=" + Thread.currentThread().getName());
-                mutableStateValue.setValue(getTextFieldValue(builder.toString()));
+                mutableStateValue.setValue(getTextFieldValue(builder.toString(), getSelection(versionsList.getLast())));
                 return null;
             });
         }
