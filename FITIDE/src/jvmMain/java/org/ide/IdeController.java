@@ -14,6 +14,7 @@ import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
 import org.ide.PluginController.PluginInterface.Plugin;
+import org.ide.Tools.PathTools;
 import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
 import org.ide.WebWorker.Positions.CursorPosition;
 import org.ide.WebWorker.Positions.HighlightedPosition;
@@ -238,8 +239,8 @@ public class IdeController implements IdeControllerWebInt {
         if (fileExplorer == null)
             throw new IllegalStateException("Project not opened");
 
-        var rp = projectRoot.relativize(path);
         if (webController != null) {
+            var rp = projectRoot.relativize(path);
             webController.updateFile(rp.toString());
         }
         List<String> list = fileExplorer.openFile(path);
@@ -436,18 +437,18 @@ public class IdeController implements IdeControllerWebInt {
     }
 
     @Override
-    public boolean insertText(String filePath, String text, CursorPosition position) {
-        return editorController.insertText(filePath, text, position);
+    public boolean insertText(String filePath, String text, CursorPosition position, String host) {
+        return editorController.insertText(absoluteFilePath(filePath), text, position, webController.isMe(host));
     }
 
     @Override
-    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position) {
-        return editorController.deleteText(filePath, textToDelete, position);
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position, String host) {
+        return editorController.deleteText(absoluteFilePath(filePath), textToDelete, position, webController.isMe(host));
     }
 
     @Override
-    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
-        return editorController.changeText(filePath, textToDelete, newText, position);
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position, String host) {
+        return editorController.changeText(absoluteFilePath(filePath), textToDelete, newText, position, webController.isMe(host));
     }
 
     public OpenedFileInfo getOpenedFileInfo() {
@@ -479,11 +480,12 @@ public class IdeController implements IdeControllerWebInt {
                 return;
             }
 
+            String filePath = projectRoot.relativize(Paths.get(editorController.getCurrentFile())).toString();
             switch (operation.operation) {
-                case Insert -> webController.insertText(editorController.getCurrentFile(), operation.text,
+                case Insert -> webController.insertText(filePath, operation.text,
                         CursorPosition.newBuilder().setLineNumer(operation.position.getLineStart()).setColumnNumber(operation.position.getColumnStart()).build());
-                case Delete -> webController.deleteText(editorController.getCurrentFile(), operation.text, operation.position);
-                case Changing -> webController.changeText(editorController.getCurrentFile(), operation.text,
+                case Delete -> webController.deleteText(filePath, operation.text, operation.position);
+                case Changing -> webController.changeText(filePath, operation.text,
                         operation.newText, operation.position);
             }
         }
@@ -614,5 +616,9 @@ public class IdeController implements IdeControllerWebInt {
         }
 
         return compileStringBuilder.toString();
+    }
+
+    private String absoluteFilePath(String relativeFilePath) {
+        return Paths.get(projectRoot.toString(), relativeFilePath).toAbsolutePath().toString();
     }
 }

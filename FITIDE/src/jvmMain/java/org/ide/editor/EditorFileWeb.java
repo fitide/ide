@@ -28,10 +28,10 @@ public class EditorFileWeb implements EditorFileInt {
     private final Object workersObject = new Object();
     private List<TextFieldValue> versionsList;
 
-    private int currentWorking = 0;
-    private int cntChanged = 0;
+    private volatile int currentWorking = 0;
+    private volatile int cntChanged = 0;
 
-    private int changeCurPos = 0;
+    private volatile int changeCurPos = 0;
 
     public EditorFileWeb(List<String> contentLines) {
         saved = true;
@@ -153,15 +153,15 @@ public class EditorFileWeb implements EditorFileInt {
     }
 
     @Override
-    public void insertText(String text, CursorPosition position) throws ChangeTextUnnavailableException {
+    public void insertText(String text, CursorPosition position, boolean isMe) throws ChangeTextUnnavailableException {
         makeChanges(() -> {
-            _insertText(text, position);
+            _insertText(text, position, isMe);
         });
     }
 
-    private void _insertText(String text, CursorPosition position) throws ChangeTextUnnavailableException {
+    private void _insertText(String text, CursorPosition position, boolean isMe) throws ChangeTextUnnavailableException {
         var changesList = getListFromString(text);
-
+        if (isMe) changeCurPos += text.length();
         if (position.getLineNumer() >= this.fileStrings.size()) {
             var startLockPos = this.fileStrings.size();
             lockStringLockers(startLockPos, position.getLineNumer() + changesList.size());
@@ -185,7 +185,10 @@ public class EditorFileWeb implements EditorFileInt {
 
         lockStringLockers(position.getLineNumer(), this.fileStrings.size() + changesList.size() - 1);
 
-        if (changesList.size() == 1) {
+        if (text.equals("\n")) {
+            fileStrings.add(position.getLineNumer(), "");
+        }
+        else if (changesList.size() == 1) {
             var strBefore = fileStrings.get(position.getLineNumer());
             fileStrings.set(position.getLineNumer(),
                     strBefore.substring(0, position.getColumnNumber() + 1) + text);
@@ -210,24 +213,24 @@ public class EditorFileWeb implements EditorFileInt {
     }
 
     @Override
-    public void deleteText(String textToDelete, HighlightedPosition position) throws ChangeTextUnnavailableException {
+    public void deleteText(String textToDelete, HighlightedPosition position, boolean isMe) throws ChangeTextUnnavailableException {
         makeChanges(() -> {
-            _deleteText(textToDelete, position);
+            _deleteText(textToDelete, position, isMe);
         });
     }
 
-    private void _deleteText(String textToDelete, HighlightedPosition position) throws ChangeTextUnnavailableException {
+    private void _deleteText(String textToDelete, HighlightedPosition position, boolean isMe) throws ChangeTextUnnavailableException {
         var changesList = getListFromString(textToDelete);
 
         if (position.getLineStart() >= this.fileStrings.size()) {
             throw new ChangeTextUnnavailableException("Delete from farther than the end of file");
         }
 
-
         if (changesList.size() == 1 && !textToDelete.endsWith("\n")) {
             lockStringLockers(position.getLineStart(), position.getLineStart() + 1);
 
             checkForChanging(changesList, position);
+            if (isMe) changeCurPos -= textToDelete.length();
 
             var strBefore = fileStrings.get(position.getLineStart());
             var newStr = strBefore.substring(0, position.getColumnStart()) +
@@ -240,9 +243,20 @@ public class EditorFileWeb implements EditorFileInt {
 
         lockStringLockers(position.getLineStart(), this.fileStrings.size());
         checkForChanging(changesList, position);
+        if (isMe) changeCurPos -= textToDelete.length();
 
+        if (textToDelete.equals("\n")) {
+            if (position.getLineStart() == 0) {
+                unlockStringLockers(position.getLineStart(), this.fileStrings.size());
+                return;
+            }
 
-        if (changesList.size() == 1) {
+            var prev = fileStrings.get(position.getLineStart() - 1);
+            var suf = fileStrings.get(position.getLineStart());
+            fileStrings.set(position.getLineStart() - 1, prev + suf);
+            fileStrings.remove(position.getLineStart());
+        }
+        else if (changesList.size() == 1) {
             var strBefore = fileStrings.get(position.getLineStart());
             fileStrings.set(position.getLineStart(),
                     strBefore.substring(0, position.getColumnStart() + 1) + fileStrings.get(position.getLineStart() + 1));
@@ -269,18 +283,19 @@ public class EditorFileWeb implements EditorFileInt {
     }
 
     @Override
-    public void changeText(String textToDelete, String newText, HighlightedPosition position) throws ChangeTextUnnavailableException {
+    public void changeText(String textToDelete, String newText, HighlightedPosition position, boolean isMe) throws ChangeTextUnnavailableException {
         makeChanges(() -> {
-            _deleteText(textToDelete, position);
+            _deleteText(textToDelete, position, isMe);
             _insertText(newText,
                     CursorPosition.newBuilder()
                             .setLineNumer(position.getLineStart())
                             .setColumnNumber(position.getColumnStart())
-                            .build());
+                            .build(), isMe);
         });
     }
 
     private void checkForChanging(List<String> textToCompare, HighlightedPosition position) throws ChangeTextUnnavailableException {
+        if (textToCompare.isEmpty()) return;
         if (textToCompare.size() == 1) {
             var curStr = fileStrings.get(position.getLineStart());
             if (!curStr.substring(position.getColumnStart(), position.getColumnEnd() + 1).equals(textToCompare.getFirst())) {
@@ -365,9 +380,12 @@ public class EditorFileWeb implements EditorFileInt {
         }
 
         if (mutableStateValue != null) {
+            var posChange = this.changeCurPos;
             UIUpdater.INSTANCE.runOnMain(() -> {
                 System.out.println("runOnMain action: thread=" + Thread.currentThread().getName());
-                mutableStateValue.setValue(getTextFieldValue(builder.toString(), getSelection(versionsList.getLast())));
+                int oldCursorPosition = getSelection(versionsList.getLast());
+                int newCursorPosition = oldCursorPosition + posChange;
+                mutableStateValue.setValue(getTextFieldValue(builder.toString(), newCursorPosition));
                 return null;
             });
         }
@@ -375,6 +393,7 @@ public class EditorFileWeb implements EditorFileInt {
             mutableStateValue = getMutableStateTextFieldValue(builder.toString());
         }
 
+        changeCurPos = 0;
         versionsList.add(mutableStateValue.getValue());
         currentVersion = versionsList.size() - 1;
     }

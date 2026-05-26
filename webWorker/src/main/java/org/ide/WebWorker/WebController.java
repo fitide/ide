@@ -30,7 +30,6 @@ public class WebController {
     private String curLeader;
     private LocalTime lastTimeUpdated;
 
-
     /**
      * Constructor for Leader
      *
@@ -205,18 +204,22 @@ public class WebController {
     }
 
     public void insertText(String filePath, String text, CursorPosition position) {
-        client.insertText(filePath, text, position);
+        client.insertText(filePath, text, position, host);
     }
 
     public void deleteText(String filePath, String textToDelete, HighlightedPosition position) {
-        client.deleteText(filePath, textToDelete, position);
+        client.deleteText(filePath, textToDelete, position, host);
     }
 
     public void changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
-        client.changeText(filePath, textToDelete, newText, position);
+        client.changeText(filePath, textToDelete, newText, position, host);
     }
 
     public void updateFile(String filePath) {
         server.updateFile(filePath);
+    }
+
+    public boolean isMe(String host) {
+        return this.host.equals(host);
     }
 }

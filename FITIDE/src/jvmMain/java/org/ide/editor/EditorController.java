@@ -100,11 +100,11 @@ public class EditorController {
         return null;
     }
 
-    public boolean insertText(String filePath, String text, CursorPosition position) {
+    public boolean insertText(String filePath, String text, CursorPosition position, boolean isMe) {
         try {
             if (files.containsKey(filePath)) {
                 var file = files.get(filePath);
-                file.insertText(text, position);
+                file.insertText(text, position, isMe);
             }
         } catch (ChangeTextUnnavailableException e) {
             return false;
@@ -112,11 +112,11 @@ public class EditorController {
         return true;
     }
 
-    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position) {
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position, boolean isMe) {
         try {
             if (files.containsKey(filePath)) {
                 var file = files.get(filePath);
-                file.deleteText(textToDelete, position);
+                file.deleteText(textToDelete, position, isMe);
             }
         } catch (ChangeTextUnnavailableException e) {
             return false;
@@ -124,11 +124,11 @@ public class EditorController {
         return true;
     }
 
-    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position, boolean isMe) {
         try {
             if (files.containsKey(filePath)) {
                 var file = files.get(filePath);
-                file.changeText(textToDelete, newText, position);
+                file.changeText(textToDelete, newText, position, isMe);
             }
         } catch (ChangeTextUnnavailableException e) {
             return false;

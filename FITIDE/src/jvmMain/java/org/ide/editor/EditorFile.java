@@ -88,17 +88,17 @@ class EditorFile implements EditorFileInt {
     }
 
     @Override
-    public void insertText(String text, CursorPosition position) {
+    public void insertText(String text, CursorPosition position, boolean isMe) {
         throw new RuntimeException("insert text on single user file");
     }
 
     @Override
-    public void deleteText(String textToDelete, HighlightedPosition position) {
+    public void deleteText(String textToDelete, HighlightedPosition position, boolean isMe) {
         throw new RuntimeException("delete text on single user file");
     }
 
     @Override
-    public void changeText(String textToDelete, String newText, HighlightedPosition position) {
+    public void changeText(String textToDelete, String newText, HighlightedPosition position, boolean isMe) {
         throw new RuntimeException("change text on single user file");
     }
 

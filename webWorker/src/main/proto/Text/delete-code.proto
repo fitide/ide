@@ -12,6 +12,7 @@ message DeleteTextServerRequest {
     string filePath = 1;
     positions.HighlightedPosition position = 2;
     string textToDelete = 3;
+    string user = 4;
 }
 
 message DeleteTextServerResponse {
@@ -22,6 +23,7 @@ message DeleteTextServerResponse {
 message DeleteTextClientRequest {
     string filePath = 1;
     positions.HighlightedPosition position = 2;
+    string user = 3;
 }
 
 message DeleteTextClientResponse {

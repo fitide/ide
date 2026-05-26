@@ -12,6 +12,7 @@ message InsertTextServerRequest {
     string filePath = 1;
     positions.CursorPosition position = 2;
     string text = 3;
+    string user = 4;
 }
 
 message InsertTextServerResponse {
@@ -23,6 +24,7 @@ message InsertTextClientRequest {
     string filePath = 1;
     positions.CursorPosition position = 2;
     string text = 3;
+    string user = 4;
 }
 
 message InsertTextClientResponse {

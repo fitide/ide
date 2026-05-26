@@ -19,9 +19,14 @@ import org.ide.WebWorker.Text.Inserting.InsertTextServerRequest;
 import org.ide.WebWorker.User.*;
 import org.ide.WebWorker.Workers.IDEWebWorkerGrpc;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class IDEWebWorkerClient {
     private IDEWebWorkerGrpc.IDEWebWorkerBlockingStub stub;
 
+    private ExecutorService senderService = Executors.newFixedThreadPool(3);
 
     public void updateServer(String host, int port) {
         stub = IDEWebWorkerGrpc.newBlockingStub(ManagedChannelBuilder.forAddress(host, port).usePlaintext().build());
@@ -60,31 +65,34 @@ public class IDEWebWorkerClient {
         stub.setUserFilePosition(file);
     }
 
-    public void insertText(String filePath, String text, CursorPosition position) {
-        new Thread(new Runnable() {
+    public void insertText(String filePath, String text, CursorPosition position, String host) {
+        CompletableFuture.runAsync(new Runnable() {
             @Override
             public void run() {
-                 stub.insertText(InsertTextServerRequest.newBuilder().setText(text).setFilePath(filePath).setPosition(position).build());
+                stub.insertText(InsertTextServerRequest.newBuilder().setText(text).setFilePath(filePath)
+                        .setPosition(position).setUser(host).build());
             }
-        }).start();
+        }, senderService);
     }
 
-    public void deleteText(String filePath, String textToDelete, HighlightedPosition position) {
-        new Thread(new Runnable() {
+    public void deleteText(String filePath, String textToDelete, HighlightedPosition position, String host) {
+        CompletableFuture.runAsync(new Runnable() {
             @Override
             public void run() {
-                stub.deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath).setPosition(position).build());
+                stub.deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath)
+                        .setPosition(position).setUser(host).build());
             }
-        }).start();
+        }, senderService);
     }
 
-    public void changeText(String filePath, String textToDelete, String newText, HighlightedPosition position) {
-        new Thread(new Runnable() {
+    public void changeText(String filePath, String textToDelete, String newText, HighlightedPosition position, String host) {
+        CompletableFuture.runAsync(new Runnable() {
             @Override
             public void run() {
-                stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete).setTextToInsert(newText).setFilePath(filePath).setPosition(position).build());
+                stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete)
+                        .setTextToInsert(newText).setFilePath(filePath).setUser(host).setPosition(position).build());
             }
-        }).start();
+        }, senderService);
     }
 
     public UsersClient getPositions() {

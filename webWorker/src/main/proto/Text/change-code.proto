@@ -13,6 +13,7 @@ message ChangeTextServerRequest {
     positions.HighlightedPosition position = 2;
     string textToDelete = 3;
     string textToInsert = 4;
+    string user = 5;
 }
 
 message ChangeTextServerResponse {
@@ -24,6 +25,7 @@ message ChangeTextClientRequest {
     string filePath = 1;
     positions.HighlightedPosition position = 2;
     string textToInsert = 4;
+    string user = 5;
 }
 
 message ChangeTextClientResponse {

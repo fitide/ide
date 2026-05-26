@@ -32,11 +32,11 @@ public interface EditorFileInt {
 
     public void onTextChanged(TextFieldValue newValue);
 
-    public void insertText(String text, CursorPosition position) throws ChangeTextUnnavailableException;
+    public void insertText(String text, CursorPosition position, boolean isMe) throws ChangeTextUnnavailableException;
 
-    public void deleteText(String textToDelete, HighlightedPosition position) throws ChangeTextUnnavailableException;
+    public void deleteText(String textToDelete, HighlightedPosition position, boolean isMe) throws ChangeTextUnnavailableException;
 
-    public void changeText(String textToDelete, String newText, HighlightedPosition position) throws ChangeTextUnnavailableException;
+    public void changeText(String textToDelete, String newText, HighlightedPosition position, boolean isMe) throws ChangeTextUnnavailableException;
 
     public MutableState<TextFieldValue> getTextField();
 

@@ -54,9 +54,9 @@ public interface IdeControllerWebInt {
 
     void setFile(File file);
 
-    public boolean insertText(String filePath, String text, CursorPosition position);
+    public boolean insertText(String filePath, String text, CursorPosition position, String host);
 
-    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position);
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position, String host);
 
-    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position);
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position, String host);
 }
