@@ -73,6 +73,7 @@ public class Follower implements Role {
     public void connect() {
         rootDir = stub.onConnection(ConnectionRequest.newBuilder().setHost(host).setName(name).build()).getDirectory();
         getDirectory(rootDir);
+        ideController.reloadPluginsAfterSync();
     }
 
     @Override

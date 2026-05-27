@@ -359,12 +359,11 @@ public class IdeController implements IdeControllerWebInt {
     }
 
     @Override
-    public List<String> getFileContent(String relativePath) throws Exception {
+    public byte[] getFileContent(String relativePath) throws Exception {
         Path rel = Paths.get(relativePath);
         Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
         Path absolutePath = projectRoot.resolve(stripped);
-        var fileText = openFile(absolutePath);
-        return List.of(fileText.split("\n"));
+        return Files.readAllBytes(absolutePath);
     }
 
     @Override
@@ -422,6 +421,13 @@ public class IdeController implements IdeControllerWebInt {
     }
 
     @Override
+    public void reloadPluginsAfterSync() {
+        if (projectRoot == null) return;
+        loadPluginsForProject();
+        refreshTree();
+    }
+
+    @Override
     public void setFile(org.ide.WebWorker.FileSystem.FileSystemComponents.File file) {
         if (projectRoot == null) return;
         Path rel = Paths.get(file.getRelativeFilePath());
@@ -429,7 +435,7 @@ public class IdeController implements IdeControllerWebInt {
         Path path = projectRoot.resolve(stripped);
         try {
             path.getParent().toFile().mkdirs();
-            Files.writeString(path, String.join("\n", file.getContentList()));
+            Files.write(path, file.getContent().toByteArray());
         } catch (IOException e) {
             logger.error("setFile failed", e);
         }

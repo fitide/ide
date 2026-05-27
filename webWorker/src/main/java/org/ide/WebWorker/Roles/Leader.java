@@ -267,10 +267,11 @@ public class Leader extends Follower{
 
     @Override
     public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) throws Exception {
-        var file = ideController.getFileContent(request.getFileRelativePath());
+        byte[] bytes = ideController.getFileContent(request.getFileRelativePath());
 
-        var fileBuilder = File.newBuilder().setRelativeFilePath(request.getFileRelativePath());
-        fileBuilder.addAllContent(file);
+        var fileBuilder = File.newBuilder()
+                .setRelativeFilePath(request.getFileRelativePath())
+                .setContent(com.google.protobuf.ByteString.copyFrom(bytes));
 
         responseObserver.onNext(FileResponse.newBuilder().setFile(fileBuilder).build());
         responseObserver.onCompleted();

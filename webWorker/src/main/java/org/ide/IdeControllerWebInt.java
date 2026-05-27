@@ -48,11 +48,13 @@ public interface IdeControllerWebInt {
 
     public List<Pair<String, FileType>> getDirData(String relativePath) throws Exception;
 
-    public List<String> getFileContent(String relativePath) throws FileNotFoundException, Exception;
+    public byte[] getFileContent(String relativePath) throws FileNotFoundException, Exception;
 
     void setDir(Directory dir);
 
     void setFile(File file);
+
+    void reloadPluginsAfterSync();
 
     public boolean insertText(String filePath, String text, CursorPosition position, String host);
 

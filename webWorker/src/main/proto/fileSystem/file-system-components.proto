@@ -7,7 +7,7 @@ option java_package = "org.ide.WebWorker.FileSystem.FileSystemComponents";
 
 message File {
     string relativeFilePath = 1;
-    repeated string content = 2;
+    bytes content = 2;
 }
 
 enum FileType {
