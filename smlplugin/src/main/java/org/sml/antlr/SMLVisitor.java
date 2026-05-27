@@ -34,12 +34,6 @@ public interface SMLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunbind(SMLParser.FunbindContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SMLParser#funmatch}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunmatch(SMLParser.FunmatchContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SMLParser#pat}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -87,6 +81,19 @@ public interface SMLVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSymbolicExp(SMLParser.SymbolicExpContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TupleExp}
+	 * labeled alternative in {@link SMLParser#exp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTupleExp(SMLParser.TupleExpContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SMLParser#tuple}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTuple(SMLParser.TupleContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SMLParser#match}.
 	 * @param ctx the parse tree
