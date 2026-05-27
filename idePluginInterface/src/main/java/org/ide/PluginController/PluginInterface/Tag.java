@@ -8,6 +8,7 @@ public enum Tag {
     KeyWord,
     ErrorNode,
     Construction,
+    Expression,
     Declaration,
     Definition,
     Usage,

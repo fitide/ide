@@ -180,7 +180,6 @@ public class Construction extends AInternalCodeNode {
 
     @Override
     protected void updateTree(ParseTree tree) {
-        //TODO: override
 
         AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
         if (node instanceof Construction) {

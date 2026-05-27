@@ -64,6 +64,9 @@ public class TreeBuilder {
                         return new ErrorNode(plugin, pathToFile, pathToParent, parseTree);
                     }
                 }
+                case Expression -> {
+                    return new Expression(plugin, pathToFile, pathToParent, parseTree);
+                }
             }
         }
 
