@@ -83,4 +83,10 @@ public abstract class ARoot extends CommonFileNode {
     }
 
     public abstract void getStandartDecs(Map<String, AInternalCodeNode> decs);
+
+    public void dump(StringBuilder builder) {
+        for (var code : childs.values()) {
+
+        }
+    }
 }

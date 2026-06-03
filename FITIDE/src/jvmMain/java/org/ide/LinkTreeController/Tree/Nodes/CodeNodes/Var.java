@@ -128,4 +128,9 @@ public class Var extends AInternalCodeNode {
         if (!contains(this.wholePos, position)) return null;
         return this;
     }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("var");
+    }
 }

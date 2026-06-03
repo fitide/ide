@@ -86,4 +86,9 @@ public class Expression extends AInternalCodeNode {
 
         return null;
     }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("expression");
+    }
 }

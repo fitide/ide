@@ -245,4 +245,21 @@ public abstract class AInternalCodeNode {
 
         return afterStart && beforeEnd;
     }
+
+
+
+    public void dump(int level, StringBuilder builder) {
+        builder.repeat("\t", level).append(name).append("_");
+        setTypeDump(builder);
+        builder.append("\n");
+        setChildrenDump(level, builder);
+    }
+
+    protected abstract void setTypeDump(StringBuilder builder);
+
+    protected void setChildrenDump(int level, StringBuilder builder) {
+        for (var child : childs.values()) {
+            child.dump(level + 1, builder);
+        }
+    }
 }

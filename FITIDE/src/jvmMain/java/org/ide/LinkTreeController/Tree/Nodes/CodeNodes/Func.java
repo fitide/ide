@@ -323,4 +323,22 @@ public class Func extends AInternalCodeNode {
         return null;
     }
 
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("func");
+    }
+
+    @Override
+    protected void setChildrenDump(int level, StringBuilder builder) {
+        builder.repeat("\t", level + 1).append("args\n");
+        for(var arg : args.values()) {
+            arg.dump(level + 2, builder);
+        }
+
+        builder.repeat("\t", level + 1).append("body\n");
+        for(var code : childs.values()) {
+            code.dump(level + 2, builder);
+        }
+    }
+
 }

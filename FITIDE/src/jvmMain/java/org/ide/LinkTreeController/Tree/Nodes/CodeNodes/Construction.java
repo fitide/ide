@@ -284,4 +284,26 @@ public class Construction extends AInternalCodeNode {
 
         return null;
     }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("construction");
+    }
+
+    @Override
+    protected void setChildrenDump(int level, StringBuilder builder) {
+        builder.repeat("\t", level + 1).append("args\n");
+        for(var arg : args.values()) {
+            arg.dump(level + 2, builder);
+        }
+
+        int it = 0;
+        for (var body : bodies) {
+            builder.repeat("\t", level + 1).append("body_").append(it).append("\n");
+            for (var code : body.a.values()) {
+                code.dump(level + 2, builder);
+            }
+            it++;
+        }
+    }
 }

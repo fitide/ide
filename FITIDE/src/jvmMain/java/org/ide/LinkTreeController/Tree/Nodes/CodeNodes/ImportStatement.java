@@ -72,4 +72,9 @@ public class ImportStatement extends AInternalCodeNode {
         return null;
     }
 
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("import_node");
+    }
+
 }

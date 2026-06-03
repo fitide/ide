@@ -138,7 +138,10 @@ public abstract class CommonFileNode {
         CommonFileNode node = getFileNode(pathToFile);
 
         if (node != null && node instanceof CommonFile) {
-            return ((CommonFile) node).getSyntaxHughlighting(null);
+            var file = ((CommonFile) node);
+            var res = (file.getSyntaxHughlighting(null));
+            file.dump();
+            return res;
         }
         return new ArrayList<>();
     }

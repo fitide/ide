@@ -304,4 +304,13 @@ public class CommonFile extends FileNode {
             node.setDefinitionsAndDeclarations(defs, decs);
         }
     }
+
+    public void dump() {
+        var builder = new StringBuilder();
+        for (var node : codeNodes.values()) {
+            node.dump(0, builder);
+        }
+
+        System.out.println(builder);
+    }
 }

@@ -67,4 +67,9 @@ public class KeyWord extends AInternalCodeNode {
     public AInternalCodeNode findByPos(LinkTreePosition position) {
         return null;
     }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("key_word");
+    }
 }
