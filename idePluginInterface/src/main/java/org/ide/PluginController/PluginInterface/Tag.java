@@ -9,6 +9,7 @@ public enum Tag {
     ErrorNode,
     Construction,
     Expression,
+    Constant,
     Declaration,
     Definition,
     Usage,

@@ -67,6 +67,9 @@ public class TreeBuilder {
                 case Expression -> {
                     return new Expression(plugin, pathToFile, pathToParent, parseTree);
                 }
+                case Constant -> {
+                    return new Constant(plugin, pathToFile, pathToParent, parseTree);
+                }
             }
         }
 
