@@ -362,7 +362,7 @@ public class EditorFileWeb implements EditorFileInt {
         int col = -1;
         int line = 0;
         int curIt = 0;
-        while(curIt != it) {
+        while(curIt != it && curIt < this.mutableStateValue.getValue().getText().length()) {
             if (value.charAt(curIt) == '\n') {
                 col = -1;
                 line += 1;
