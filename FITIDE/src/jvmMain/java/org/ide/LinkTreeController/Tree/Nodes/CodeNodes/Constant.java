@@ -2,6 +2,8 @@ package org.ide.LinkTreeController.Tree.Nodes.CodeNodes;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
+import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
 import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
@@ -26,6 +28,11 @@ public class Constant extends AInternalCodeNode {
     @Override
     public void getHint(String prefix, Set<HintNode> hints, Path pathToModule) {
         return;
+    }
+
+    @Override
+    public void getHighlightning(List<CodeStrForColour> list) {
+        list.add(new CodeStrForColour(wholePos, LinkTreeCodeTag.Constant));
     }
 
     @Override
