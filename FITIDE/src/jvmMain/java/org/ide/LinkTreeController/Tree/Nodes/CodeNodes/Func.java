@@ -224,7 +224,10 @@ public class Func extends AInternalCodeNode {
             List<Path> res = new ArrayList<>();
 
             for (AInternalCodeNode node : args.values()) {
-                if (node.wholePos.compareTo(position) == 0) res = node.getPathsToSearchDeclaration(position);
+                if (node.wholePos.compareTo(position) == 0) {
+                    res = node.getPathsToSearchDeclaration(position);
+                    break;
+                }
             }
 
             res.add(this.pathToModule);

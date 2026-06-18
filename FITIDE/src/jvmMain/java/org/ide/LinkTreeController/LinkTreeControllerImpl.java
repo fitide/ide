@@ -8,6 +8,7 @@ import org.ide.LinkTreeController.Exceptions.BadPathException;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.ARoot;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CommonFileNode;
+import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.ClassNode;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Construction;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Func;
 import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
@@ -109,6 +110,7 @@ public class LinkTreeControllerImpl implements LinkTreeController {
         setFuncs(plugin);
         setVars(plugin);
         setExternalFiles(plugin);
+        setExternalClasses(plugin);
     }
 
     private void setFilesLinks(List<Pair<Path, ParseTree>> files) {
@@ -155,6 +157,15 @@ public class LinkTreeControllerImpl implements LinkTreeController {
             files.put(file.name, new CommonFile(file));
         }
         root.setExternalFiles(files);
+    }
+
+    private void setExternalClasses(Plugin plugin) {
+        var classesInfo = plugin.getStandardClasses();
+        Map<String, ClassNode> classes = new HashMap<>();
+        for (var tClass : classesInfo) {
+            classes.put(tClass.name, new ClassNode(tClass.name, List.of()));
+        }
+        root.setExternalClasses(classes);
     }
 
     private void setStandartTypes(Plugin plugin) {
