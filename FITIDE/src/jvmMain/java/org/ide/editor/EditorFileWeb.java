@@ -188,7 +188,9 @@ public class EditorFileWeb implements EditorFileInt {
         lockStringLockers(startLock, endLock);
 
         if (text.equals("\n")) {
-            fileStrings.add(position.getLineNumer(), "");
+            var prevStr = fileStrings.get(position.getLineNumer());
+            fileStrings.set(position.getLineNumer(), prevStr.substring(0, position.getColumnNumber()));
+            fileStrings.add(position.getLineNumer() + 1, prevStr.substring(position.getColumnNumber()));
         }
         else if (changesList.size() == 1) {
             var strBefore = fileStrings.get(position.getLineNumer());
