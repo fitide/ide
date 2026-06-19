@@ -183,7 +183,9 @@ public class EditorFileWeb implements EditorFileInt {
             return;
         }
 
-        lockStringLockers(position.getLineNumer(), this.fileStrings.size() + changesList.size() - 1);
+        int startLock = position.getLineNumer();
+        int endLock = this.fileStrings.size() + changesList.size() - 1;
+        lockStringLockers(startLock, endLock);
 
         if (text.equals("\n")) {
             fileStrings.add(position.getLineNumer(), "");
@@ -209,7 +211,7 @@ public class EditorFileWeb implements EditorFileInt {
             fileStrings.addAll(position.getLineNumer() + 1, changesList);
         }
 
-        unlockStringLockers(position.getLineNumer(), this.fileStrings.size() + changesList.size() - 1);
+        unlockStringLockers(startLock, endLock);
     }
 
     @Override
@@ -241,7 +243,8 @@ public class EditorFileWeb implements EditorFileInt {
             return;
         }
 
-        lockStringLockers(position.getLineStart(), this.fileStrings.size());
+        var lockEnd = this.fileStrings.size();
+        lockStringLockers(position.getLineStart(), lockEnd);
         checkForChanging(changesList, position);
         if (isMe) changeCurPos -= textToDelete.length();
 
@@ -279,7 +282,7 @@ public class EditorFileWeb implements EditorFileInt {
             fileStrings.removeAll(fileStrings.subList(position.getLineStart() + 1, position.getLineEnd() + 1));
         }
 
-        unlockStringLockers(position.getLineStart(), this.fileStrings.size());
+        unlockStringLockers(position.getLineStart(), lockEnd);
     }
 
     @Override
@@ -339,21 +342,21 @@ public class EditorFileWeb implements EditorFileInt {
         int start = 0;
         int end1 = curText.length() - 1;
         int end2 = newText.length() - 1;
-        while(curText.charAt(start) == newText.charAt(start) && start < end1 && start < end2) start++;
+        while(start < curText.length() && curText.charAt(start) == newText.charAt(start) && start < end1 && start < end2) start++;
 
-        while(curText.charAt(end1) == newText.charAt(end2) && end1 > start && end2 > start) {
+        while(end1 >= 0 && curText.charAt(end1) == newText.charAt(end2) && end1 > start && end2 > start) {
             end1--;
             end2--;
         }
 
-        var difLen = end1 - start;
+        var difLen = end1 >= start ? end1 - start : 0;
         var startPos = getPosition(curText, start);
-        var endPos = getPosition(curText, end1 - 1);
+        var endPos = end1 >= 0 ? getPosition(curText, end1 - 1) : getPosition(curText, 0);
         var positions = HighlightedPosition.newBuilder()
                 .setColumnStart(startPos.getColumnNumber()).setLineStart(startPos.getLineNumer())
                 .setColumnEnd(endPos.getColumnNumber()).setLineEnd(endPos.getLineNumer()).build();
 
-        if (difLen == 0) return new OperationInfo(TextOperation.Insert, positions, newText.substring(start, end2));
+        if (difLen == 0) return new OperationInfo(TextOperation.Insert, positions, newText.substring(start, end2 + 1));
         else if (difLen == curText.length() - newText.length()) return new OperationInfo(TextOperation.Delete, positions, curText.substring(start, end1));
         else return new OperationInfo(TextOperation.Changing, positions, curText.substring(start, end1), newText.substring(start, end2));
     }
