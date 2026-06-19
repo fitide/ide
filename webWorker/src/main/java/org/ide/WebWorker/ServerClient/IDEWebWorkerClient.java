@@ -22,6 +22,7 @@ import org.ide.WebWorker.Workers.IDEWebWorkerGrpc;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class IDEWebWorkerClient {
     private IDEWebWorkerGrpc.IDEWebWorkerBlockingStub stub;
@@ -69,8 +70,20 @@ public class IDEWebWorkerClient {
         CompletableFuture.runAsync(new Runnable() {
             @Override
             public void run() {
-                stub.insertText(InsertTextServerRequest.newBuilder().setText(text).setFilePath(filePath)
-                        .setPosition(position).setUser(host).build());
+                System.out.println("Task started: " + filePath + " on thread " + Thread.currentThread().getName());
+                try {
+                    stub.withDeadlineAfter(500, TimeUnit.MILLISECONDS)
+                            .insertText(InsertTextServerRequest.newBuilder()
+                                    .setText(text)
+                                    .setFilePath(filePath)
+                                    .setPosition(position)
+                                    .setUser(host)
+                                    .build());
+                    System.out.println("Task completed successfully");
+                } catch (Exception e) {
+                    System.err.println("Error: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }, senderService);
     }
@@ -79,7 +92,7 @@ public class IDEWebWorkerClient {
         CompletableFuture.runAsync(new Runnable() {
             @Override
             public void run() {
-                stub.deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath)
+                stub.withDeadlineAfter(500, TimeUnit.MILLISECONDS).deleteText(DeleteTextServerRequest.newBuilder().setTextToDelete(textToDelete).setFilePath(filePath)
                         .setPosition(position).setUser(host).build());
             }
         }, senderService);
@@ -89,7 +102,7 @@ public class IDEWebWorkerClient {
         CompletableFuture.runAsync(new Runnable() {
             @Override
             public void run() {
-                stub.changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete)
+                stub.withDeadlineAfter(500, TimeUnit.MILLISECONDS).changeText(ChangeTextServerRequest.newBuilder().setTextToDelete(textToDelete)
                         .setTextToInsert(newText).setFilePath(filePath).setUser(host).setPosition(position).build());
             }
         }, senderService);
