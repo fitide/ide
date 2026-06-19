@@ -100,8 +100,8 @@ public class EditorFileWeb implements EditorFileInt {
     }
 
     private List<String> getListFromString(String str) {
-        var splitted = str.split("\n");
-        return Arrays.stream(splitted).toList();
+        var splitted = str.split("\n", -1);
+        return new ArrayList<>(Arrays.asList(splitted));
     }
 
     @Override
