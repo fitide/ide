@@ -70,7 +70,7 @@ public class IDEWebWorkerClient {
         CompletableFuture.runAsync(new Runnable() {
             @Override
             public void run() {
-                System.out.println("Задача запущена: " + filePath + " на потоке " + Thread.currentThread().getName());
+                System.out.println("Task started: " + filePath + " on thread " + Thread.currentThread().getName());
                 try {
                     stub.withDeadlineAfter(500, TimeUnit.MILLISECONDS)
                             .insertText(InsertTextServerRequest.newBuilder()
@@ -79,9 +79,9 @@ public class IDEWebWorkerClient {
                                     .setPosition(position)
                                     .setUser(host)
                                     .build());
-                    System.out.println("Задача завершена успешно");
+                    System.out.println("Task completed successfully");
                 } catch (Exception e) {
-                    System.err.println("Ошибка: " + e.getMessage());
+                    System.err.println("Error: " + e.getMessage());
                     e.printStackTrace();
                 }
             }

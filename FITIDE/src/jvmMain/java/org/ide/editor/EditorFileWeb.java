@@ -161,6 +161,8 @@ public class EditorFileWeb implements EditorFileInt {
 
     private void _insertText(String text, CursorPosition position, boolean isMe) throws ChangeTextUnnavailableException {
         var changesList = getListFromString(text);
+        if (changesList.getLast() == "") changesList.removeLast();
+
         if (isMe) changeCurPos += text.length();
         if (position.getLineNumer() >= this.fileStrings.size()) {
             var startLockPos = this.fileStrings.size();
@@ -189,8 +191,8 @@ public class EditorFileWeb implements EditorFileInt {
 
         if (text.equals("\n")) {
             var prevStr = fileStrings.get(position.getLineNumer());
-            fileStrings.set(position.getLineNumer(), prevStr.substring(0, position.getColumnNumber()));
-            fileStrings.add(position.getLineNumer() + 1, prevStr.substring(position.getColumnNumber()));
+            fileStrings.set(position.getLineNumer(), prevStr.substring(0, position.getColumnNumber() < prevStr.length() ? position.getColumnNumber() : prevStr.length()));
+            fileStrings.add(position.getLineNumer() + 1, position.getColumnNumber() < prevStr.length() ? prevStr.substring(position.getColumnNumber()) : "");
         }
         else if (changesList.size() == 1) {
             var strBefore = fileStrings.get(position.getLineNumer());
@@ -225,6 +227,7 @@ public class EditorFileWeb implements EditorFileInt {
 
     private void _deleteText(String textToDelete, HighlightedPosition position, boolean isMe) throws ChangeTextUnnavailableException {
         var changesList = getListFromString(textToDelete);
+        if (changesList.getLast().equals("")) changesList.removeLast();
 
         if (position.getLineStart() >= this.fileStrings.size()) {
             throw new ChangeTextUnnavailableException("Delete from farther than the end of file");
@@ -251,15 +254,15 @@ public class EditorFileWeb implements EditorFileInt {
         if (isMe) changeCurPos -= textToDelete.length();
 
         if (textToDelete.equals("\n")) {
-            if (position.getLineStart() == 0) {
+            if (position.getLineStart() == -1) {
                 unlockStringLockers(position.getLineStart(), this.fileStrings.size());
                 return;
             }
 
-            var prev = fileStrings.get(position.getLineStart() - 1);
-            var suf = fileStrings.get(position.getLineStart());
-            fileStrings.set(position.getLineStart() - 1, prev + suf);
-            fileStrings.remove(position.getLineStart());
+            var prev = fileStrings.get(position.getLineStart());
+            var suf = fileStrings.get(position.getLineStart() + 1);
+            fileStrings.set(position.getLineStart(), prev + suf);
+            fileStrings.remove(position.getLineStart() + 1);
         }
         else if (changesList.size() == 1) {
             var strBefore = fileStrings.get(position.getLineStart());
@@ -302,9 +305,17 @@ public class EditorFileWeb implements EditorFileInt {
     private void checkForChanging(List<String> textToCompare, HighlightedPosition position) throws ChangeTextUnnavailableException {
         if (textToCompare.isEmpty()) return;
         if (textToCompare.size() == 1) {
-            var curStr = fileStrings.get(position.getLineStart());
-            if (!curStr.substring(position.getColumnStart(), position.getColumnEnd() + 1).equals(textToCompare.getFirst())) {
-                throw new ChangeTextUnnavailableException("Deleting on changed text");
+            if (fileStrings.get(position.getLineStart()).length() == position.getColumnStart()) {
+                var curStr =  fileStrings.get(position.getLineStart() + 1);
+                if (!curStr.substring(0, Math.min(position.getColumnEnd() + 1, curStr.length())).equals(textToCompare.getFirst())) {
+                    throw new ChangeTextUnnavailableException("Deleting on changed text");
+                }
+            }
+            else {
+                var curStr = fileStrings.get(position.getLineStart());
+                if (!curStr.substring(position.getColumnStart(), position.getColumnEnd() + 1).equals(textToCompare.getFirst())) {
+                    throw new ChangeTextUnnavailableException("Deleting on changed text");
+                }
             }
         }
         else {
@@ -344,27 +355,38 @@ public class EditorFileWeb implements EditorFileInt {
         int start = 0;
         int end1 = curText.length() - 1;
         int end2 = newText.length() - 1;
-        while(start < curText.length() && curText.charAt(start) == newText.charAt(start) && start < end1 && start < end2) start++;
+        while(start < curText.length() && start < newText.length() - 1 && curText.charAt(start) == newText.charAt(start)) start++;
 
         while(end1 >= 0 && curText.charAt(end1) == newText.charAt(end2) && end1 > start && end2 > start) {
             end1--;
             end2--;
         }
 
-        var difLen = end1 >= start ? end1 - start : 0;
+        if (start == curText.length() && end2 > end1) {
+            var startPos = getPosition(curText, curText.length());
+            return new OperationInfo(TextOperation.Insert, HighlightedPosition.newBuilder()
+                    .setColumnStart(startPos.getColumnNumber()).setLineStart(startPos.getLineNumer()).build(), newText.substring(start, end2 + 1));
+        }
+
+
+        var difLen = end1 - start;
         var startPos = getPosition(curText, start);
         var endPos = end1 >= 0 ? getPosition(curText, end1 > start ? end1 - 1 : start) : getPosition(curText, 0);
         var positions = HighlightedPosition.newBuilder()
                 .setColumnStart(startPos.getColumnNumber()).setLineStart(startPos.getLineNumer())
                 .setColumnEnd(endPos.getColumnNumber()).setLineEnd(endPos.getLineNumer()).build();
 
-        if (difLen == 0) return new OperationInfo(TextOperation.Insert, positions, newText.substring(start, end2));
-        else if (difLen == curText.length() - newText.length()) return new OperationInfo(TextOperation.Delete, positions, curText.substring(start, end1));
+        if (start == end1 && start == end2) {
+            return new OperationInfo(TextOperation.Insert, positions, "");
+        }
+
+        if (start >= end2 && start - end2 + 1 == curText.length() - newText.length()) return new OperationInfo(TextOperation.Delete, positions, curText.substring(start, end1));
+        else if (difLen == 0) return new OperationInfo(TextOperation.Insert, positions, newText.substring(start, end2));
         else return new OperationInfo(TextOperation.Changing, positions, curText.substring(start, end1), newText.substring(start, end2));
     }
 
     private CursorPosition getPosition(String value, int it) {
-        int col = -1;
+        int col = 0;
         int line = 0;
         int curIt = 0;
         while(curIt != it && curIt < this.mutableStateValue.getValue().getText().length()) {
