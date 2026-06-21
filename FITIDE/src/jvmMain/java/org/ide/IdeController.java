@@ -241,11 +241,23 @@ public class IdeController implements IdeControllerWebInt {
 
         if (webController != null) {
             var rp = projectRoot.relativize(path);
+            var fullPath = Paths.get(projectRoot.toString(), rp.toString());
             webController.updateFile(rp.toString());
-
-            if (editorController.hasFileOpened(path.toString())) {
-                initializeFile(path);
-                return editorController.getContent(path.toString());
+            System.out.println("relativePath = " + rp.toString());
+            System.out.println("fullPath = " + fullPath);
+            if (editorController.hasFileOpened(rp.toString())) {
+                System.out.println("editor has file: " + rp);
+                initializeFile(fullPath);
+                System.out.println("file " + rp + " initialized");
+                var content = editorController.getContent(rp.toString());
+                System.out.println("content: " + content);
+                editorController.setOpenedFileSnapshot(rp.toString());
+                return content;
+            }
+            else {
+                editorController.openFile(rp.toString(), fileExplorer.openFile(fullPath));
+                initializeFile(fullPath);
+                return String.join("\n", fileExplorer.openFile(fullPath));
             }
         }
 
@@ -457,17 +469,18 @@ public class IdeController implements IdeControllerWebInt {
 
     @Override
     public boolean insertText(String filePath, String text, CursorPosition position, String host) {
-        return editorController.insertText(absoluteFilePath(filePath), text, position, webController.isMe(host));
+        System.out.println("file " + filePath + " insert text " + text);
+        return editorController.insertText(filePath, text, position, webController.isMe(host));
     }
 
     @Override
     public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position, String host) {
-        return editorController.deleteText(absoluteFilePath(filePath), textToDelete, position, webController.isMe(host));
+        return editorController.deleteText(filePath, textToDelete, position, webController.isMe(host));
     }
 
     @Override
     public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position, String host) {
-        return editorController.changeText(absoluteFilePath(filePath), textToDelete, newText, position, webController.isMe(host));
+        return editorController.changeText(filePath, textToDelete, newText, position, webController.isMe(host));
     }
 
     public OpenedFileInfo getOpenedFileInfo() {
@@ -499,7 +512,7 @@ public class IdeController implements IdeControllerWebInt {
                 return;
             }
 
-            String filePath = projectRoot.relativize(Paths.get(editorController.getCurrentFile())).toString();
+            String filePath = editorController.getCurrentFile();
             switch (operation.operation) {
                 case Insert -> webController.insertText(filePath, operation.text,
                         CursorPosition.newBuilder().setLineNumer(operation.position.getLineStart()).setColumnNumber(operation.position.getColumnStart()).build());
@@ -522,7 +535,7 @@ public class IdeController implements IdeControllerWebInt {
         if (currentFile == null) {
             return Collections.emptyList();
         }
-        Path absolutePath = Paths.get(currentFile);
+        Path absolutePath = Paths.get(projectRoot.toString(), currentFile);
         Path relativePath = projectRoot.relativize(absolutePath);
 
         try {
@@ -542,7 +555,7 @@ public class IdeController implements IdeControllerWebInt {
         if (currentFile == null) {
             return Collections.emptyList();
         }
-        Path absolutePath = Paths.get(currentFile);
+        Path absolutePath = Paths.get(projectRoot.toString(), currentFile);
         Path relativePath = projectRoot.relativize(absolutePath).normalize();
         try {
             return new ArrayList<>(linkTreeController.getHintsForFile(relativePath, prefix));

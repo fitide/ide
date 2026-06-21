@@ -23,10 +23,17 @@ public class EditorController {
     }
 
     public void openFile(String fileName, List<String> fileContent) {
-        var editorFile = new EditorFileWeb(fileContent);
-        files.put(fileName, editorFile);
+        EditorFileInt editorFile;
+        if (!hasFileOpened(fileName)) {
+            editorFile  = new EditorFileWeb(fileContent);
+            files.put(fileName, editorFile);
+        }
+        else {
+            editorFile = files.get(fileName);
+        }
         currentFile = fileName;
 
+        System.out.println("File opened: " + fileName);
         openedFileInfoState.setValue(
                 new OpenedFileInfo(editorFile.getTextField())
         );
@@ -35,6 +42,17 @@ public class EditorController {
     public void createFileNode(String fileName, List<String> fileContent) {
         var editorFile = new EditorFileWeb(fileContent);
         files.put(fileName, editorFile);
+
+        System.out.println("FileInfoCreated " + fileName);
+    }
+
+    public void setOpenedFileSnapshot(String fileName) {
+        var editorFile = files.get(fileName);
+        currentFile = fileName;
+
+        openedFileInfoState.setValue(
+                new OpenedFileInfo(editorFile.getTextField())
+        );
     }
 
     public boolean hasFileOpened(String fileOpened) {
@@ -114,6 +132,10 @@ public class EditorController {
             if (files.containsKey(filePath)) {
                 var file = files.get(filePath);
                 file.insertText(text, position, isMe);
+                System.out.println("file content " + file.getContent());
+            }
+            else {
+                System.out.println("file " + filePath + " not found");
             }
         } catch (ChangeTextUnnavailableException e) {
             return false;

@@ -82,8 +82,10 @@ public class EditorFileWeb implements EditorFileInt {
 
     @Override
     public String getContent() {
+        System.out.println("getContentRequest");
         fileLock.readLock().lock();
         var res = mutableStateValue.getValue().getText();
+        System.out.println(res);
         fileLock.readLock().unlock();
         return res;
     }

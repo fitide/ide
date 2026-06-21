@@ -236,15 +236,15 @@ public class FileExplorerController {
         if (logger != null) logger.debug("Path to file: " + pathToFile.toString());
 
         File file = new File(pathToFile.toString());
-        if (!file.canRead()) {
-            throw new UnnableToReadFileException("");
+        if (file.canRead()) {
+            Scanner scanner = new Scanner(file);
+            ArrayList<String> strsList = new ArrayList<>();
+            while(scanner.hasNextLine()) {
+                strsList.addLast(scanner.nextLine());
+            }
+            return strsList;
         }
-        Scanner scanner = new Scanner(file);
-        ArrayList<String> strsList = new ArrayList<>();
-        while(scanner.hasNextLine()) {
-            strsList.addLast(scanner.nextLine());
-        }
-        return strsList;
+        else return List.of();
     }
 
     public void renameFile(Path pathToFile, String newName) throws NoNodeFoundException, WrongTypeOfNodeException, UnnableToRenameException {
