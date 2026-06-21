@@ -242,7 +242,13 @@ public class IdeController implements IdeControllerWebInt {
         if (webController != null) {
             var rp = projectRoot.relativize(path);
             webController.updateFile(rp.toString());
+
+            if (editorController.hasFileOpened(path.toString())) {
+                initializeFile(path);
+                return editorController.getContent(path.toString());
+            }
         }
+
         List<String> list = fileExplorer.openFile(path);
         editorController.openFile(path.toString(), list);
 
@@ -363,6 +369,13 @@ public class IdeController implements IdeControllerWebInt {
         Path rel = Paths.get(relativePath);
         Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
         Path absolutePath = projectRoot.resolve(stripped);
+        if (editorController != null) {
+            if (editorController.hasFileOpened(relativePath)) {
+                return editorController.getContent(relativePath).getBytes();
+            }
+            List<String> list = fileExplorer.openFile(rel);
+            editorController.createFileNode(relativePath, list);
+        }
         return Files.readAllBytes(absolutePath);
     }
 

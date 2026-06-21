@@ -32,6 +32,15 @@ public class EditorController {
         );
     }
 
+    public void createFileNode(String fileName, List<String> fileContent) {
+        var editorFile = new EditorFileWeb(fileContent);
+        files.put(fileName, editorFile);
+    }
+
+    public boolean hasFileOpened(String fileOpened) {
+        return files.containsKey(fileOpened);
+    }
+
     public void closeFile(String filename) {
         files.remove(filename);
     }
