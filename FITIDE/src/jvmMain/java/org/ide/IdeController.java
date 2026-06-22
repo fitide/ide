@@ -243,6 +243,7 @@ public class IdeController implements IdeControllerWebInt {
             var rp = projectRoot.relativize(path);
             var fullPath = Paths.get(projectRoot.toString(), rp.toString());
             webController.updateFile(rp.toString());
+            webController.sendFileOpened(rp.toString());
             System.out.println("relativePath = " + rp.toString());
             System.out.println("fullPath = " + fullPath);
             if (editorController.hasFileOpened(rp.toString())) {
@@ -385,7 +386,7 @@ public class IdeController implements IdeControllerWebInt {
             if (editorController.hasFileOpened(relativePath)) {
                 return editorController.getContent(relativePath).getBytes();
             }
-            List<String> list = fileExplorer.openFile(rel);
+            List<String> list = fileExplorer.openFile(absolutePath);
             editorController.createFileNode(relativePath, list);
         }
         return Files.readAllBytes(absolutePath);
@@ -489,6 +490,47 @@ public class IdeController implements IdeControllerWebInt {
 
     public MutableState<OpenedFileInfo> openedFileInfoState() {
         return editorController.openedFileInfoState();
+    }
+
+    public record RemoteSelection(int startLine, int startColumn, int endLine, int endColumn) {}
+
+    public record RemoteCaret(String name, int line, int column, RemoteSelection selection) {}
+
+    public void onCursorMoved(int line, int column) {
+        if (webController == null) return;
+        webController.sendCursor(line, column);
+    }
+
+    public void onSelectionChanged(int startLine, int startColumn, int endLine, int endColumn) {
+        if (webController == null) return;
+        webController.sendHighlight(startLine, startColumn, endLine, endColumn);
+    }
+
+    public List<RemoteCaret> getRemoteCaretsForCurrentFile() {
+        if (webController == null) return Collections.emptyList();
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null || projectRoot == null) return Collections.emptyList();
+
+        String relativePath = projectRoot.relativize(Paths.get(projectRoot.toString(), currentFile)).toString();
+        String myName = webController.getMyName();
+
+        List<RemoteCaret> result = new ArrayList<>();
+        for (var entry : webController.getPositionsTable().usersPositions.entrySet()) {
+            if (entry.getKey().equals(myName)) continue;
+            var pos = entry.getValue();
+            if (pos.file == null || !pos.file.equals(relativePath)) continue;
+
+            if (pos.highlightedPosition != null) {
+                var h = pos.highlightedPosition;
+                var selection = new RemoteSelection(
+                        h.getLineStart(), h.getColumnStart(), h.getLineEnd(), h.getColumnEnd());
+                result.add(new RemoteCaret(entry.getKey(), h.getLineEnd(), h.getColumnEnd(), selection));
+            } else if (pos.cursorPosition != null) {
+                result.add(new RemoteCaret(entry.getKey(),
+                        pos.cursorPosition.getLineNumer(), pos.cursorPosition.getColumnNumber(), null));
+            }
+        }
+        return result;
     }
 
     private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();

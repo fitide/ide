@@ -102,6 +102,32 @@ fun EditorView(ide: IdeController) {
         }
     }
 
+    var remoteCarets by remember { mutableStateOf<List<IdeController.RemoteCaret>>(emptyList()) }
+
+    LaunchedEffect(textValue.selection) {
+        val sel = textValue.selection
+        fun lineCol(offset: Int): Pair<Int, Int> {
+            val o = offset.coerceIn(0, textValue.text.length)
+            val before = textValue.text.substring(0, o)
+            return before.count { it == '\n' } to (o - (before.lastIndexOf('\n') + 1))
+        }
+        if (sel.collapsed) {
+            val (line, column) = lineCol(sel.end)
+            ide.onCursorMoved(line, column)
+        } else {
+            val (startLine, startColumn) = lineCol(sel.min)
+            val (endLine, endColumn) = lineCol(sel.max)
+            ide.onSelectionChanged(startLine, startColumn, endLine, endColumn)
+        }
+    }
+
+    LaunchedEffect(opened) {
+        while (true) {
+            remoteCarets = ide.getRemoteCaretsForCurrentFile()
+            delay(50)
+        }
+    }
+
     var hints by remember { mutableStateOf<List<HintNode>>(emptyList()) }
     var hintsVisible by remember { mutableStateOf(false) }
     var selectedHint by remember { mutableStateOf(0) }
@@ -200,6 +226,14 @@ fun EditorView(ide: IdeController) {
                             .padding(top = editorPadding, start = 8.dp, bottom = editorPadding)
                     ) {
                         innerTextField()
+                        RemoteCaretsOverlay(
+                            carets = remoteCarets,
+                            layout = textLayoutResult,
+                            text = textValue.text,
+                            transform = visualTransformation,
+                            lineHeight = lineHeight,
+                            modifier = Modifier.matchParentSize()
+                        )
                     }
                 }
             }

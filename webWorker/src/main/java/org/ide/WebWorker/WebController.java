@@ -12,9 +12,14 @@ import org.ide.WebWorker.ServerClient.IDEWebWorkerClient;
 import org.ide.WebWorker.ServerClient.IDEWebWorkerServer;
 import org.ide.WebWorker.User.*;
 
+import com.google.protobuf.Timestamp;
+
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WebController {
     private final IdeControllerWebInt ideController;
@@ -29,6 +34,12 @@ public class WebController {
     private ServersRoles curRole;
     private String curLeader;
     private LocalTime lastTimeUpdated;
+
+    private final ExecutorService positionSender = Executors.newSingleThreadExecutor(r -> {
+        var t = new Thread(r, "position-sender");
+        t.setDaemon(true);
+        return t;
+    });
 
     /**
      * Constructor for Leader
@@ -191,16 +202,61 @@ public class WebController {
         client.rename(relativePath, newName, type);
     }
 
-    public void setUserCursor(UserCursor userCursor) {
-        client.setUserCursor(userCursor);
+    public User getMe() {
+        return User.newBuilder().setHost(host).setName(name).build();
     }
 
-    public void setUserHighlighted(UserHighlighted userHighlighted) {
-        client.setUserHighlighted(userHighlighted);
+    public String getMyName() {
+        return name;
     }
 
-    public void setUserFilePosition(UserFile file) {
-        client.setUserFilePosition(file);
+    private Timestamp nowTimestamp() {
+        var now = Instant.now();
+        return Timestamp.newBuilder().setSeconds(now.getEpochSecond()).setNanos(now.getNano()).build();
+    }
+
+    public void sendCursor(int line, int column) {
+        var cursor = UserCursor.newBuilder()
+                .setUser(getMe())
+                .setCursorPosition(CursorPosition.newBuilder().setLineNumer(line).setColumnNumber(column).build())
+                .setTime(nowTimestamp())
+                .build();
+        positionSender.submit(() -> {
+            try {
+                client.setUserCursor(cursor);
+            } catch (Exception ignored) {
+            }
+        });
+    }
+
+    public void sendHighlight(int startLine, int startColumn, int endLine, int endColumn) {
+        var highlighted = UserHighlighted.newBuilder()
+                .setUser(getMe())
+                .setHighlightedPosition(HighlightedPosition.newBuilder()
+                        .setLineStart(startLine).setColumnStart(startColumn)
+                        .setLineEnd(endLine).setColumnEnd(endColumn).build())
+                .setTime(nowTimestamp())
+                .build();
+        positionSender.submit(() -> {
+            try {
+                client.setUserHighlighted(highlighted);
+            } catch (Exception ignored) {
+            }
+        });
+    }
+
+    public void sendFileOpened(String relativePath) {
+        var userFile = UserFile.newBuilder()
+                .setUser(getMe())
+                .setFile(relativePath)
+                .setTime(nowTimestamp())
+                .build();
+        positionSender.submit(() -> {
+            try {
+                client.setUserFilePosition(userFile);
+            } catch (Exception ignored) {
+            }
+        });
     }
 
     public void insertText(String filePath, String text, CursorPosition position) {

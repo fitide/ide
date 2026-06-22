@@ -169,55 +169,60 @@ public class EditorFileWeb implements EditorFileInt {
         if (position.getLineNumer() >= this.fileStrings.size()) {
             var startLockPos = this.fileStrings.size();
             lockStringLockers(startLockPos, position.getLineNumer() + changesList.size());
-
-            for (int curIt = startLockPos; curIt < position.getLineNumer(); curIt++) fileStrings.addLast("");
-            for (var changeStr : changesList) {
-                fileStrings.addLast(changeStr);
+            try {
+                for (int curIt = startLockPos; curIt < position.getLineNumer(); curIt++) fileStrings.addLast("");
+                for (var changeStr : changesList) {
+                    fileStrings.addLast(changeStr);
+                }
+            } finally {
+                unlockStringLockers(startLockPos, position.getLineNumer() + changesList.size());
             }
-
-            unlockStringLockers(startLockPos, position.getLineNumer() + changesList.size());
             return;
         }
 
 
         if (changesList.size() == 1 && !text.endsWith("\n")) {
             lockStringLockers(position.getLineNumer(), position.getLineNumer() + 1);
-            addToStr(text, position.getLineNumer(), position.getColumnNumber());
-            unlockStringLockers(position.getLineNumer(), position.getLineNumer() + 1);
+            try {
+                addToStr(text, position.getLineNumer(), position.getColumnNumber());
+            } finally {
+                unlockStringLockers(position.getLineNumer(), position.getLineNumer() + 1);
+            }
             return;
         }
 
         int startLock = position.getLineNumer();
         int endLock = this.fileStrings.size() + changesList.size() - 1;
         lockStringLockers(startLock, endLock);
-
-        if (text.equals("\n")) {
-            var prevStr = fileStrings.get(position.getLineNumer());
-            fileStrings.set(position.getLineNumer(), prevStr.substring(0, position.getColumnNumber() < prevStr.length() ? position.getColumnNumber() : prevStr.length()));
-            fileStrings.add(position.getLineNumer() + 1, position.getColumnNumber() < prevStr.length() ? prevStr.substring(position.getColumnNumber()) : "");
-        }
-        else if (changesList.size() == 1) {
-            var strBefore = fileStrings.get(position.getLineNumer());
-            fileStrings.set(position.getLineNumer(),
-                    strBefore.substring(0, position.getColumnNumber() + 1) + text);
-            fileStrings.add(position.getLineNumer() + 1, strBefore.substring(position.getColumnNumber()));
-        }
-        else {
-            var strBefore = fileStrings.get(position.getLineNumer());
-            var prefixStr = strBefore.substring(0, position.getColumnNumber() + 1);
-            var suffixStr = strBefore.substring(position.getColumnNumber());
-
-            fileStrings.set(position.getLineNumer(), prefixStr + changesList.getFirst());
-            changesList.removeFirst();
-            if (text.endsWith("\n")) {
-                changesList.addLast(suffixStr);
-            } else {
-                changesList.addLast(changesList.removeLast() + suffixStr);
+        try {
+            if (text.equals("\n")) {
+                var prevStr = fileStrings.get(position.getLineNumer());
+                fileStrings.set(position.getLineNumer(), prevStr.substring(0, position.getColumnNumber() < prevStr.length() ? position.getColumnNumber() : prevStr.length()));
+                fileStrings.add(position.getLineNumer() + 1, position.getColumnNumber() < prevStr.length() ? prevStr.substring(position.getColumnNumber()) : "");
             }
-            fileStrings.addAll(position.getLineNumer() + 1, changesList);
-        }
+            else if (changesList.size() == 1) {
+                var strBefore = fileStrings.get(position.getLineNumer());
+                fileStrings.set(position.getLineNumer(),
+                        strBefore.substring(0, position.getColumnNumber() + 1) + text);
+                fileStrings.add(position.getLineNumer() + 1, strBefore.substring(position.getColumnNumber()));
+            }
+            else {
+                var strBefore = fileStrings.get(position.getLineNumer());
+                var prefixStr = strBefore.substring(0, position.getColumnNumber() + 1);
+                var suffixStr = strBefore.substring(position.getColumnNumber());
 
-        unlockStringLockers(startLock, endLock);
+                fileStrings.set(position.getLineNumer(), prefixStr + changesList.getFirst());
+                changesList.removeFirst();
+                if (text.endsWith("\n")) {
+                    changesList.addLast(suffixStr);
+                } else {
+                    changesList.addLast(changesList.removeLast() + suffixStr);
+                }
+                fileStrings.addAll(position.getLineNumer() + 1, changesList);
+            }
+        } finally {
+            unlockStringLockers(startLock, endLock);
+        }
     }
 
     @Override
@@ -237,59 +242,61 @@ public class EditorFileWeb implements EditorFileInt {
 
         if (changesList.size() == 1 && !textToDelete.endsWith("\n")) {
             lockStringLockers(position.getLineStart(), position.getLineStart() + 1);
+            try {
+                checkForChanging(changesList, position);
+                if (isMe) changeCurPos -= textToDelete.length();
 
-            checkForChanging(changesList, position);
-            if (isMe) changeCurPos -= textToDelete.length();
-
-            var strBefore = fileStrings.get(position.getLineStart());
-            var newStr = strBefore.substring(0, position.getColumnStart()) +
-                    strBefore.substring(position.getColumnEnd() + 1);
-            fileStrings.set(position.getLineStart(), newStr);
-
-            unlockStringLockers(position.getLineStart(), position.getLineStart() + 1);
+                var strBefore = fileStrings.get(position.getLineStart());
+                var newStr = strBefore.substring(0, position.getColumnStart()) +
+                        strBefore.substring(position.getColumnEnd() + 1);
+                fileStrings.set(position.getLineStart(), newStr);
+            } finally {
+                unlockStringLockers(position.getLineStart(), position.getLineStart() + 1);
+            }
             return;
         }
 
         var lockEnd = this.fileStrings.size();
         lockStringLockers(position.getLineStart(), lockEnd);
-        checkForChanging(changesList, position);
-        if (isMe) changeCurPos -= textToDelete.length();
+        try {
+            checkForChanging(changesList, position);
+            if (isMe) changeCurPos -= textToDelete.length();
 
-        if (textToDelete.equals("\n")) {
-            if (position.getLineStart() == -1) {
-                unlockStringLockers(position.getLineStart(), this.fileStrings.size());
-                return;
+            if (textToDelete.equals("\n")) {
+                if (position.getLineStart() == -1) {
+                    return;
+                }
+
+                var prev = fileStrings.get(position.getLineStart());
+                var suf = fileStrings.get(position.getLineStart() + 1);
+                fileStrings.set(position.getLineStart(), prev + suf);
+                fileStrings.remove(position.getLineStart() + 1);
             }
+            else if (changesList.size() == 1) {
+                var strBefore = fileStrings.get(position.getLineStart());
+                fileStrings.set(position.getLineStart(),
+                        strBefore.substring(0, position.getColumnStart() + 1) + fileStrings.get(position.getLineStart() + 1));
+                fileStrings.remove(position.getLineStart() + 1);
 
-            var prev = fileStrings.get(position.getLineStart());
-            var suf = fileStrings.get(position.getLineStart() + 1);
-            fileStrings.set(position.getLineStart(), prev + suf);
-            fileStrings.remove(position.getLineStart() + 1);
-        }
-        else if (changesList.size() == 1) {
-            var strBefore = fileStrings.get(position.getLineStart());
-            fileStrings.set(position.getLineStart(),
-                    strBefore.substring(0, position.getColumnStart() + 1) + fileStrings.get(position.getLineStart() + 1));
-            fileStrings.remove(position.getLineStart() + 1);
-
-        }
-        else {
-            var prefixStr = fileStrings.get(position.getLineStart()).substring(0, position.getColumnStart() + 1);
-            String suffixStr = null;
-
-            if (textToDelete.endsWith("\n")) {
-                suffixStr = fileStrings.get(position.getLineEnd() + 1);
             }
             else {
-                suffixStr = fileStrings.get(position.getLineEnd()).substring(position.getColumnEnd());
+                var prefixStr = fileStrings.get(position.getLineStart()).substring(0, position.getColumnStart() + 1);
+                String suffixStr = null;
+
+                if (textToDelete.endsWith("\n")) {
+                    suffixStr = fileStrings.get(position.getLineEnd() + 1);
+                }
+                else {
+                    suffixStr = fileStrings.get(position.getLineEnd()).substring(position.getColumnEnd());
+                }
+
+                fileStrings.set(position.getLineStart(), prefixStr + suffixStr);
+
+                fileStrings.removeAll(fileStrings.subList(position.getLineStart() + 1, position.getLineEnd() + 1));
             }
-
-            fileStrings.set(position.getLineStart(), prefixStr + suffixStr);
-
-            fileStrings.removeAll(fileStrings.subList(position.getLineStart() + 1, position.getLineEnd() + 1));
+        } finally {
+            unlockStringLockers(position.getLineStart(), lockEnd);
         }
-
-        unlockStringLockers(position.getLineStart(), lockEnd);
     }
 
     @Override
@@ -458,8 +465,11 @@ public class EditorFileWeb implements EditorFileInt {
 
     private void makeChanges(WorkerAction action) throws ChangeTextUnnavailableException {
         workerStart();
-        action.changeFile();
-        workerEnd();
+        try {
+            action.changeFile();
+        } finally {
+            workerEnd();
+        }
     }
 
     private void lockStringLockers(int start, int end) {

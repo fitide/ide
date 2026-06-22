@@ -207,6 +207,8 @@ public class Follower implements Role {
     @Override
     public void setUserCursor(UserCursorServer request, StreamObserver<Empty> responseObserver) {
         setUserCursorClient(request.getUserCursor());
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 
     private void setUserCursorClient(UserCursor cursor) {
@@ -216,6 +218,8 @@ public class Follower implements Role {
     @Override
     public void setUserHighlighted(UserHighlightedServer request, StreamObserver<Empty> responseObserver) {
         setUserHighlightedClient(request.getUserCursor());
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 
     private void setUserHighlightedClient(UserHighlighted userHighlighted) {
@@ -225,6 +229,8 @@ public class Follower implements Role {
     @Override
     public void setUserFilePosition(UserFile request, StreamObserver<Empty> responseObserver) {
         this.setUserFilePositionClient(request);
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 
     private void setUserFilePositionClient(UserFile userFile) {

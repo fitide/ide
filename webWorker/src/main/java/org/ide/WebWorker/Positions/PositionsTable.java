@@ -1,12 +1,13 @@
 package org.ide.WebWorker.Positions;
 
+import com.google.protobuf.Timestamp;
 import org.ide.WebWorker.User.UserCursor;
 import org.ide.WebWorker.User.UserFile;
 import org.ide.WebWorker.User.UserHighlighted;
 
 import java.time.Instant;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,11 +15,11 @@ public class PositionsTable {
     public Map<String, UserFullPosition> usersPositions = new ConcurrentHashMap<>();
 
     public void updateCursor(String user, UserCursor userCursor) {
-        var userPos = getUser(user);
+        var userPos = getOrCreate(user);
 
         synchronized (userPos) {
-            var newTime = (Instant.ofEpochSecond(userCursor.getTime().getSeconds())).atZone(ZoneId.systemDefault()).toLocalTime();
-            if (userPos.timeWasChanged == null || userPos.timeWasChanged.isAfter(newTime)) {
+            var newTime = toLocalTime(userCursor.getTime());
+            if (isNewer(userPos.timeWasChanged, newTime)) {
                 userPos.highlightedPosition = null;
                 userPos.cursorPosition = userCursor.getCursorPosition();
                 userPos.timeWasChanged = newTime;
@@ -27,11 +28,11 @@ public class PositionsTable {
     }
 
     public void updateHighlited(String user, UserHighlighted userHighlighted) {
-        var userPos = getUser(user);
+        var userPos = getOrCreate(user);
 
         synchronized (userPos) {
-            var newTime = (Instant.ofEpochSecond(userHighlighted.getTime().getSeconds())).atZone(ZoneId.systemDefault()).toLocalTime();
-            if (userPos.timeWasChanged == null || userPos.timeWasChanged.isAfter(newTime)) {
+            var newTime = toLocalTime(userHighlighted.getTime());
+            if (isNewer(userPos.timeWasChanged, newTime)) {
                 userPos.cursorPosition = null;
                 userPos.highlightedPosition = userHighlighted.getHighlightedPosition();
                 userPos.timeWasChanged = newTime;
@@ -40,11 +41,11 @@ public class PositionsTable {
     }
 
     public void updateFile(String user, UserFile userFile) {
-        var userPos = getUser(user);
+        var userPos = getOrCreate(user);
 
         synchronized (userPos) {
-            var newTime = (Instant.ofEpochSecond(userFile.getTime().getSeconds())).atZone(ZoneId.systemDefault()).toLocalTime();
-            if (userPos.timeWasChanged == null || userPos.timeWasChanged.isAfter(newTime)) {
+            var newTime = toLocalTime(userFile.getTime());
+            if (isNewer(userPos.timeWasChanged, newTime)) {
                 userPos.cursorPosition = null;
                 userPos.highlightedPosition = null;
                 userPos.file = userFile.getFile();
@@ -53,15 +54,17 @@ public class PositionsTable {
         }
     }
 
-    private UserFullPosition getUser(String user) {
-        if (!usersPositions.containsKey(user)) {
-            usersPositions.put(user, new UserFullPosition());
-        }
+    private UserFullPosition getOrCreate(String user) {
+        return usersPositions.computeIfAbsent(user, k -> new UserFullPosition());
+    }
 
-        try {
-            return usersPositions.get(user).clone();
-        } catch (CloneNotSupportedException e) {
-            return usersPositions.get(user);
-        }
+    private boolean isNewer(LocalTime stored, LocalTime incoming) {
+        return stored == null || !incoming.isBefore(stored);
+    }
+
+    private LocalTime toLocalTime(Timestamp time) {
+        return Instant.ofEpochSecond(time.getSeconds(), time.getNanos())
+                .atZone(ZoneId.systemDefault())
+                .toLocalTime();
     }
 }

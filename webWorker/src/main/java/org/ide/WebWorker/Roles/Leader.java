@@ -137,6 +137,7 @@ public class Leader extends Follower{
 
     @Override
     public void setUserFilePosition(UserFile request, StreamObserver<Empty> responseObserver) {
+        nameToHost.put(request.getUser().getName(), request.getUser().getHost());
         super.setUserFilePosition(request, responseObserver);
     }
 
@@ -210,7 +211,11 @@ public class Leader extends Follower{
             responseObserver.onNext(InsertTextServerResponse.newBuilder().setCode(InsertTextCode.Insert_Text_Code_OK).build());
             responseObserver.onCompleted();
             for (var programmer : programmersStub.values()) {
-                programmer.insertText(request);
+                try {
+                    programmer.insertText(request);
+                } catch (Exception ignored) {
+                    // peer unreachable — keep delivering to the others
+                }
             }
         }
 
@@ -225,7 +230,11 @@ public class Leader extends Follower{
             responseObserver.onNext(DeleteTextServerResponse.newBuilder().setCode(DeleteTextCode.Delete_Text_Code_OK).build());
             responseObserver.onCompleted();
             for (var programmer : programmersStub.values()) {
-                programmer.deleteText(request);
+                try {
+                    programmer.deleteText(request);
+                } catch (Exception ignored) {
+                    // peer unreachable — keep delivering to the others
+                }
             }
         }
 
@@ -241,7 +250,11 @@ public class Leader extends Follower{
             responseObserver.onNext(ChangeTextServerResponse.newBuilder().setCode(ChangeCode.Change_Code_OK).build());
             responseObserver.onCompleted();
             for (var programmer : programmersStub.values()) {
-                programmer.changeText(request);
+                try {
+                    programmer.changeText(request);
+                } catch (Exception ignored) {
+                    // peer unreachable — keep delivering to the others
+                }
             }
         }
 
