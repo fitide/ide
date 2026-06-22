@@ -5,16 +5,25 @@ prog
     ;
 
 dec
-    : 'val' valbind
-    | 'fun' funbind
+    : val valbind # ValDec
+    | fun funbind # FunDec
+    | structure structbind # StructDec
     ;
 
 valbind
-    : pat '=' exp
+    : pat (':' typ)? '=' exp
     ;
 
 funbind
-    : ID pat+ '=' exp
+    : ID pat+ (':' typ)? '=' exp
+    ;
+
+structbind
+    : ID '=' struct_ decs end
+    ;
+
+decs
+    : dec (';' dec)* ';'?
     ;
 
 pat
@@ -24,14 +33,38 @@ pat
     ;
 
 exp
-    : <assoc=left> exp exp           # ApplicationExp
-    | 'fn' match                     # FnExp
-    | tuple                          # TupleExp
-    | '(' exp ')'                    # ParensExp
-    | INT                            # IntExp
-    | ID                             # IdExp
-    | SYMBOLIC_ID                    # SymbolicExp
+    : 'fn' match                        # FnExp
+    | <assoc=left> exp arg+               # ApplicationExp
+    | <assoc=left> exp mulOp exp         # MulExp
+    | <assoc=left> exp addOp exp         # AddExp
+    | tuple                             # TupleExp
+    | '(' exp ')'                       # ParensExp
+    | INT                               # IntExp
+    | ID                                # IdExp
+    | SYMBOLIC_ID                       # SymbolicExp
+    | longid                            # LongIdExp
     ;
+
+arg :
+    tuple                             # TupleArg
+    | '(' exp ')'                       # ParensArg
+    | INT                               # IntArg
+    | ID                                # IdArg
+    | SYMBOLIC_ID                       # SymbolicArg
+    | longid                            # LongIdArg
+    ;
+
+mulOp
+    : STAR
+    | DIV
+    | MOD
+    ;
+
+addOp
+    : PLUS
+    | MINUS
+    ;
+
 
 tuple
     : '(' exp (',' exp)+ ')'
@@ -41,12 +74,42 @@ match
     : pat '=>' exp ('|' pat '=>' exp)*
     ;
 
+longid
+    : ID ('.' ID)+
+    ;
+
+typ
+    : INT_TYPE                          # IntType
+    | '(' typ ')'                       # ParensType
+    | '(' typ (',' typ)+ ')'            # TupleType
+    | <assoc=right> typ ARROW typ       # FunType
+    ;
+
+
+val : 'val' ;
+fun : 'fun' ;
+structure : 'structure' ;
+struct_ : 'struct' ;
+end : 'end' ;
+INT_TYPE : 'int' ;
+ARROW : '->' ;
+
+PLUS  : '+' ;
+MINUS : '-' ;
+STAR  : '*' ;
+DIV   : 'div' ;
+MOD   : 'mod' ;
+
 ID
     : [a-zA-Z] [a-zA-Z0-9'_]*
     ;
 
 SYMBOLIC_ID
-    : [!%&$#+\-/:<>=?@\\~^|*]+
+    : SYMCHAR+
+    ;
+
+fragment SYMCHAR
+    : [!%&$#/:<>=?@\\~^|]
     ;
 
 INT

@@ -44,6 +44,7 @@ public abstract class AInternalCodeNode {
     public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
         setCommon(plugin, pathToFile, path, tree);
         this.name = name;
+        System.out.println(tree.getClass().getSimpleName());
         Position namePos = plugin.getNamePositionOfModule(tree);
         this.namePosition.rowS = namePos.rowS;
         this.namePosition.colS = namePos.colS;

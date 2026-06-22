@@ -12,5 +12,7 @@ internal fun colorForTag(tag: LinkTreeCodeTag): Color =
         LinkTreeCodeTag.importStatement -> Color(0xFFCC7832)
         LinkTreeCodeTag.constant    -> Color(0xFF9876AA)
         LinkTreeCodeTag.Error       -> Color(0xFFBC3F3C)
+        LinkTreeCodeTag.Type -> Color(0xFF8D4D4D)
+        LinkTreeCodeTag.Class -> Color(0xFF8D4D4D) //TODO: поменять на другой цвет
         else               -> UIColors.TextPrimary
     }

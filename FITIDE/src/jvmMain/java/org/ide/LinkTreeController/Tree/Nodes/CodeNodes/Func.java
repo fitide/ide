@@ -38,7 +38,10 @@ public class Func extends AInternalCodeNode {
         Position pos;
         if ((pos = plugin.getPositionOfModuleBody(tree)) != null) this.bodyPosition = new LinkTreePosition(pos);
         if ((pos = plugin.getPositionOfArgsOfFunc(tree)) != null) this.argsPosition = new LinkTreePosition(pos);
-        if ((pos = plugin.getTypePositionOfModule(tree)) != null) this.retTypePosition = new LinkTreePosition(pos);
+        if ((pos = plugin.getTypePositionOfModule(tree)) != null) {
+            this.retTypePosition = new LinkTreePosition(pos);
+            this.retType = plugin.getType(tree);
+        }
     }
 
     public Func(String name, List<String> keyWords, List<ExternalVar> externalArgs, ExternalType externalType) {
