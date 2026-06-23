@@ -16,12 +16,12 @@ public class ErrorNode extends AInternalCodeNode {
         super(plugin, pathToFile, path, tree, name);
     }
 
-    public ErrorNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
-        super(plugin, pathToFile, path, tree);
+    public ErrorNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, Object state) {
+        super(plugin, pathToFile, path, tree, state);
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
+    protected void setChilds(ParseTree curNode, Object state) {
     }
 
     @Override
@@ -29,7 +29,7 @@ public class ErrorNode extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
+    protected void updateTree(ParseTree tree, Object state) {
     }
 
     @Override

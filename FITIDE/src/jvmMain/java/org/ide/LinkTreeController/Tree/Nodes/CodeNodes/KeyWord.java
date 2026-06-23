@@ -25,7 +25,7 @@ public class KeyWord extends AInternalCodeNode {
     }
 
     @Override
-    public void setChilds(ParseTree curNode) {
+    public void setChilds(ParseTree curNode, Object state) {
         childs = new HashMap<>();
     }
 
@@ -43,8 +43,8 @@ public class KeyWord extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         this.updateCurNode(node);
     }
 

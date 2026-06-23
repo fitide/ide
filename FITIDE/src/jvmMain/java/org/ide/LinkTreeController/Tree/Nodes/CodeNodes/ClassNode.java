@@ -25,8 +25,8 @@ public class ClassNode extends AInternalCodeNode {
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
-        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
+    protected void setChilds(ParseTree curNode, Object state) {
+        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule, state);
     }
 
     @Override
@@ -104,8 +104,8 @@ public class ClassNode extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         this.updateCurNode(node);
     }
 

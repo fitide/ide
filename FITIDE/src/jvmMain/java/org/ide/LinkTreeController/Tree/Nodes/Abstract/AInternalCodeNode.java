@@ -31,8 +31,8 @@ public abstract class AInternalCodeNode {
     public String name;
     public LinkTreePosition namePosition = new LinkTreePosition();
 
-    public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
-        setCommon(plugin, pathToFile, path, tree);
+    public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, Object state) {
+        setCommon(plugin, pathToFile, path, tree, state);
     }
 
     public AInternalCodeNode(String name, List<String> keyWords) {
@@ -41,18 +41,18 @@ public abstract class AInternalCodeNode {
         this.keyWordsNames = keyWords;
     }
 
-    public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
-        setCommon(plugin, pathToFile, path, tree);
+    public AInternalCodeNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, Object state) {
+        setCommon(plugin, pathToFile, path, tree, state);
         this.name = name;
         System.out.println(tree.getClass().getSimpleName());
-        Position namePos = plugin.getNamePositionOfModule(tree);
+        Position namePos = plugin.getNamePositionOfModule(tree, state);
         this.namePosition.rowS = namePos.rowS;
         this.namePosition.colS = namePos.colS;
         this.namePosition.rowE = namePos.rowE;
         this.namePosition.colE = namePos.colE;
     }
 
-    protected void setCommon(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
+    protected void setCommon(Plugin plugin, Path pathToFile, Path path, ParseTree tree, Object state) {
         this.plugin = plugin;
         this.pathToFile = pathToFile;
         Position position = plugin.getBounds(tree);
@@ -78,9 +78,9 @@ public abstract class AInternalCodeNode {
 
         if (codeType == CodeType.Error) return;
 
-        setKeyWords(tree);
+        setKeyWords(tree, state);
 
-        this.setChilds(tree);
+        this.setChilds(tree, state);
 
         this.id = UUID.randomUUID().toString();
         if (pathToModule != null) {
@@ -88,16 +88,16 @@ public abstract class AInternalCodeNode {
         }
     }
 
-    protected void setKeyWords(ParseTree tree) {
+    protected void setKeyWords(ParseTree tree, Object state) {
         List<ParseTree> keyWordsOfModule = plugin.getKeyWordsOfModule(tree);
         List<KeyWord> keyWordList = new ArrayList<>();
         for (ParseTree key : keyWordsOfModule) {
-            keyWordList.add(new KeyWord(plugin, pathToFile, pathToModule, key, plugin.getNameOfNode(key)));
+            keyWordList.add(new KeyWord(plugin, pathToFile, pathToModule, key, plugin.getNameOfNode(key, state)));
         }
         this.keyWords = keyWordList;
     }
 
-    protected abstract void setChilds(ParseTree curNode);
+    protected abstract void setChilds(ParseTree curNode, Object state);
 
 
 
@@ -136,19 +136,19 @@ public abstract class AInternalCodeNode {
         return null;
     }
 
-    public void updateTree(Path pathToModule, ParseTree parseTree) {
+    public void updateTree(Path pathToModule, ParseTree parseTree, Object state) {
         if (pathToModule.getNameCount() != 0 && this.childs.containsKey(PathTools.getRootStr(pathToModule))) {
-            this.childs.get(PathTools.getRootStr(pathToModule)).updateTree(PathTools.deleteRoot(pathToModule), parseTree);
+            this.childs.get(PathTools.getRootStr(pathToModule)).updateTree(PathTools.deleteRoot(pathToModule), parseTree, state);
             return;
         }
 
         if (pathToModule.getNameCount() == 0) {
-            this.updateTree(parseTree);
+            this.updateTree(parseTree, state);
         }
 
     }
 
-    protected abstract void updateTree(ParseTree tree);
+    protected abstract void updateTree(ParseTree tree, Object state);
 
     public AInternalCodeNode getDeclaration(Path path) {
         if (path.getNameCount() == 0 && this.codeType == CodeType.Declaration || this.codeType == CodeType.Definition) {

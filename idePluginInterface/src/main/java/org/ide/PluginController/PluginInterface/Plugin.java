@@ -16,14 +16,14 @@ public interface Plugin {
 
     // for func/class/var/KeyWord/error
     // �� ���������: ImportStatement->name = importStatement->value (���� � �������� �����������)
-    String getNameOfNode(ParseTree node);
+    String getNameOfNode(ParseTree node, Object object);
 
     List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement);
 
     Position getBounds(ParseTree node);
 
     // node is a class/func/var
-    Position getNamePositionOfModule(ParseTree node);
+    Position getNamePositionOfModule(ParseTree node, Object object);
 
     String getType(ParseTree tree);
     // node is a class/func/var
@@ -31,11 +31,11 @@ public interface Plugin {
 
     List<ParseTree> getKeyWordsOfModule(ParseTree node);
 
-    List<ParseTree> getArgsOfFunc(ParseTree func);
+    List<ParseTree> getArgsOfFunc(ParseTree func, Object object);
 
     List<ParseTree> getConstructionArgs(ParseTree constr);
     //module is func/while/for/if etc
-    List<ParseTree> getChildsOfNode(ParseTree module);
+    List<ParseTree> getChildsOfNode(ParseTree module, Object object);
 
     List<ParseTree> getFuncsOfClass(ParseTree classNode);
 
@@ -55,6 +55,7 @@ public interface Plugin {
 
 
     Position getPositionOfModuleBody(ParseTree tree);
-    Position getPositionOfArgsOfFunc(ParseTree tree);
+    Position getPositionOfArgsOfFunc(ParseTree tree, Object object);
 
+    Object newStateObject();
 }

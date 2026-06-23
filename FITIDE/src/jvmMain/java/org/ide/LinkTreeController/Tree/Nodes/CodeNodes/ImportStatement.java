@@ -22,7 +22,7 @@ public class ImportStatement extends AInternalCodeNode {
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
+    protected void setChilds(ParseTree curNode, Object state) {
         this.childs = new HashMap<>();
     }
 
@@ -42,8 +42,8 @@ public class ImportStatement extends AInternalCodeNode {
     }
 
     @Override
-    public void updateTree(ParseTree parseTree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, PathTools.deleteLast(pathToModule));
+    public void updateTree(ParseTree parseTree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, PathTools.deleteLast(pathToModule), state);
         this.updateCurNode(node);
     }
 

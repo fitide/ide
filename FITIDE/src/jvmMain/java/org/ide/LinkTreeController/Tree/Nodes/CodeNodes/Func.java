@@ -26,18 +26,18 @@ public class Func extends AInternalCodeNode {
     public LinkTreePosition bodyPosition;
     public LinkTreePosition argsPosition;
 
-    public Func(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
+    public Func(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, Object state) {
         super(plugin, pathToFile, path, tree, name);
         if (codeType == CodeType.Error) return;
 
-        List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree);
+        List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree, state);
         for (ParseTree parseTree : argsInTree) {
-            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule));
+            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule, state));
             args.put(arg.id, arg);
         }
         Position pos;
         if ((pos = plugin.getPositionOfModuleBody(tree)) != null) this.bodyPosition = new LinkTreePosition(pos);
-        if ((pos = plugin.getPositionOfArgsOfFunc(tree)) != null) this.argsPosition = new LinkTreePosition(pos);
+        if ((pos = plugin.getPositionOfArgsOfFunc(tree, state)) != null) this.argsPosition = new LinkTreePosition(pos);
         if ((pos = plugin.getTypePositionOfModule(tree)) != null) {
             this.retTypePosition = new LinkTreePosition(pos);
             this.retType = plugin.getType(tree);
@@ -53,8 +53,8 @@ public class Func extends AInternalCodeNode {
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
-        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
+    protected void setChilds(ParseTree curNode, Object state) {
+        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule, state);
     }
 
     @Override
@@ -174,8 +174,8 @@ public class Func extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         this.updateCurNode(node);
     }
 

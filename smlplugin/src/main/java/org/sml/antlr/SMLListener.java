@@ -53,6 +53,28 @@ public interface SMLListener extends ParseTreeListener {
 	 */
 	void exitStructDec(SMLParser.StructDecContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code InfixId}
+	 * labeled alternative in {@link SMLParser#dec}.
+	 * @param ctx the parse tree
+	 */
+	void enterInfixId(SMLParser.InfixIdContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code InfixId}
+	 * labeled alternative in {@link SMLParser#dec}.
+	 * @param ctx the parse tree
+	 */
+	void exitInfixId(SMLParser.InfixIdContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SMLParser#infixarg}.
+	 * @param ctx the parse tree
+	 */
+	void enterInfixarg(SMLParser.InfixargContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SMLParser#infixarg}.
+	 * @param ctx the parse tree
+	 */
+	void exitInfixarg(SMLParser.InfixargContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SMLParser#valbind}.
 	 * @param ctx the parse tree
 	 */

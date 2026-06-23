@@ -37,7 +37,7 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
+    protected void setChilds(ParseTree curNode, Object state) {
         this.childs = new HashMap<>();
     }
 
@@ -74,8 +74,8 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, this.pathToFile, this.pathToModule.subpath(0, pathToModule.getNameCount()));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, this.pathToFile, this.pathToModule.subpath(0, pathToModule.getNameCount()), state);
         this.updateCurNode(node);
     }
 

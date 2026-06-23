@@ -37,6 +37,19 @@ public interface SMLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStructDec(SMLParser.StructDecContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code InfixId}
+	 * labeled alternative in {@link SMLParser#dec}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInfixId(SMLParser.InfixIdContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SMLParser#infixarg}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInfixarg(SMLParser.InfixargContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SMLParser#valbind}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

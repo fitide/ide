@@ -16,13 +16,13 @@ import java.util.*;
 public class Expression extends AInternalCodeNode {
 
 
-    public Expression(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
-        super(plugin, pathToFile, path, tree);
+    public Expression(Plugin plugin, Path pathToFile, Path path, ParseTree tree, Object state) {
+        super(plugin, pathToFile, path, tree, state);
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
-        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
+    protected void setChilds(ParseTree curNode, Object state) {
+        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule, state);
     }
 
     @Override
@@ -75,8 +75,8 @@ public class Expression extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        var newNode = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+    protected void updateTree(ParseTree tree, Object state) {
+        var newNode = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         if (newNode instanceof Expression) {
             this.updateCurNode(newNode);
         }

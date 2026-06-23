@@ -45,6 +45,20 @@ public class SMLBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements SM
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitInfixId(SMLParser.InfixIdContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitInfixarg(SMLParser.InfixargContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitValbind(SMLParser.ValbindContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

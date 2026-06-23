@@ -16,12 +16,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class Constant extends AInternalCodeNode {
-    public Constant(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
-        super(plugin, pathToFile, path, tree);
+    public Constant(Plugin plugin, Path pathToFile, Path path, ParseTree tree, Object state) {
+        super(plugin, pathToFile, path, tree, state);
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
+    protected void setChilds(ParseTree curNode, Object state) {
         return;
     }
 
@@ -36,8 +36,8 @@ public class Constant extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         this.updateCurNode(node);
     }
 

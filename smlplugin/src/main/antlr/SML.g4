@@ -8,7 +8,14 @@ dec
     : val valbind # ValDec
     | fun funbind # FunDec
     | structure structbind # StructDec
+    | INFIX infixarg # InfixId
     ;
+
+infixarg
+    : ID;
+
+INFIX
+    : 'infix';
 
 valbind
     : pat (':' typ)? '=' exp
