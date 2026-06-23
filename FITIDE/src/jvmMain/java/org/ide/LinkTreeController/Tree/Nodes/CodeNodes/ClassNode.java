@@ -141,6 +141,9 @@ public class ClassNode extends AInternalCodeNode {
             }
             default -> {}
         }
+
+
+        for (var node : childs.values()) node.addDefinitionsAndDeclarations(defs, decs);
     }
 
     @Override
