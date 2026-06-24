@@ -480,17 +480,31 @@ public class IdeController implements IdeControllerWebInt {
     @Override
     public boolean insertText(String filePath, String text, CursorPosition position, String host) {
         System.out.println("file " + filePath + " insert text " + text);
-        return editorController.insertText(filePath, text, position, webController.isMe(host));
+        var res = editorController.insertText(filePath, text, position, webController.isMe(host));
+        updateCurrentFileLinkTreeOutside(res, filePath);
+        return res;
     }
 
     @Override
     public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position, String host) {
-        return editorController.deleteText(filePath, textToDelete, position, webController.isMe(host));
+        var res = editorController.deleteText(filePath, textToDelete, position, webController.isMe(host));
+        updateCurrentFileLinkTreeOutside(res, filePath);
+        return res;
     }
 
     @Override
     public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position, String host) {
-        return editorController.changeText(filePath, textToDelete, newText, position, webController.isMe(host));
+        var res = editorController.changeText(filePath, textToDelete, newText, position, webController.isMe(host));
+        updateCurrentFileLinkTreeOutside(res, filePath);
+        return res;
+    }
+
+    private void updateCurrentFileLinkTreeOutside(boolean res, String filePath) {
+        if (res && Objects.equals(filePath, editorController.getCurrentFile())) {
+            Path absolute = Paths.get(projectRoot.toString(), filePath);
+            if (pending != null) pending.cancel(false);
+            pending = exec.schedule(() -> analyzeAndUpdateLinkTree(absolute), 300, TimeUnit.MILLISECONDS);
+        }
     }
 
     public OpenedFileInfo getOpenedFileInfo() {
