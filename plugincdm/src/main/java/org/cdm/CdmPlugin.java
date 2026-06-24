@@ -118,7 +118,7 @@ public class CdmPlugin implements Plugin {
     }
 
     @Override
-    public Position getPositionOfArgsOfFunc(ParseTree tree) {
+    public Position getPositionOfArgsOfFunc(ParseTree tree, Object object) {
         Position pos = new Position();
         if (tree instanceof CdmParser.InstructionWithArgContext line) {
             if (line.arguments() != null) {
@@ -173,6 +173,11 @@ public class CdmPlugin implements Plugin {
     }
 
     @Override
+    public Object newStateObject() {
+        return new Object();
+    }
+
+    @Override
     public Position getPositionOfModuleBody(ParseTree tree) {
         try {
             Position pos = new Position();
@@ -224,27 +229,27 @@ public class CdmPlugin implements Plugin {
     }
 
     @Override
-    public List<ParseTree> getChildsOfNode(ParseTree module) {
+    public List<ParseTree> getChildsOfNode(ParseTree module, Object object) {
         try {
             var res = new ArrayList<ParseTree>();
             if (module instanceof CdmParser.ProgramContext program) {
                 res.addAll(program.section());
             } else if (module instanceof CdmParser.MacroSectionContext section) {
-                res.addAll(getChildsOfNode(section.macro().code_block()));
+                res.addAll(getChildsOfNode(section.macro().code_block(), object));
             } else if (module instanceof CdmParser.AbsoluteSectionContext section) {
                 if (section.code_block() != null) {
-                    res.addAll(getChildsOfNode(section.code_block()));
+                    res.addAll(getChildsOfNode(section.code_block(), object));
                 }
             } else if (module instanceof CdmParser.RelocatableSectionContext section) {
                 if (section.code_block() != null) {
-                    res.addAll(getChildsOfNode(section.code_block()));
+                    res.addAll(getChildsOfNode(section.code_block(), object));
                 }
             } else if (module instanceof CdmParser.Code_blockContext code_block) {
                 if (code_block.children != null) {
                     for (int j = 0; j < code_block.getChildCount(); j++) {
                         var child = code_block.getChild(j);
                         if (child instanceof CdmParser.InstructionLineContext line) {
-                            res.addAll(getChildsOfNode(line));
+                            res.addAll(getChildsOfNode(line, object));
                         } else if (child instanceof CdmParser.StandaloneLabelsContext line) {
                             res.add(line.labels_declaration().label());
                         } else {
@@ -279,7 +284,7 @@ public class CdmPlugin implements Plugin {
                     }
                 }
             } else if (module instanceof CdmParser.MacroContext macro) {
-                res.addAll(getChildsOfNode(macro.code_block()));
+                res.addAll(getChildsOfNode(macro.code_block(), object));
             } else if (module instanceof CdmParser.ConditionalContext cond) {
                 var conditions = cond.conditions();
                 if (conditions.connective_condition() != null) {
@@ -349,7 +354,7 @@ public class CdmPlugin implements Plugin {
     }
 
     @Override
-    public List<ParseTree> getArgsOfFunc(ParseTree func) {
+    public List<ParseTree> getArgsOfFunc(ParseTree func, Object object) {
         if (func instanceof CdmParser.InstructionWithArgContext instr) {
             if (instr.arguments() != null) {
                 return new ArrayList<ParseTree>(instr.arguments().argument());
@@ -404,7 +409,7 @@ public class CdmPlugin implements Plugin {
     }
 
     @Override
-    public Position getNamePositionOfModule(ParseTree node) {
+    public Position getNamePositionOfModule(ParseTree node, Object object) {
         Position pos = new Position();
         if (node instanceof CdmParser.InstructionWithArgContext instr) {
             var name = instr.WORD();
@@ -515,7 +520,7 @@ public class CdmPlugin implements Plugin {
     }
 
     @Override
-    public String getNameOfNode(ParseTree node) {
+    public String getNameOfNode(ParseTree node, Object o) {
         if (node instanceof CdmParser.InstructionWithArgContext instr) {
             return instr.WORD().getText();
         } else if (node instanceof CdmParser.Branch_mnemonicContext branch) {
