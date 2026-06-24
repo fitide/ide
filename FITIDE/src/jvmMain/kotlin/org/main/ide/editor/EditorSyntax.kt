@@ -10,7 +10,7 @@ internal fun colorForTag(tag: LinkTreeCodeTag): Color =
         LinkTreeCodeTag.Var             -> Color(0xFFA9B7C6)
         LinkTreeCodeTag.Func            -> Color(0xFF4A9EFF)
         LinkTreeCodeTag.importStatement -> Color(0xFFCC7832)
-        LinkTreeCodeTag.constant    -> Color(0xFF9876AA)
+        LinkTreeCodeTag.Constant    -> Color(0xFF9876AA)
         LinkTreeCodeTag.Error       -> Color(0xFFBC3F3C)
         LinkTreeCodeTag.Type -> Color(0xFF8D4D4D)
         LinkTreeCodeTag.Class -> Color(0xFF8D4D4D) //TODO: поменять на другой цвет

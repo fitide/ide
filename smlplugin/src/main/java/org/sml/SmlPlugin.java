@@ -105,7 +105,7 @@ public class SmlPlugin implements Plugin {
         } else if (tree instanceof SMLParser.InfixIdContext) {
             return new Tag[] {Tag.Func, Tag.Usage};
         } else if (tree instanceof SMLParser.InfixargContext) {
-            return new Tag[] {Tag.Var};
+            return new Tag[] {Tag.Var, Tag.Usage};
         }
 
         return new Tag[0];
@@ -178,7 +178,7 @@ public class SmlPlugin implements Plugin {
         }
 
         if (node instanceof SMLParser.StructDecContext struct) {
-            return struct.structbind().struct_().getText();
+            return struct.structbind().ID().getText();
         }
 
         if (node instanceof TerminalNode tn) {
@@ -195,6 +195,14 @@ public class SmlPlugin implements Plugin {
 
         if (node instanceof SMLParser.InfixIdContext infix) {
             return "infix";
+        }
+
+        if (node instanceof SMLParser.InfixargContext infixarg) {
+            return infixarg.ID().getText();
+        }
+
+        if (node instanceof SMLParser.ArgContext arg) {
+            return arg.getText();
         }
 
 
@@ -257,7 +265,7 @@ public class SmlPlugin implements Plugin {
             }
         }
         if (node instanceof SMLParser.StructDecContext struct) {
-            return rulePosition(struct.structbind().struct_());
+            return tokenPosition(struct.structbind().ID().getSymbol());
         }
 
         if (node instanceof SMLParser.FunbindContext fb) {
@@ -289,7 +297,7 @@ public class SmlPlugin implements Plugin {
 
         if (node instanceof SMLParser.ApplicationExpContext exp) {
             if (exp.arg().size() == 2 && state instanceof HashSet<?> table) {
-                if (table.contains(exp.arg(0))) {
+                if (table.contains(exp.arg(0).getText())) {
                     return rulePosition(exp.arg(0));
                 }
             }
@@ -321,6 +329,14 @@ public class SmlPlugin implements Plugin {
 
         if (node instanceof SMLParser.InfixIdContext infix) {
             return tokenPosition(infix.INFIX().getSymbol());
+        }
+
+        if (node instanceof SMLParser.InfixargContext infixarg) {
+            return tokenPosition(infixarg.getStart());
+        }
+
+        if (node instanceof SMLParser.ArgContext arg) {
+            return rulePosition(arg);
         }
 
         return null;
@@ -463,7 +479,7 @@ public class SmlPlugin implements Plugin {
             return List.of(fn.getChild(0));
         }
         if (node instanceof SMLParser.StructDecContext struct) {
-            return List.of(struct.structbind().end());
+            return List.of(struct.structure(), struct.structbind().struct_(), struct.structbind().end());
         }
         return List.of();
     }
@@ -475,7 +491,7 @@ public class SmlPlugin implements Plugin {
         if (module instanceof SMLParser.ProgContext prog) {
             res.addAll(prog.dec());
         } else if (module instanceof SMLParser.FunDecContext dec) {
-            res.add(dec.funbind());
+            res.addAll(getChildsOfNode(dec.funbind(), state));
             res.add(dec.fun());
         } else if (module instanceof SMLParser.ValDecContext dec) {
             res.add(dec.val());

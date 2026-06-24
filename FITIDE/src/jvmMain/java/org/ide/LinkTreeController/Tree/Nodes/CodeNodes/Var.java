@@ -114,7 +114,7 @@ public class Var extends AInternalCodeNode {
     }
 
     private AInternalCodeNode validatePointer(AInternalCodeNode node) {
-        if (node instanceof Var) return node;
+        if (node instanceof Var || node instanceof Func) return node;
         return null;
     }
 
