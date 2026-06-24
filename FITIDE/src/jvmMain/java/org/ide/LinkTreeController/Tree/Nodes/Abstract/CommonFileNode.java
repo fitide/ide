@@ -140,7 +140,7 @@ public abstract class CommonFileNode {
         if (node != null && node instanceof CommonFile) {
             var file = ((CommonFile) node);
             var res = (file.getSyntaxHughlighting(null));
-            file.dump();
+            //file.dump();
             return res;
         }
         return new ArrayList<>();

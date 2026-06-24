@@ -381,6 +381,11 @@ public class EditorFileWeb implements EditorFileInt {
         var difLen = end1 - start;
         var startPos = getPosition(curText, start);
         var endPos = end1 >= 0 ? getPosition(curText, end1 > start ? end1 - 1 : start) : getPosition(curText, 0);
+        if (difLen == 1 && curText.charAt(start) == '\n') {
+            startPos = CursorPosition.newBuilder().setLineNumer(startPos.getLineNumer() - 1).build();
+            endPos = CursorPosition.newBuilder().setLineNumer(endPos.getLineNumer() - 1).build();
+        }
+
         var positions = HighlightedPosition.newBuilder()
                 .setColumnStart(startPos.getColumnNumber()).setLineStart(startPos.getLineNumer())
                 .setColumnEnd(endPos.getColumnNumber()).setLineEnd(endPos.getLineNumer()).build();

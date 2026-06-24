@@ -581,6 +581,11 @@ public class IdeController implements IdeControllerWebInt {
                 case Changing -> webController.changeText(filePath, operation.text,
                         operation.newText, operation.position);
             }
+            if (filePath != null) {
+                Path absolute = Paths.get(projectRoot.toString(), filePath);
+                if (pending != null) pending.cancel(false);
+                pending = exec.schedule(() -> analyzeAndUpdateLinkTree(absolute), 300, TimeUnit.MILLISECONDS);
+            }
         }
     }
 
@@ -658,7 +663,7 @@ public class IdeController implements IdeControllerWebInt {
             }
             this.currentPlugin = plugin;
 
-            String content = editorController.getContent(path.toString());
+            String content = editorController.getContent(editorController.getCurrentFile());
             if (content == null) {
                 return;
             }
