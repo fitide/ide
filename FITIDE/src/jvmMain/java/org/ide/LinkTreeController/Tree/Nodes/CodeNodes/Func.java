@@ -33,7 +33,7 @@ public class Func extends AInternalCodeNode {
         List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree, state);
         for (ParseTree parseTree : argsInTree) {
             AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule, state));
-            args.put(arg.id, arg);
+            if (arg != null) args.put(arg.id, arg);
         }
         Position pos;
         if ((pos = plugin.getPositionOfModuleBody(tree)) != null) this.bodyPosition = new LinkTreePosition(pos);

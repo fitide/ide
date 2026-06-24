@@ -17,6 +17,7 @@ message DirectoryResponse {
 
 message FileRequest {
     string fileRelativePath = 1;
+    bool isInitingProject = 2;
 }
 
 message FileResponse {

@@ -280,7 +280,7 @@ public class Leader extends Follower{
 
     @Override
     public void shareFile(FileRequest request, StreamObserver<FileResponse> responseObserver) throws Exception {
-        byte[] bytes = ideController.getFileContent(request.getFileRelativePath());
+        byte[] bytes = ideController.getFileContent(request.getFileRelativePath(), request.getIsInitingProject());
 
         var fileBuilder = File.newBuilder()
                 .setRelativeFilePath(request.getFileRelativePath())

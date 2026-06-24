@@ -387,7 +387,7 @@ public class IdeController implements IdeControllerWebInt {
     }
 
     @Override
-    public byte[] getFileContent(String relativePath) throws Exception {
+    public byte[] getFileContent(String relativePath, boolean isNeededInAdding) throws Exception {
         Path rel = Paths.get(relativePath);
         Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
         Path absolutePath = projectRoot.resolve(stripped);
@@ -396,7 +396,7 @@ public class IdeController implements IdeControllerWebInt {
                 return editorController.getContent(relativePath).getBytes();
             }
             List<String> list = fileExplorer.openFile(absolutePath);
-            editorController.createFileNode(relativePath, list);
+            if (isNeededInAdding) editorController.createFileNode(relativePath, list);
         }
         return Files.readAllBytes(absolutePath);
     }

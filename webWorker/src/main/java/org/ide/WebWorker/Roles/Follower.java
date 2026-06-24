@@ -338,7 +338,7 @@ public class Follower implements Role {
         ideController.setDir(dir);
         for (var file : dir.getInboundsList()) {
             if (file.getType() == FileType.REGULAR) {
-                getFile(file.getRelativePath());
+                getFile(file.getRelativePath(), true);
             } else if (file.getType() == FileType.DIRECTORY) {
                 getDirectory(file.getRelativePath());
             }
@@ -346,15 +346,15 @@ public class Follower implements Role {
 
     }
 
-    private void getFile(String filePath) {
-        var file = stub.shareFile(FileRequest.newBuilder().setFileRelativePath(filePath).build());
+    private void getFile(String filePath, boolean isInitingProject) {
+        var file = stub.shareFile(FileRequest.newBuilder().setFileRelativePath(filePath).setIsInitingProject(isInitingProject).build());
         ideController.setFile(file.getFile());
     }
 
 
     @Override
     public void updateFile(String filePath) {
-        getFile(filePath);
+        getFile(filePath, false);
     }
 
     public String getCurMain() {
