@@ -34,5 +34,7 @@ plugins {
 }
 
 include(":FITIDE")
-include("plugincdm")
+include(":plugincdm")
+include(":idePluginInterface")
+include("smlplugin")
 include("webWorker")

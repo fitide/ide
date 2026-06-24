@@ -8,5 +8,6 @@ public enum LinkTreeCodeTag {
     Func,
     Type,
     importStatement,
-    Error
+    Error,
+    Constant
 }

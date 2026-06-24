@@ -16,6 +16,7 @@ public abstract class ARoot extends CommonFileNode {
     protected Map<String, Func> externalFunctions = new HashMap<>();
     protected Map<String, Var> externalVars = new HashMap<>();
     protected Map<String, CommonFile> externalFiles = new HashMap<>();
+    protected Map<String, ClassNode> externalClasses = new HashMap<>();
     protected Set<String> standartTypes = new HashSet<>();
     protected final int cntSearches;
     protected Map<String, Construction> externalConstrs = new HashMap<>();
@@ -45,6 +46,10 @@ public abstract class ARoot extends CommonFileNode {
 
     public void setExternalFunctions(Map<String, Func> externalFunctions) {
         this.externalFunctions = externalFunctions;
+    }
+
+    public void setExternalClasses(Map<String, ClassNode> externalClasses) {
+        this.externalClasses = externalClasses;
     }
 
     public void setStandartTypes(Set<String> standartTypes) {
@@ -83,4 +88,10 @@ public abstract class ARoot extends CommonFileNode {
     }
 
     public abstract void getStandartDecs(Map<String, AInternalCodeNode> decs);
+
+    public void dump(StringBuilder builder) {
+        for (var code : childs.values()) {
+
+        }
+    }
 }

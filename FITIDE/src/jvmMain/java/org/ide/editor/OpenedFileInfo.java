@@ -7,9 +7,6 @@ import androidx.compose.ui.text.input.TextFieldValue;
 public class OpenedFileInfo {
     public MutableState<TextFieldValue> textFieldValue;
 
-    public OpenedFileInfo() {
-    }
-
     public OpenedFileInfo(MutableState<TextFieldValue> textFieldValue) {
         this.textFieldValue = textFieldValue;
     }

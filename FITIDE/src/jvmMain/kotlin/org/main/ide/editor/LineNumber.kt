@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.ide.IdeController
 import org.main.ide.editor.folding.FoldRegion
 import org.main.ide.uistate.UIColors
 
@@ -27,7 +29,8 @@ fun LineNumberGutter(
     onToggleFold: (Int) -> Unit,
     lineHeight: TextUnit,
     topPadding: Dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    ide : IdeController
 ) {
     val density = LocalDensity.current
 
@@ -37,6 +40,10 @@ fun LineNumberGutter(
             .background(UIColors.EditorBg)
             .padding(top = topPadding)
     ) {
+        if (ide.openedFiles.isEmpty()) {
+            return
+        }
+
         repeat(visibleToOriginal.size) { visibleIndex ->
             val originalLine = visibleToOriginal[visibleIndex]
             val fold = folds.find { it.startLine == originalLine }
@@ -52,7 +59,7 @@ fun LineNumberGutter(
                     Icon(
                         imageVector =
                             if (fold.collapsed)
-                                Icons.Default.KeyboardArrowRight
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight
                             else
                                 Icons.Default.KeyboardArrowDown,
                         contentDescription = "Toggle Fold",

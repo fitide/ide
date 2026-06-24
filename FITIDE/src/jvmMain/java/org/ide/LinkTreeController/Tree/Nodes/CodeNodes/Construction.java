@@ -21,19 +21,19 @@ public class Construction extends AInternalCodeNode {
     public LinkTreePosition argsPosition;
     public List<Pair<Map<String, AInternalCodeNode>, LinkTreePosition>> bodies;
 
-    public Construction(Plugin plugin, Path pathToFile, Path path, ParseTree tree) {
+    public Construction(Plugin plugin, Path pathToFile, Path path, ParseTree tree, Object state) {
         //TODO: override
-        super(plugin, pathToFile, path, tree);
+        super(plugin, pathToFile, path, tree, state);
         if (codeType == CodeType.Error) return;
 
         List<ParseTree> argsInTree = plugin.getConstructionArgs(tree);
         for (ParseTree parseTree : argsInTree) {
-            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, this.pathToModule));
+            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, this.pathToModule, state));
             args.put(arg.id, arg);
         }
 
         this.bodyPosition = new LinkTreePosition(plugin.getPositionOfModuleBody(tree));
-        this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree));
+        this.argsPosition = new LinkTreePosition(plugin.getPositionOfArgsOfFunc(tree, state));
 
     }
 
@@ -42,13 +42,13 @@ public class Construction extends AInternalCodeNode {
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
+    protected void setChilds(ParseTree curNode, Object state) {
         //TODO: override
 
-        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
-        List<ParseTree> argsTrees = plugin.getArgsOfFunc(curNode);
+        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule, state);
+        List<ParseTree> argsTrees = plugin.getArgsOfFunc(curNode, state);
         for (ParseTree tree : argsTrees) {
-            AInternalCodeNode arg = TreeBuilder.buildOneChild(plugin, tree, pathToFile, pathToModule);
+            AInternalCodeNode arg = TreeBuilder.buildOneChild(plugin, tree, pathToFile, pathToModule, state);
             args.put(arg.id, arg);
         }
 
@@ -179,10 +179,9 @@ public class Construction extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        //TODO: override
+    protected void updateTree(ParseTree tree, Object state) {
 
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         if (node instanceof Construction) {
             this.updateCurNode(node);
             this.args = ((Construction) node).args;
@@ -243,7 +242,7 @@ public class Construction extends AInternalCodeNode {
             var tempDecs = new HashMap<>(decs);
 
             for (var node : body.a.values()) {
-                node.setDefinitionsAndDeclarations(defs, decs);
+                node.addDefinitionsAndDeclarations(defs, decs);
             }
 
             for (var node : body.a.values()) {
@@ -264,6 +263,47 @@ public class Construction extends AInternalCodeNode {
             for (var node : body.a.values()) {
                 node.setTypes(types);
             }
+        }
+    }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        if (contains(this.argsPosition, position)) {
+            for (var arg : args.values()) {
+                if (contains(arg.wholePos, position)) {
+                    return arg.findByPos(position);
+                }
+            }
+        }
+
+        for (var node : childs.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("construction");
+    }
+
+    @Override
+    protected void setChildrenDump(int level, StringBuilder builder) {
+        builder.repeat("\t", level + 1).append("args\n");
+        for(var arg : args.values()) {
+            arg.dump(level + 2, builder);
+        }
+
+        int it = 0;
+        for (var body : bodies) {
+            builder.repeat("\t", level + 1).append("body_").append(it).append("\n");
+            for (var code : body.a.values()) {
+                code.dump(level + 2, builder);
+            }
+            it++;
         }
     }
 }

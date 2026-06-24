@@ -10,6 +10,7 @@ import org.ide.FileExplorerController.Exceptions.UnnableToWriteInFileException;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.LinkTreeController.LinkTreeController;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
@@ -128,6 +129,14 @@ public class IdeController implements IdeControllerWebInt {
         }
         fileTreeState.setValue(updated);
         return updated;
+    }
+
+    public Directory refreshFileTree() {
+        if (fileExplorer == null || projectRoot == null) return null;
+
+        fileExplorer.updateTree(projectRoot.toString());
+
+        return fileExplorer.getTreeCopy();
     }
 
     public void createFile(Path dir, String name) throws Exception {
@@ -536,6 +545,16 @@ public class IdeController implements IdeControllerWebInt {
     private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> pending;
 
+    public void changeCurrentFile(Path path) {
+        if (path == null) return;
+        editorController.changeOpenedFile(path.toString());
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return;
+
+        if (pending != null) pending.cancel(false);
+        pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+    }
+
     public void onTextChanged(TextFieldValue newValue) {
         if (webController == null) {
             editorController.onTextChanged(newValue);
@@ -563,6 +582,18 @@ public class IdeController implements IdeControllerWebInt {
                         operation.newText, operation.position);
             }
         }
+    }
+
+    public Path getOpenedFilePath() {
+        return editorController.getOpenedFilePath();
+    }
+
+    public List<Path> getOpenedFiles() {
+        return editorController.getOpenFiles();
+    }
+
+    public void closeFile(Path path) {
+        editorController.closeFile(path.toString());
     }
 
     public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException {
@@ -656,7 +687,7 @@ public class IdeController implements IdeControllerWebInt {
     private Path getShadowFilePath(Path originalPath) {
         Path relative = projectRoot.relativize(originalPath);
         return projectRoot
-                .resolve(".fitide-cache")
+                .resolve(".ide/.cache")
                 .resolve(relative);
     }
 
@@ -695,4 +726,28 @@ public class IdeController implements IdeControllerWebInt {
     private String absoluteFilePath(String relativeFilePath) {
         return Paths.get(projectRoot.toString(), relativeFilePath).toAbsolutePath().toString();
     }
+
+    public GoToResult goToDefinition(int row, int col) {
+        if (linkTreeController == null || projectRoot == null) return null;
+
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return null;
+
+        Path absolutePath = Paths.get(currentFile);
+        Path relativePath = projectRoot.relativize(absolutePath).normalize();
+
+        AInternalCodeNode def = linkTreeController.goToDefinition(relativePath, row, col);
+        if (def == null || def.pathToFile == null) return null;
+
+        var pos = def.wholePos;
+        if (pos == null) return null;
+
+        Path defAbs = projectRoot.resolve(def.pathToFile).normalize();
+
+        int targetRow = pos.rowS;
+        int targetCol = pos.colS;
+
+        return new GoToResult(defAbs, targetRow, targetCol);
+    }
+
 }

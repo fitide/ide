@@ -33,6 +33,7 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(project(":webWorker"))
+            implementation(project(":idePluginInterface"))
             implementation(compose.desktop.currentOs)
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
