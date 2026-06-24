@@ -5,9 +5,9 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.Nodes.Abstract.CodeType;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
+import org.ide.Tools.PathTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

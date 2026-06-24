@@ -608,7 +608,10 @@ public class IdeController implements IdeControllerWebInt {
         if (currentFile == null) {
             return Collections.emptyList();
         }
-        Path absolutePath = Paths.get(projectRoot.toString(), currentFile);
+
+        Path absolutePath = null;
+        if (Paths.get(currentFile).isAbsolute()) absolutePath = Paths.get(currentFile);
+        else absolutePath = Paths.get(projectRoot.toString(), currentFile);
         Path relativePath = projectRoot.relativize(absolutePath);
 
         try {
