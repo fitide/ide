@@ -80,11 +80,16 @@ public class SmlPlugin implements Plugin {
         } else if (tree instanceof SMLParser.IdExpContext id) {
             if (isApplicationHead(id)) return new Tag[]{Tag.Func, Tag.Usage};
             return new Tag[]{Tag.Var};
+        } else if (tree instanceof SMLParser.LongIdExpContext id) {
+            if (isApplicationHead(id)) return new Tag[]{Tag.Func, Tag.Usage};
+            return new Tag[]{Tag.Var};
         } else if (tree instanceof SMLParser.IntExpContext) {
             return new Tag[]{Tag.Constant};
         } else if (tree instanceof SMLParser.SymbolicExpContext) {
             return new Tag[]{Tag.Var};
         } else if (tree instanceof SMLParser.IdArgContext) {
+            return new Tag[]{Tag.Var};
+        } else if (tree instanceof SMLParser.LongIdArgContext) {
             return new Tag[]{Tag.Var};
         } else if (tree instanceof SMLParser.IntArgContext) {
             return new Tag[]{Tag.Constant};
@@ -106,6 +111,8 @@ public class SmlPlugin implements Plugin {
             return new Tag[] {Tag.Func, Tag.Usage};
         } else if (tree instanceof SMLParser.InfixargContext) {
             return new Tag[] {Tag.Var, Tag.Usage};
+        } else if (tree instanceof SMLParser.ArgContext) {
+            return new Tag[]{Tag.Expression};
         }
 
         return new Tag[0];
@@ -144,6 +151,10 @@ public class SmlPlugin implements Plugin {
             return id.ID().getText();
         }
 
+        if (node instanceof SMLParser.LongIdExpContext lid) {
+            return lastIdOf(lid.longid()).getText();
+        }
+
         if (node instanceof SMLParser.SymbolicExpContext sym) {
             return sym.SYMBOLIC_ID().getText();
         }
@@ -163,6 +174,10 @@ public class SmlPlugin implements Plugin {
 
         if (node instanceof SMLParser.IdArgContext id) {
             return id.ID().getText();
+        }
+
+        if (node instanceof SMLParser.LongIdArgContext lid) {
+            return lastIdOf(lid.longid()).getText();
         }
 
         if (node instanceof SMLParser.SymbolicArgContext sym) {
@@ -215,6 +230,11 @@ public class SmlPlugin implements Plugin {
         if (pat.ID() != null) return pat.ID().getText();
 
         return pat.getText();
+    }
+
+    private TerminalNode lastIdOf(SMLParser.LongidContext longid) {
+        List<TerminalNode> ids = longid.ID();
+        return ids.get(ids.size() - 1);
     }
 
     private boolean isApplicationHead(ParserRuleContext node) {
@@ -284,6 +304,9 @@ public class SmlPlugin implements Plugin {
         }
         if (node instanceof SMLParser.IdExpContext id) {
             return tokenPosition(id.ID().getSymbol());
+        }
+        if (node instanceof SMLParser.LongIdExpContext lid) {
+            return tokenPosition(lastIdOf(lid.longid()).getSymbol());
         }
         if (node instanceof SMLParser.SymbolicExpContext sym) {
             return tokenPosition(sym.SYMBOLIC_ID().getSymbol());
@@ -612,7 +635,25 @@ public class SmlPlugin implements Plugin {
 
     @Override
     public List<ParseTree> getFuncsOfClass(ParseTree classNode) {
-        return List.of();
+        SMLParser.DecsContext decs = null;
+
+        if (classNode instanceof SMLParser.StructDecContext struct) {
+            decs = struct.structbind().decs();
+        } else if (classNode instanceof SMLParser.StructbindContext sb) {
+            decs = sb.decs();
+        }
+
+        if (decs == null) {
+            return List.of();
+        }
+
+        List<ParseTree> result = new ArrayList<>();
+        for (SMLParser.DecContext dec : decs.dec()) {
+            if (dec instanceof SMLParser.FunDecContext || dec instanceof SMLParser.ValDecContext) {
+                result.add(dec);
+            }
+        }
+        return result;
     }
 
 
