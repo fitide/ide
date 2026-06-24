@@ -16,8 +16,8 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class ClassNode extends AInternalCodeNode {
-    public ClassNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
-        super(plugin, pathToFile, path, tree, name);
+    public ClassNode(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, Object state) {
+        super(plugin, pathToFile, path, tree, name, state);
     }
 
     public ClassNode(String name, List<String> keyWords) {

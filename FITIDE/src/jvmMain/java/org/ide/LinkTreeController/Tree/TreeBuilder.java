@@ -42,7 +42,7 @@ public class TreeBuilder {
         for (Tag tag : tags) {
             switch (tag) {
                 case Var -> {
-                    return new Var(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree, state), plugin.getType(parseTree));
+                    return new Var(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree, state), plugin.getType(parseTree), state);
                 }
                 case ImportStatement -> {
                     return new ImportStatement(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree, state));
@@ -57,7 +57,7 @@ public class TreeBuilder {
                     return new Func(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree, state), state);
                 }
                 case Class -> {
-                    return new ClassNode(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree, state));
+                    return new ClassNode(plugin, pathToFile, pathToParent, parseTree, plugin.getNameOfNode(parseTree, state), state);
                 }
                 case ErrorNode -> {
                     String name;

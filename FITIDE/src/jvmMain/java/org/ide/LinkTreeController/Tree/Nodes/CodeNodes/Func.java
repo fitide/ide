@@ -27,7 +27,7 @@ public class Func extends AInternalCodeNode {
     public LinkTreePosition argsPosition;
 
     public Func(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, Object state) {
-        super(plugin, pathToFile, path, tree, name);
+        super(plugin, pathToFile, path, tree, name, state);
         if (codeType == CodeType.Error) return;
 
         List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree, state);
