@@ -338,7 +338,7 @@ public class Follower implements Role {
         ideController.setDir(dir);
         for (var file : dir.getInboundsList()) {
             if (file.getType() == FileType.REGULAR) {
-                getFile(file.getRelativePath(), true);
+                getFile(file.getRelativePath(), false);
             } else if (file.getType() == FileType.DIRECTORY) {
                 getDirectory(file.getRelativePath());
             }
@@ -354,7 +354,7 @@ public class Follower implements Role {
 
     @Override
     public void updateFile(String filePath) {
-        getFile(filePath, false);
+        getFile(filePath, true);
     }
 
     public String getCurMain() {
