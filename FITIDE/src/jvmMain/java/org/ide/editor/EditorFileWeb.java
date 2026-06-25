@@ -380,9 +380,11 @@ public class EditorFileWeb implements EditorFileInt {
 
         var difLen = end1 - start;
         var startPos = getPosition(curText, start);
+        System.out.println("StartPos: " + startPos.getLineNumer() + " " + startPos.getColumnNumber());
         var endPos = end1 >= 0 ? getPosition(curText, end1 > start ? end1 - 1 : start) : getPosition(curText, 0);
         if (difLen == 1 && curText.charAt(start) == '\n') {
-            startPos = CursorPosition.newBuilder().setLineNumer(startPos.getLineNumer() - 1).build();
+            startPos = CursorPosition.newBuilder().setLineNumer(startPos.getLineNumer() - 1).setColumnNumber(fileStrings.get(startPos.getLineNumer() - 1).length()).build();
+            System.out.println("StartPos: " + startPos.getLineNumer() + " " + startPos.getColumnNumber());
             endPos = CursorPosition.newBuilder().setLineNumer(endPos.getLineNumer() - 1).build();
         }
 

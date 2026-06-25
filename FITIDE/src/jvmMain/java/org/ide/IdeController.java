@@ -262,6 +262,7 @@ public class IdeController implements IdeControllerWebInt {
                 var content = editorController.getContent(rp.toString());
                 System.out.println("content: " + content);
                 editorController.setOpenedFileSnapshot(rp.toString());
+                updateCurrentFileLinkTreeOutside(true, rp.toString());
                 return content;
             }
             else {
@@ -757,7 +758,9 @@ public class IdeController implements IdeControllerWebInt {
         String currentFile = editorController.getCurrentFile();
         if (currentFile == null) return null;
 
-        Path absolutePath = Paths.get(currentFile);
+        Path absolutePath = null;
+        if (Paths.get(currentFile).isAbsolute()) absolutePath = Paths.get(currentFile);
+        else absolutePath = Paths.get(projectRoot.toString(), currentFile);
         Path relativePath = projectRoot.relativize(absolutePath).normalize();
 
         AInternalCodeNode def = linkTreeController.goToDefinition(relativePath, row, col);
