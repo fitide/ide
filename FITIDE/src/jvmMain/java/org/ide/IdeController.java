@@ -10,13 +10,23 @@ import org.ide.FileExplorerController.Exceptions.UnnableToWriteInFileException;
 import org.ide.FileExplorerController.FileExplorerController;
 import org.ide.FileExplorerController.Node.Directory;
 import org.ide.LinkTreeController.LinkTreeController;
+import org.ide.LinkTreeController.Tree.Nodes.Abstract.AInternalCodeNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.PluginController.PluginController;
 import org.ide.PluginController.PluginInterface.Plugin;
+import org.ide.Tools.PathTools;
+import org.ide.WebWorker.FileSystem.FileSystemComponents.FileType;
+import org.ide.WebWorker.Positions.CursorPosition;
+import org.ide.WebWorker.Positions.HighlightedPosition;
+import org.ide.WebWorker.WebController;
 import org.ide.editor.EditorController;
 import org.ide.editor.OpenedFileInfo;
+import org.ide.editor.TextOperation;
 
+import static org.ide.editor.TextFieldValueHelperKt.getMutableStateForFileTree;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +40,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class IdeController {
+public class IdeController implements IdeControllerWebInt {
 
     private final Logger logger = LogManager.getLogger(IdeController.class);
 
@@ -38,12 +48,19 @@ public class IdeController {
     private final EditorController editorController = new EditorController();
     private PluginController pluginController;
     private LinkTreeController linkTreeController;
+    private WebController webController;
 
     private Path projectRoot;
     private File config;
 
     private ParseTree currentParseTree = null;
     private Plugin currentPlugin = null;
+
+    private final MutableState<Directory> fileTreeState = getMutableStateForFileTree(null);
+
+    public MutableState<Directory> fileTreeState() {
+        return fileTreeState;
+    }
 
     public ParseTree getCurrentParseTree() {
         return currentParseTree;
@@ -53,6 +70,9 @@ public class IdeController {
         return currentPlugin;
     }
 
+    public void setWebController(WebController webController) {
+        this.webController = webController;
+    }
 
     public void setLinkTreeController(LinkTreeController linkTreeController) {
         this.linkTreeController = linkTreeController;
@@ -70,21 +90,26 @@ public class IdeController {
 
         loadPluginsForProject();
 
+        Directory rootCopy = fileExplorer.getTreeCopy();
+        fileTreeState.setValue(rootCopy);
         if (linkTreeController != null) {
-            Directory rootCopy = fileExplorer.getTreeCopy();
             linkTreeController.setFilesAndDirectoriesData(rootCopy);
         }
     }
 
     private void loadPluginsForProject() {
         try {
-            Path confDir = projectRoot.resolve("conf");
+            Path confDir = projectRoot.resolve(".ide").resolve("conf");
             this.pluginController = new PluginController(projectRoot.toString());
 
             logger.info("Plugins loaded from: " + confDir);
         } catch (Exception e) {
             logger.error("Failed to load plugins for project: " + projectRoot, e);
         }
+    }
+
+    public Path getProjectRoot() {
+        return projectRoot;
     }
 
     public File getConfig() {
@@ -102,7 +127,16 @@ public class IdeController {
         if (linkTreeController != null) {
             linkTreeController.setFilesAndDirectoriesData(updated);
         }
+        fileTreeState.setValue(updated);
         return updated;
+    }
+
+    public Directory refreshFileTree() {
+        if (fileExplorer == null || projectRoot == null) return null;
+
+        fileExplorer.updateTree(projectRoot.toString());
+
+        return fileExplorer.getTreeCopy();
     }
 
     public void createFile(Path dir, String name) throws Exception {
@@ -115,6 +149,24 @@ public class IdeController {
         refreshTree();
     }
 
+    public void createFileShared(Path dir, String name) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(dir).toString();
+            webController.create(rel, FileType.REGULAR, name);
+        } else {
+            createFile(dir, name);
+        }
+    }
+
+    public void createDirShared(Path dir, String name) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(dir).toString();
+            webController.create(rel, FileType.DIRECTORY, name);
+        } else {
+            createDir(dir, name);
+        }
+    }
+
     public void deleteFile(Path path) throws Exception {
         fileExplorer.deleteFile(path);
         refreshTree();
@@ -125,6 +177,24 @@ public class IdeController {
         refreshTree();
     }
 
+    public void deleteFileShared(Path path) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.delete(rel, FileType.REGULAR);
+        } else {
+            deleteFile(path);
+        }
+    }
+
+    public void deleteDirShared(Path path) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.delete(rel, FileType.DIRECTORY);
+        } else {
+            deleteDir(path);
+        }
+    }
+
     public void renameFile(Path path, String newName) throws Exception {
         fileExplorer.renameFile(path, newName);
         refreshTree();
@@ -133,6 +203,24 @@ public class IdeController {
     public void renameDir(Path path, String newName) throws Exception {
         fileExplorer.renameDirectory(path, newName);
         refreshTree();
+    }
+
+    public void renameFileShared(Path path, String newName) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.rename(rel, newName, FileType.REGULAR);
+        } else {
+            renameFile(path, newName);
+        }
+    }
+
+    public void renameDirShared(Path path, String newName) throws Exception {
+        if (webController != null) {
+            String rel = projectRoot.relativize(path).toString();
+            webController.rename(rel, newName, FileType.DIRECTORY);
+        } else {
+            renameDir(path, newName);
+        }
     }
 
     public void moveFile(Path from, Path toDir) throws Exception {
@@ -159,6 +247,30 @@ public class IdeController {
     public String openFile(Path path) throws Exception {
         if (fileExplorer == null)
             throw new IllegalStateException("Project not opened");
+
+        if (webController != null) {
+            var rp = projectRoot.relativize(path);
+            var fullPath = Paths.get(projectRoot.toString(), rp.toString());
+            webController.updateFile(rp.toString());
+            webController.sendFileOpened(rp.toString());
+            System.out.println("relativePath = " + rp.toString());
+            System.out.println("fullPath = " + fullPath);
+            if (editorController.hasFileOpened(rp.toString())) {
+                System.out.println("editor has file: " + rp);
+                initializeFile(fullPath);
+                System.out.println("file " + rp + " initialized");
+                var content = editorController.getContent(rp.toString());
+                System.out.println("content: " + content);
+                editorController.setOpenedFileSnapshot(rp.toString());
+                updateCurrentFileLinkTreeOutside(true, rp.toString());
+                return content;
+            }
+            else {
+                editorController.openFile(rp.toString(), fileExplorer.openFile(fullPath));
+                initializeFile(fullPath);
+                return String.join("\n", fileExplorer.openFile(fullPath));
+            }
+        }
 
         List<String> list = fileExplorer.openFile(path);
         editorController.openFile(path.toString(), list);
@@ -259,6 +371,143 @@ public class IdeController {
         return editorController.hasUnsavedChanges(path.toString());
     }
 
+    @Override
+    public List<org.ide.WebWorker.Tools.Pair<String, FileType>> getDirData(String relativePath) throws Exception {
+        List<org.ide.WebWorker.Tools.Pair<String, FileType>> resList = new ArrayList<>();
+        var dir = fileExplorer.getTreeCopy().findDir(relativePath);
+        for (int i = 0; i < dir.getDirsCnt(); i++) {
+            var subDir = dir.getDir(i);
+            resList.add(new org.ide.WebWorker.Tools.Pair<>(Paths.get(relativePath, subDir.name).toString(), FileType.DIRECTORY));
+        }
+        for (int i = 0; i < dir.getFilesCnt(); i++) {
+            var subFile = dir.getFile(i);
+            resList.add(new org.ide.WebWorker.Tools.Pair<>(Paths.get(relativePath, subFile.name).toString(), FileType.REGULAR));
+        }
+
+        return resList;
+    }
+
+    @Override
+    public byte[] getFileContent(String relativePath, boolean isNeededInAdding) throws Exception {
+        Path rel = Paths.get(relativePath);
+        Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
+        Path absolutePath = projectRoot.resolve(stripped);
+        if (editorController != null) {
+            if (editorController.hasFileOpened(relativePath)) {
+                return editorController.getContent(relativePath).getBytes();
+            }
+            List<String> list = fileExplorer.openFile(absolutePath);
+            if (isNeededInAdding) editorController.createFileNode(relativePath, list);
+        }
+        return Files.readAllBytes(absolutePath);
+    }
+
+    @Override
+    public void setDir(org.ide.WebWorker.FileSystem.FileSystemComponents.Directory dir) {
+        if (projectRoot == null) {
+            String name = Paths.get(dir.getRelativeDirPath()).getFileName().toString();
+            Path targetDir = chooseTargetDirectory();
+            if (targetDir == null) {
+                logger.info("setDir cancelled: no target directory selected");
+                return;
+            }
+            projectRoot = targetDir.resolve(name);
+        }
+
+        for (var entry : dir.getInboundsList()) {
+            if (entry.getType() == FileType.DIRECTORY) {
+                Path rel = Paths.get(entry.getRelativePath());
+                Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : Paths.get("");
+                if (stripped.getNameCount() > 0) projectRoot.resolve(stripped).toFile().mkdirs();
+            }
+        }
+
+        if (fileExplorer == null) {
+            try {
+                openProject(projectRoot);
+            } catch (Exception e) {
+                logger.error("setDir failed", e);
+            }
+        }
+    }
+
+    private Path chooseTargetDirectory() {
+        final Path[] result = new Path[1];
+        Runnable task = () -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                File selected = chooser.getSelectedFile();
+                if (selected != null) result[0] = selected.toPath();
+            }
+        };
+        try {
+            if (SwingUtilities.isEventDispatchThread()) {
+                task.run();
+            } else {
+                SwingUtilities.invokeAndWait(task);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Directory selection interrupted", e);
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            logger.error("Directory selection failed", e);
+        }
+        return result[0];
+    }
+
+    @Override
+    public void reloadPluginsAfterSync() {
+        if (projectRoot == null) return;
+        loadPluginsForProject();
+        refreshTree();
+    }
+
+    @Override
+    public void setFile(org.ide.WebWorker.FileSystem.FileSystemComponents.File file) {
+        if (projectRoot == null) return;
+        Path rel = Paths.get(file.getRelativeFilePath());
+        Path stripped = rel.getNameCount() > 1 ? rel.subpath(1, rel.getNameCount()) : rel;
+        Path path = projectRoot.resolve(stripped);
+        try {
+            path.getParent().toFile().mkdirs();
+            Files.write(path, file.getContent().toByteArray());
+        } catch (IOException e) {
+            logger.error("setFile failed", e);
+        }
+        refreshTree();
+    }
+
+    @Override
+    public boolean insertText(String filePath, String text, CursorPosition position, String host) {
+        System.out.println("file " + filePath + " insert text " + text);
+        var res = editorController.insertText(filePath, text, position, webController.isMe(host));
+        updateCurrentFileLinkTreeOutside(res, filePath);
+        return res;
+    }
+
+    @Override
+    public boolean deleteText(String filePath, String textToDelete, HighlightedPosition position, String host) {
+        var res = editorController.deleteText(filePath, textToDelete, position, webController.isMe(host));
+        updateCurrentFileLinkTreeOutside(res, filePath);
+        return res;
+    }
+
+    @Override
+    public boolean changeText(String filePath, String textToDelete, String newText, HighlightedPosition position, String host) {
+        var res = editorController.changeText(filePath, textToDelete, newText, position, webController.isMe(host));
+        updateCurrentFileLinkTreeOutside(res, filePath);
+        return res;
+    }
+
+    private void updateCurrentFileLinkTreeOutside(boolean res, String filePath) {
+        if (res && Objects.equals(filePath, editorController.getCurrentFile())) {
+            Path absolute = Paths.get(projectRoot.toString(), filePath);
+            if (pending != null) pending.cancel(false);
+            pending = exec.schedule(() -> analyzeAndUpdateLinkTree(absolute), 300, TimeUnit.MILLISECONDS);
+        }
+    }
+
     public OpenedFileInfo getOpenedFileInfo() {
         return editorController.getOpenedFileInfo();
     }
@@ -267,19 +516,104 @@ public class IdeController {
         return editorController.openedFileInfoState();
     }
 
+    public record RemoteSelection(int startLine, int startColumn, int endLine, int endColumn) {}
+
+    public record RemoteCaret(String name, int line, int column, RemoteSelection selection) {}
+
+    public void onCursorMoved(int line, int column) {
+        if (webController == null) return;
+        webController.sendCursor(line, column);
+    }
+
+    public void onSelectionChanged(int startLine, int startColumn, int endLine, int endColumn) {
+        if (webController == null) return;
+        webController.sendHighlight(startLine, startColumn, endLine, endColumn);
+    }
+
+    public List<RemoteCaret> getRemoteCaretsForCurrentFile() {
+        if (webController == null) return Collections.emptyList();
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null || projectRoot == null) return Collections.emptyList();
+
+        String relativePath = projectRoot.relativize(Paths.get(projectRoot.toString(), currentFile)).toString();
+        String myName = webController.getMyName();
+
+        List<RemoteCaret> result = new ArrayList<>();
+        for (var entry : webController.getPositionsTable().usersPositions.entrySet()) {
+            if (entry.getKey().equals(myName)) continue;
+            var pos = entry.getValue();
+            if (pos.file == null || !pos.file.equals(relativePath)) continue;
+
+            if (pos.highlightedPosition != null) {
+                var h = pos.highlightedPosition;
+                var selection = new RemoteSelection(
+                        h.getLineStart(), h.getColumnStart(), h.getLineEnd(), h.getColumnEnd());
+                result.add(new RemoteCaret(entry.getKey(), h.getLineEnd(), h.getColumnEnd(), selection));
+            } else if (pos.cursorPosition != null) {
+                result.add(new RemoteCaret(entry.getKey(),
+                        pos.cursorPosition.getLineNumer(), pos.cursorPosition.getColumnNumber(), null));
+            }
+        }
+        return result;
+    }
+
     private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> pending;
 
-    public void onTextChanged(TextFieldValue newValue) {
-        editorController.onTextChanged(newValue);
-
+    public void changeCurrentFile(Path path) {
+        if (path == null) return;
+        editorController.changeOpenedFile(path.toString());
         String currentFile = editorController.getCurrentFile();
         if (currentFile == null) return;
 
-        Path path = Paths.get(currentFile);
-
         if (pending != null) pending.cancel(false);
         pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+    }
+
+    public void onTextChanged(TextFieldValue newValue) {
+        if (webController == null) {
+            editorController.onTextChanged(newValue);
+
+            String currentFile = editorController.getCurrentFile();
+            if (currentFile == null) return;
+
+            Path path = Paths.get(currentFile);
+
+            if (pending != null) pending.cancel(false);
+            pending = exec.schedule(() -> analyzeAndUpdateLinkTree(path), 120, TimeUnit.MILLISECONDS);
+        } else {
+            var operation = editorController.getOperationType(newValue);
+            if (operation.operation == TextOperation.Insert && operation.text.equals("")) {
+                editorController.onTextChanged(newValue);
+                return;
+            }
+
+            String filePath = editorController.getCurrentFile();
+            switch (operation.operation) {
+                case Insert -> webController.insertText(filePath, operation.text,
+                        CursorPosition.newBuilder().setLineNumer(operation.position.getLineStart()).setColumnNumber(operation.position.getColumnStart()).build());
+                case Delete -> webController.deleteText(filePath, operation.text, operation.position);
+                case Changing -> webController.changeText(filePath, operation.text,
+                        operation.newText, operation.position);
+            }
+            if (filePath != null) {
+                Path absolute = Paths.get(projectRoot.toString(), filePath);
+                if (pending != null) pending.cancel(false);
+                pending = exec.schedule(() -> analyzeAndUpdateLinkTree(absolute), 300, TimeUnit.MILLISECONDS);
+            }
+        }
+    }
+
+    public Path getOpenedFilePath() {
+        return editorController.getOpenedFilePath();
+    }
+
+    public List<Path> getOpenedFiles() {
+        return editorController.getOpenFiles();
+    }
+
+    public void closeFile(Path path) {
+        editorController.closeFile(path.toString());
     }
 
     public void applyConfig(List<String> config) throws UnnableToWriteInFileException, IOException {
@@ -294,7 +628,10 @@ public class IdeController {
         if (currentFile == null) {
             return Collections.emptyList();
         }
-        Path absolutePath = Paths.get(currentFile);
+
+        Path absolutePath = null;
+        if (Paths.get(currentFile).isAbsolute()) absolutePath = Paths.get(currentFile);
+        else absolutePath = Paths.get(projectRoot.toString(), currentFile);
         Path relativePath = projectRoot.relativize(absolutePath);
 
         try {
@@ -314,7 +651,9 @@ public class IdeController {
         if (currentFile == null) {
             return Collections.emptyList();
         }
-        Path absolutePath = Paths.get(currentFile);
+        Path absolutePath = null;
+        if (Paths.get(currentFile).isAbsolute()) absolutePath = Paths.get(currentFile);
+        else absolutePath = Paths.get(projectRoot.toString(), currentFile);
         Path relativePath = projectRoot.relativize(absolutePath).normalize();
         try {
             return new ArrayList<>(linkTreeController.getHintsForFile(relativePath, prefix));
@@ -341,7 +680,7 @@ public class IdeController {
             }
             this.currentPlugin = plugin;
 
-            String content = editorController.getContent(path.toString());
+            String content = editorController.getContent(editorController.getCurrentFile());
             if (content == null) {
                 return;
             }
@@ -373,10 +712,9 @@ public class IdeController {
     private Path getShadowFilePath(Path originalPath) {
         Path relative = projectRoot.relativize(originalPath);
         return projectRoot
-                .resolve(".fitide-cache")
+                .resolve(".ide/.cache")
                 .resolve(relative);
     }
-
 
     private String detectLang(Path path) {
         String fileName = path.getFileName().toString();
@@ -409,4 +747,34 @@ public class IdeController {
 
         return compileStringBuilder.toString();
     }
+
+    private String absoluteFilePath(String relativeFilePath) {
+        return Paths.get(projectRoot.toString(), relativeFilePath).toAbsolutePath().toString();
+    }
+
+    public GoToResult goToDefinition(int row, int col) {
+        if (linkTreeController == null || projectRoot == null) return null;
+
+        String currentFile = editorController.getCurrentFile();
+        if (currentFile == null) return null;
+
+        Path absolutePath = null;
+        if (Paths.get(currentFile).isAbsolute()) absolutePath = Paths.get(currentFile);
+        else absolutePath = Paths.get(projectRoot.toString(), currentFile);
+        Path relativePath = projectRoot.relativize(absolutePath).normalize();
+
+        AInternalCodeNode def = linkTreeController.goToDefinition(relativePath, row, col);
+        if (def == null || def.pathToFile == null) return null;
+
+        var pos = def.wholePos;
+        if (pos == null) return null;
+
+        Path defAbs = projectRoot.resolve(def.pathToFile).normalize();
+
+        int targetRow = pos.rowS;
+        int targetCol = pos.colS;
+
+        return new GoToResult(defAbs, targetRow, targetCol);
+    }
+
 }

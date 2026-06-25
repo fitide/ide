@@ -11,10 +11,11 @@ import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.Nodes.FileNodes.Directory;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 import org.ide.PluginController.PluginInterface.Plugin;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -137,7 +138,10 @@ public abstract class CommonFileNode {
         CommonFileNode node = getFileNode(pathToFile);
 
         if (node != null && node instanceof CommonFile) {
-            return ((CommonFile) node).getSyntaxHughlighting(null);
+            var file = ((CommonFile) node);
+            var res = (file.getSyntaxHughlighting(null));
+            //file.dump();
+            return res;
         }
         return new ArrayList<>();
     }
@@ -228,4 +232,43 @@ public abstract class CommonFileNode {
     }
 
     public abstract void updateFilePath(Directory newDir);
+
+    public void updateFileName(Path pathToFile, String newName) {
+        if (pathToFile == null || pathToFile.getNameCount() == 0) {
+        }
+        if (this.pathToFile != null) {
+            assert pathToFile != null;
+            if (pathToFile.isAbsolute()) {
+                try {
+                    pathToFile = this.pathToFile.relativize(pathToFile);
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
+
+        String firstName = pathToFile.getName(0).toString();
+        if (pathToFile.getNameCount() == 1) {
+            if (firstName.equals(this.name)) {
+                this.name = newName;
+            }
+            if (this.childs.containsKey(firstName)) {
+                var child = this.childs.get(firstName);
+                child.updateFileName(pathToFile, newName);
+                childs.remove(firstName);
+                childs.put(newName, child);
+            }
+            return;
+        }
+
+        if (this.childs.containsKey(firstName)) {
+            Path remainingPath = pathToFile.subpath(1, pathToFile.getNameCount());
+            childs.get(firstName).updateFileName(remainingPath, newName);
+            if (remainingPath.getNameCount() == 1) {
+                var child = this.childs.get(firstName);
+                childs.remove(firstName);
+                childs.put(newName, child);
+            }
+
+        }
+    }
 }

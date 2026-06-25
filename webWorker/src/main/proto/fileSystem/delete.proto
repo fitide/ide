@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package fileSystemDelete;
+
+import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.FileSystem.Delete";
+
+message DeleteServerRequest {
+    string relativeFilePath = 1;
+    fileSystemComponents.FileType file_type = 2;
+}
+
+message DeleteServerResponse {
+    responsesCodes.DeleteFileCode code = 1;
+    string error = 2;
+}
+
+message DeleteClientRequest {
+    string relativeFilePath = 1;
+    fileSystemComponents.FileType file_type = 2;
+}
+
+message DeleteClientResponse {
+    responsesCodes.DeleteFileCode code = 1;
+    string error = 2;
+}

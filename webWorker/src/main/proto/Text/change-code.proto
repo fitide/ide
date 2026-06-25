@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package textChanging;
+
+import "constants/responsesCodes.proto";
+import "Positions/positions.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.Text.Changing";
+
+message ChangeTextServerRequest {
+    string filePath = 1;
+    positions.HighlightedPosition position = 2;
+    string textToDelete = 3;
+    string textToInsert = 4;
+    string user = 5;
+}
+
+message ChangeTextServerResponse {
+    responsesCodes.ChangeCode code = 1;
+    string error = 2;
+}
+
+message ChangeTextClientRequest {
+    string filePath = 1;
+    positions.HighlightedPosition position = 2;
+    string textToInsert = 4;
+    string user = 5;
+}
+
+message ChangeTextClientResponse {
+    responsesCodes.CodeChangingCode code = 1;
+    string error = 2;
+}

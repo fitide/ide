@@ -16,8 +16,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import kotlinx.coroutines.delay
 import org.ide.IdeController
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.ide.WebWorker.WebController
 import org.main.ide.buttonbar.ButtonBarHorizontal
 import org.main.ide.buttonbar.ButtonBarVertical
 import org.main.ide.config.Config
@@ -25,8 +26,10 @@ import org.main.ide.config.ConfigView
 import org.main.ide.config.getCompileStr
 import org.main.ide.config.parseConfigsJson
 import org.main.ide.editor.EditorView
+import org.main.ide.editor.tabs.EditorTabs
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.fileexplorer.FileExplorerView
+import org.main.ide.server.CodeWithMeDialog
 import org.main.ide.terminal.Terminal
 import org.main.ide.uistate.UIColors.Background
 import org.main.ide.uistate.UIColors.ButtonBg
@@ -88,6 +91,8 @@ fun App(
     var showNoProjectDialog by remember { mutableStateOf(false) }
     var configs by remember { mutableStateOf(listOf(Config())) }
     var selectedConfigIndex by remember { mutableStateOf(0) }
+    var showCodeWithMe by remember { mutableStateOf(false) }
+    var webController by remember { mutableStateOf<WebController?>(null) }
 
     LaunchedEffect(isConfigOpen) {
         if (isConfigOpen) {
@@ -113,6 +118,8 @@ fun App(
         if (isRun) {
             val compileString = getCompileStr(configs.get(selectedConfigIndex))
             uiState.terminalController.sendCommand(compileString)
+            delay(1200)
+            fileExplorer.refresh()
             isRun = false
         }
     }
@@ -142,7 +149,11 @@ fun App(
                         onRunClick = {
                           if (fileExplorer.currentProject != null && (configs.size > selectedConfigIndex))
                               isRun = true
-                        }
+                        },
+                        onServerClick = {
+                            showCodeWithMe = true
+                        },
+                        isConnected = webController != null
                     )
                 }
 
@@ -193,7 +204,22 @@ fun App(
                                     .fillMaxHeight(),
                                 bg = EditorBg
                             ) {
-                                EditorView(ideController)
+                                Column(Modifier.fillMaxSize()) {
+                                    EditorTabs(
+                                        ide = ideController,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    ThinDivider(vertical = false)
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxWidth()
+                                    ) {
+                                        EditorView(ideController)
+                                    }
+                                }
                             }
                         }
 
@@ -270,6 +296,19 @@ fun App(
                         }
                     },
                     dismissButton = {}
+                )
+            }
+
+            if (showCodeWithMe) {
+                CodeWithMeDialog(
+                    ideController = ideController,
+                    existingLink = webController?.codeToConnect,
+                    hasProject = fileExplorer.currentProject != null,
+                    onCreated = { wc ->
+                        webController = wc
+                        fileExplorer.syncFromController()
+                    },
+                    onDismiss = { showCodeWithMe = false }
                 )
             }
         }

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package fileSystem;
+
+import "fileSystem/file-system-components.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.FileSystem.FilesGetting";
+
+message DirectoryRequest {
+    string directoryRelativePath = 1;
+}
+
+message DirectoryResponse {
+    fileSystemComponents.Directory directory = 1;
+}
+
+message FileRequest {
+    string fileRelativePath = 1;
+    bool isInitingProject = 2;
+}
+
+message FileResponse {
+    fileSystemComponents.File file = 1;
+}

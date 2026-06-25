@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package mainSelecting;
+
+import "constants/responsesCodes.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.MainSelecting";
+
+message Programmer {
+    string host = 1;
+    string name = 2;
+    uint32 clientNumber = 3;
+}
+
+message UpdateProgrammersRequest {
+    repeated Programmer programmers = 1;
+}
+
+message UpdateProgrammersResponse {
+    responsesCodes.UpdateProgrammersCode code = 1;
+    string error = 2;
+}
+

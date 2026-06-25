@@ -3,7 +3,7 @@ package org.ide.LinkTreeController.Tree.Nodes.Abstract;
 public enum LinkTreeCodeTag {
     KeyWord,
     Var,
-    constant,
+    Constant,
     Class,
     Func,
     Type,

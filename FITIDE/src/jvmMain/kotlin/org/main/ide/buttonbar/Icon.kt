@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 fun IconWithTooltip(
     iconRes: DrawableResource,
     tooltip: String,
+    tint: Color = Color(0xFFE6E6E6),
     onClick: (() -> Unit)? = null
 ) {
     var hovered by remember { mutableStateOf(false) }
@@ -77,7 +78,7 @@ fun IconWithTooltip(
         Icon(
             painter = painterResource(iconRes),
             contentDescription = tooltip,
-            tint = Color(0xFFE6E6E6),
+            tint = tint,
             modifier = Modifier.size(22.dp)
         )
     }

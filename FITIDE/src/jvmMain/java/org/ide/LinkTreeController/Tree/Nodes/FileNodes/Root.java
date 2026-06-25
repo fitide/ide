@@ -13,7 +13,7 @@ import org.ide.LinkTreeController.Tree.Finders.DeclarationByPathFinder;
 import org.ide.LinkTreeController.Tree.Finders.DeclarationFinder;
 import org.ide.LinkTreeController.Tree.Finders.DefinitionByPathFinder;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

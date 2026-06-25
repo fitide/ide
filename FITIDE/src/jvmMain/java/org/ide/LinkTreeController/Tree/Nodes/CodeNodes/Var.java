@@ -21,8 +21,8 @@ public class Var extends AInternalCodeNode {
     public LinkTreePosition retPosition;
     private boolean isTypeDef = false;
 
-    public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, String retType) {
-        super(plugin, pathToFile, path, tree, name);
+    public Var(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, String retType, Object state) {
+        super(plugin, pathToFile, path, tree, name, state);
         var pos = plugin.getTypePositionOfModule(tree);
         if (pos != null) {
             this.retPosition = new LinkTreePosition(pos);
@@ -37,7 +37,7 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
+    protected void setChilds(ParseTree curNode, Object state) {
         this.childs = new HashMap<>();
     }
 
@@ -74,8 +74,8 @@ public class Var extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, this.pathToFile, this.pathToModule.subpath(0, pathToModule.getNameCount()));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, this.pathToFile, this.pathToModule.subpath(0, pathToModule.getNameCount()), state);
         this.updateCurNode(node);
     }
 
@@ -105,21 +105,32 @@ public class Var extends AInternalCodeNode {
             case Usage -> {
                 this.definition = validatePointer(defs.getOrDefault(this.name, null));
                 this.declaration = validatePointer(decs.getOrDefault(this.name, null));
-                //if (definition == null && declaration == null) {
-                //    codeType = CodeType.Error;
-                //}
+                if (definition == null && declaration == null) {
+                    codeType = CodeType.Error;
+                }
             }
             default -> {}
         }
     }
 
     private AInternalCodeNode validatePointer(AInternalCodeNode node) {
-        if (node instanceof Var) return node;
+        if (node instanceof Var || node instanceof Func) return node;
         return null;
     }
 
     @Override
     public void setTypes(Set<String> types) {
         if (types.contains(retType)) isTypeDef = true;
+    }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        if (!contains(this.wholePos, position)) return null;
+        return this;
+    }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("var");
     }
 }

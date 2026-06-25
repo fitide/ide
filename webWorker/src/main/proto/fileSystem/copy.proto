@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package fileSystemCopy;
+
+import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.FileSystem.Copy";
+
+
+message CopyServerRequest {
+    fileSystemComponents.FileType file_type = 1;
+    string relativeFilePath = 2;
+    string pathToCopy = 3;
+}
+
+message CopyServerResponse {
+    responsesCodes.CopyCode code = 1;
+    string error = 2;
+}
+
+message CopyClientRequest {
+    fileSystemComponents.FileType file_type = 1;
+    string relativeFilePath = 2;
+    string pathToCopy = 3;
+}
+
+message CopyClientResponse {
+    responsesCodes.CopyCode code = 1;
+    string error = 2;
+}

@@ -11,7 +11,7 @@ import org.ide.LinkTreeController.Tree.Nodes.CodeNodes.Var;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.ExternalFile;
 import org.ide.PluginController.PluginInterface.Plugin;
@@ -303,5 +303,14 @@ public class CommonFile extends FileNode {
         for (var node : this.codeNodes.values()) {
             node.setDefinitionsAndDeclarations(defs, decs);
         }
+    }
+
+    public void dump() {
+        var builder = new StringBuilder();
+        for (var node : codeNodes.values()) {
+            node.dump(0, builder);
+        }
+
+        System.out.println(builder);
     }
 }

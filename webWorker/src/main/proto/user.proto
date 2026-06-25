@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package user;
+
+
+import "google/protobuf/timestamp.proto";
+import "Positions/positions.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.User";
+
+message User {
+    string host = 1;
+    string name = 2;
+}
+
+message UserCursor {
+    User user = 1;
+    positions.CursorPosition cursor_position = 2;
+    google.protobuf.Timestamp time = 3;
+}
+
+message UserCursorServer {
+    UserCursor user_cursor = 1;
+}
+
+message UsersClient {
+    repeated UserFile user_files = 1;
+    repeated UserCursor user_cursors = 2;
+    repeated UserHighlighted user_highlighteds = 3;
+    google.protobuf.Timestamp time = 4;
+}
+
+message UserHighlighted {
+    User user = 1;
+    positions.HighlightedPosition highlighted_position = 2;
+    google.protobuf.Timestamp time = 3;
+}
+
+message UserHighlightedServer {
+    UserHighlighted user_cursor = 1;
+}
+
+message UserFile {
+    User user = 1;
+    string file = 2;
+    google.protobuf.Timestamp time = 3;
+}
+

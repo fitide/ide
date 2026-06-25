@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package Connection;
+
+import "constants/responsesCodes.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.Connection";
+
+message ConnectionRequest {
+    string host = 1;
+    string name = 2;
+}
+
+message ConnectionResponse {
+    responsesCodes.ConnectionCode code = 1;
+    string error = 2;
+    string Directory = 3;
+}

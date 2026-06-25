@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package fileSystemRename;
+
+import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.FileSystem.Rename";
+
+message RenameServerRequest {
+    string relativeFilePath = 1;
+    string newName = 2;
+    fileSystemComponents.FileType file_type = 3;
+}
+
+message RenameServerResponse {
+    responsesCodes.RenameCode code = 1;
+    string error = 2;
+}
+
+message RenameClientRequest {
+    string relativeFilePath = 1;
+    string newName = 2;
+    fileSystemComponents.FileType file_type = 3;
+}
+
+message RenameClientResponse {
+    responsesCodes.RenameCode code = 1;
+    string error = 2;
+}
+

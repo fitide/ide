@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "connection.proto";
+import "google/protobuf/empty.proto";
+import "main-selecting.proto";
+import "user.proto";
+
+import "fileSystem/copy.proto";
+import "fileSystem/create.proto";
+import "fileSystem/delete.proto";
+import "fileSystem/move.proto";
+import "fileSystem/rename.proto";
+import "fileSystem/files-getting.proto";
+
+import "Text/insertText.proto";
+import "Text/delete-code.proto";
+import "Text/change-code.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.Workers";
+
+service IDEWebWorker {
+    rpc copy(fileSystemCopy.CopyServerRequest) returns (fileSystemCopy.CopyServerResponse) {};
+    rpc create(fileSystemCreate.CreateServerRequest) returns (fileSystemCreate.CreateServerResponse) {};
+    rpc delete(fileSystemDelete.DeleteServerRequest) returns (fileSystemDelete.DeleteServerResponse) {};
+    rpc move(fileSystemMove.MoveServerRequest) returns (fileSystemMove.MoveServerResponse) {};
+    rpc rename(fileSystemRename.RenameServerRequest) returns (fileSystemRename.RenameServerResponse) {};
+
+
+    rpc setUserCursor(user.UserCursorServer) returns (google.protobuf.Empty) {};
+    rpc setUserHighlighted(user.UserHighlightedServer) returns (google.protobuf.Empty) {};
+    rpc setUserFilePosition(user.UserFile) returns (google.protobuf.Empty) {};
+
+    rpc onConnection(Connection.ConnectionRequest) returns (Connection.ConnectionResponse) {};
+
+    rpc updatePositions(user.UsersClient) returns (google.protobuf.Empty) {};
+
+    rpc updateUsers(mainSelecting.UpdateProgrammersRequest) returns (mainSelecting.UpdateProgrammersResponse) {};
+
+    rpc insertText(textInserting.InsertTextServerRequest) returns (textInserting.InsertTextServerResponse) {};
+    rpc deleteText(textDeleting.DeleteTextServerRequest) returns (textDeleting.DeleteTextServerResponse) {};
+    rpc changeText(textChanging.ChangeTextServerRequest) returns (textChanging.ChangeTextServerResponse) {};
+
+    rpc shareDir(fileSystem.DirectoryRequest) returns (fileSystem.DirectoryResponse);
+    rpc shareFile(fileSystem.FileRequest) returns (fileSystem.FileResponse);
+
+    rpc getPositions(google.protobuf.Empty) returns (user.UsersClient);
+}

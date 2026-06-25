@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package fileSystemCreate;
+
+import "constants/responsesCodes.proto";
+import "fileSystem/file-system-components.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.FileSystem.Create";
+
+
+message CreateServerRequest {
+    string relativeFilePath = 1;
+    string name = 2;
+    fileSystemComponents.FileType file_type = 3;
+}
+
+message CreateServerResponse {
+    responsesCodes.CreateFileCode code = 1;
+    string error = 2;
+}
+
+message CreateClientRequest {
+    string relativeFilePath = 1;
+    string name = 2;
+    fileSystemComponents.FileType file_type = 3;
+}
+
+message CreateClientResponse {
+    responsesCodes.CreateFileCode code = 1;
+    string error = 2;
+}
+

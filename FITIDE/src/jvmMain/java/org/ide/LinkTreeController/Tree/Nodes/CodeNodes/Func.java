@@ -7,7 +7,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.ExternalType;
 import org.ide.PluginController.PluginInterface.ExternalVar;
@@ -26,19 +26,22 @@ public class Func extends AInternalCodeNode {
     public LinkTreePosition bodyPosition;
     public LinkTreePosition argsPosition;
 
-    public Func(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name) {
-        super(plugin, pathToFile, path, tree, name);
+    public Func(Plugin plugin, Path pathToFile, Path path, ParseTree tree, String name, Object state) {
+        super(plugin, pathToFile, path, tree, name, state);
         if (codeType == CodeType.Error) return;
 
-        List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree);
+        List<ParseTree> argsInTree = plugin.getArgsOfFunc(tree, state);
         for (ParseTree parseTree : argsInTree) {
-            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule));
-            args.put(arg.id, arg);
+            AInternalCodeNode arg = (TreeBuilder.buildOneChild(plugin, parseTree, pathToFile, pathToModule, state));
+            if (arg != null) args.put(arg.id, arg);
         }
         Position pos;
         if ((pos = plugin.getPositionOfModuleBody(tree)) != null) this.bodyPosition = new LinkTreePosition(pos);
-        if ((pos = plugin.getPositionOfArgsOfFunc(tree)) != null) this.argsPosition = new LinkTreePosition(pos);
-        if ((pos = plugin.getTypePositionOfModule(tree)) != null) this.retTypePosition = new LinkTreePosition(pos);
+        if ((pos = plugin.getPositionOfArgsOfFunc(tree, state)) != null) this.argsPosition = new LinkTreePosition(pos);
+        if ((pos = plugin.getTypePositionOfModule(tree)) != null) {
+            this.retTypePosition = new LinkTreePosition(pos);
+            this.retType = plugin.getType(tree);
+        }
     }
 
     public Func(String name, List<String> keyWords, List<ExternalVar> externalArgs, ExternalType externalType) {
@@ -50,8 +53,8 @@ public class Func extends AInternalCodeNode {
     }
 
     @Override
-    protected void setChilds(ParseTree curNode) {
-        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule);
+    protected void setChilds(ParseTree curNode, Object state) {
+        this.childs = TreeBuilder.getChilds(plugin, curNode, pathToFile, pathToModule, state);
     }
 
     @Override
@@ -171,8 +174,8 @@ public class Func extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         this.updateCurNode(node);
     }
 
@@ -224,7 +227,10 @@ public class Func extends AInternalCodeNode {
             List<Path> res = new ArrayList<>();
 
             for (AInternalCodeNode node : args.values()) {
-                if (node.wholePos.compareTo(position) == 0) res = node.getPathsToSearchDeclaration(position);
+                if (node.wholePos.compareTo(position) == 0) {
+                    res = node.getPathsToSearchDeclaration(position);
+                    break;
+                }
             }
 
             res.add(this.pathToModule);
@@ -268,6 +274,9 @@ public class Func extends AInternalCodeNode {
             case Usage -> {
                 this.definition = setDefDec(defs);
                 this.declaration = setDefDec(decs);
+                for (var arg : args.values()) {
+                    arg.setDefinitionsAndDeclarations(defs, decs);
+                }
                 if (this.definition == null && this.declaration == null) {
                    codeType = CodeType.Error;
                 }
@@ -298,6 +307,43 @@ public class Func extends AInternalCodeNode {
 
         for (var arg : args.values()) {
             arg.setTypes(types);
+        }
+    }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        if (contains(namePosition, position)) return this;
+
+        for (var node : args.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        for (var node : childs.values()) {
+            if (contains(node.wholePos, position)) {
+                return node.findByPos(position);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("func");
+    }
+
+    @Override
+    protected void setChildrenDump(int level, StringBuilder builder) {
+        builder.repeat("\t", level + 1).append("args\n");
+        for(var arg : args.values()) {
+            arg.dump(level + 2, builder);
+        }
+
+        builder.repeat("\t", level + 1).append("body\n");
+        for(var code : childs.values()) {
+            code.dump(level + 2, builder);
         }
     }
 

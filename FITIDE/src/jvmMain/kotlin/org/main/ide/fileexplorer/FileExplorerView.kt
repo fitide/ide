@@ -141,13 +141,13 @@ fun FileExplorerView(
         }
 
         if (tree == null) {
-            Text("Проект не открыт", color = Color.LightGray)
+            Text("No project open", color = Color.LightGray)
             return@Box
         }
 
         val rootPath = fileExplorer.currentProject?.toString() ?: ""
         if (rootPath.isEmpty()) {
-            Text("Проект не открыт", color = Color.White)
+            Text("No project open", color = Color.White)
             return@Box
         }
 

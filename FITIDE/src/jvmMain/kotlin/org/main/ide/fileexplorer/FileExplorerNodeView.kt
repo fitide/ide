@@ -110,9 +110,9 @@ fun FileExplorerNodeView(
 
         DropdownMenu(expanded = menuVisible, onDismissRequest = { menuVisible = false }) {
             DropdownMenuItem(
-                text = { Text("Новый файл") },
+                text = { Text("New File") },
                 onClick = {
-                    val name = JOptionPane.showInputDialog("Имя файла:")?.trim()
+                    val name = JOptionPane.showInputDialog("File name:")?.trim()
                     if (!name.isNullOrEmpty()) {
                         val targetDir =
                             if (isDirectory) Path.of(item.path)
@@ -124,9 +124,9 @@ fun FileExplorerNodeView(
             )
 
             DropdownMenuItem(
-                text = { Text("Новая папка") },
+                text = { Text("New Folder") },
                 onClick = {
-                    val name = JOptionPane.showInputDialog("Имя папки:")?.trim()
+                    val name = JOptionPane.showInputDialog("Folder name:")?.trim()
                     if (!name.isNullOrEmpty()) {
                         val targetDir =
                             if (isDirectory) Path.of(item.path)
@@ -138,12 +138,12 @@ fun FileExplorerNodeView(
             )
 
             DropdownMenuItem(
-                text = { Text("Переименовать") },
+                text = { Text("Rename") },
                 onClick = {
                     val currentName = node.name
                     val name = JOptionPane.showInputDialog(
                         null,
-                        "Новое имя:",
+                        "New name:",
                         currentName
                     )?.trim()
                     if (!name.isNullOrEmpty() && name != currentName) {
@@ -154,7 +154,7 @@ fun FileExplorerNodeView(
             )
 
             DropdownMenuItem(
-                text = { Text("Удалить") },
+                text = { Text("Delete") },
                 onClick = {
                     explorer.delete(Path.of(item.path), isDirectory)
                     menuVisible = false
@@ -162,7 +162,7 @@ fun FileExplorerNodeView(
             )
 
             DropdownMenuItem(
-                text = { Text("Копировать") },
+                text = { Text("Copy") },
                 onClick = {
                     explorer.copySelected()
                     menuVisible = false
@@ -170,7 +170,7 @@ fun FileExplorerNodeView(
             )
 
             DropdownMenuItem(
-                text = { Text("Вырезать") },
+                text = { Text("Cut") },
                 onClick = {
                     explorer.cutSelected()
                     menuVisible = false
@@ -178,7 +178,7 @@ fun FileExplorerNodeView(
             )
 
             DropdownMenuItem(
-                text = { Text("Вставить") },
+                text = { Text("Paste") },
                 onClick = {
                     val target = if (isDirectory) Path.of(item.path)
                     else Path.of(item.path).parent ?: Path.of(item.path)

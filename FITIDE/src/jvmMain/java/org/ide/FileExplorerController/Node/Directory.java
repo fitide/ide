@@ -2,8 +2,12 @@ package org.ide.FileExplorerController.Node;
 
 import org.ide.FileExplorerController.Exceptions.DirAlreadyExistException;
 import org.ide.FileExplorerController.Exceptions.FileAlreadyExistException;
+import org.ide.Tools.PathTools;
 
 
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -95,5 +99,37 @@ public class Directory extends Node {
             builder.append(file.toString(level + 1));
         }
         return builder.toString();
+    }
+
+    public Directory findDir(String relativePath) throws FileNotFoundException {
+        return findDir(Paths.get(relativePath));
+    }
+
+    public Directory findDir(Path relativePath) throws FileNotFoundException {
+        if (relativePath.getNameCount() == 1 && relativePath.getFileName().toString().equals(this.name)) return this;
+        var newPath = PathTools.deleteRoot(relativePath);
+        if (newPath.getNameCount() == 0) throw new FileNotFoundException();
+
+        for (int i = 0; i < this.getDirsCnt(); i++) {
+            var dir = getDir(i);
+            if (dir.name.equals(newPath.getName(0).toString())) return dir.findDir(newPath);
+        }
+
+        throw new FileNotFoundException();
+    }
+
+    public FEFile findFile(String relativePath) throws FileNotFoundException {
+        return findFile(Paths.get(relativePath));
+    }
+
+    public FEFile findFile(Path relativePath) throws FileNotFoundException {
+        var dir = findDir(PathTools.deleteLast(relativePath));
+
+        for (int i = 0; i < dir.getFilesCnt(); i++) {
+            var file = dir.getFile(i);
+            if (file.name.equals(PathTools.getRootStr(relativePath))) return file;
+        }
+
+        throw new FileNotFoundException();
     }
 }

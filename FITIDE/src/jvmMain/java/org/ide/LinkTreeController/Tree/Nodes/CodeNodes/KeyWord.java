@@ -7,7 +7,7 @@ import org.ide.LinkTreeController.Tree.Nodes.Abstract.LinkTreeCodeTag;
 import org.ide.LinkTreeController.Tree.ToolClasses.CodeStrForColour;
 import org.ide.LinkTreeController.Tree.ToolClasses.HintNode;
 import org.ide.LinkTreeController.Tree.ToolClasses.LinkTreePosition;
-import org.ide.LinkTreeController.Tree.ToolClasses.PathTools;
+import org.ide.Tools.PathTools;
 import org.ide.LinkTreeController.Tree.TreeBuilder;
 import org.ide.PluginController.PluginInterface.Plugin;
 
@@ -25,7 +25,7 @@ public class KeyWord extends AInternalCodeNode {
     }
 
     @Override
-    public void setChilds(ParseTree curNode) {
+    public void setChilds(ParseTree curNode, Object state) {
         childs = new HashMap<>();
     }
 
@@ -43,8 +43,8 @@ public class KeyWord extends AInternalCodeNode {
     }
 
     @Override
-    protected void updateTree(ParseTree tree) {
-        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule));
+    protected void updateTree(ParseTree tree, Object state) {
+        AInternalCodeNode node = TreeBuilder.buildOneChild(plugin, tree, pathToFile, PathTools.deleteLast(pathToModule), state);
         this.updateCurNode(node);
     }
 
@@ -61,5 +61,15 @@ public class KeyWord extends AInternalCodeNode {
     @Override
     public void setDefinitionsAndDeclarations(Map<String, AInternalCodeNode> defs, Map<String, AInternalCodeNode> decs) {
         return;
+    }
+
+    @Override
+    public AInternalCodeNode findByPos(LinkTreePosition position) {
+        return null;
+    }
+
+    @Override
+    protected void setTypeDump(StringBuilder builder) {
+        builder.append("key_word");
     }
 }

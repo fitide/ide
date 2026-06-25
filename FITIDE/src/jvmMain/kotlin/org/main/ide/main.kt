@@ -4,12 +4,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import kotlinx.coroutines.Dispatchers
 import org.ide.IdeController
 import org.ide.LinkTreeController.LinkTreeControllerImpl
 import org.main.ide.fileexplorer.FileExplorer
 import org.main.ide.uistate.UIState
 
 fun main() = application {
+    Dispatchers.Main
     Window(
         onCloseRequest = ::exitApplication,
         title = "FITIDE"

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package textDeleting;
+
+import "constants/responsesCodes.proto";
+import "Positions/positions.proto";
+
+option java_multiple_files = true;
+option java_package = "org.ide.WebWorker.Text.Deleting";
+
+message DeleteTextServerRequest {
+    string filePath = 1;
+    positions.HighlightedPosition position = 2;
+    string textToDelete = 3;
+    string user = 4;
+}
+
+message DeleteTextServerResponse {
+    responsesCodes.DeleteTextCode code = 1;
+    string error = 2;
+}
+
+message DeleteTextClientRequest {
+    string filePath = 1;
+    positions.HighlightedPosition position = 2;
+    string user = 3;
+}
+
+message DeleteTextClientResponse {
+    responsesCodes.CodeChangingCode code = 1;
+    string error = 2;
+}

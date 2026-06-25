@@ -1,0 +1,61 @@
+package org.ide.PluginController.PluginInterface;
+
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
+
+public interface Plugin {
+
+    String fileExtension();
+
+    ParseTree getFileParseTree(File file);
+
+    Tag[] getTagsOfNode(ParseTree tree);
+
+    // for func/class/var/KeyWord/error
+    // �� ���������: ImportStatement->name = importStatement->value (���� � �������� �����������)
+    String getNameOfNode(ParseTree node, Object object);
+
+    List<Path> getPathsOfSearchingByImportStatement(ParseTree tree, Path pathToFileWithStatement);
+
+    Position getBounds(ParseTree node);
+
+    // node is a class/func/var
+    Position getNamePositionOfModule(ParseTree node, Object object);
+
+    String getType(ParseTree tree);
+    // node is a class/func/var
+    Position getTypePositionOfModule(ParseTree node);
+
+    List<ParseTree> getKeyWordsOfModule(ParseTree node);
+
+    List<ParseTree> getArgsOfFunc(ParseTree func, Object object);
+
+    List<ParseTree> getConstructionArgs(ParseTree constr);
+    //module is func/while/for/if etc
+    List<ParseTree> getChildsOfNode(ParseTree module, Object object);
+
+    List<ParseTree> getFuncsOfClass(ParseTree classNode);
+
+    List<ExternalFile> getStandardFiles();
+
+    List<ExternalFunc> getStandardFuncs();
+
+    List<ExternalVar> getStandardVars();
+
+    List<ExternalClass> getStandardClasses();
+
+    List<ExternalType> getStandardTypes();
+
+    // for/while/if etc
+    List<ExternalConstruction> getStandardConstructionsLike();
+
+
+
+    Position getPositionOfModuleBody(ParseTree tree);
+    Position getPositionOfArgsOfFunc(ParseTree tree, Object object);
+
+    Object newStateObject();
+}
