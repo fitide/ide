@@ -525,7 +525,7 @@ private fun JoinView(
                         .padding(horizontal = 18.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Присоединиться",
+                        text = "Join",
                         style = TextStyle(
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
@@ -548,7 +548,7 @@ private fun BackButton(onClick: () -> Unit) {
             .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
         Text(
-            text = "← Назад",
+            text = "← Back",
             style = TextStyle(
                 fontSize = 13.sp,
                 color = TextSecondary
